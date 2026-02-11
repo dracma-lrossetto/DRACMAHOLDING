@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estructura Integrada: Holding + ALyC + SGFCI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        /* Estilos para contenedores de gráficos */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
+        }
+        
+        /* Líneas de conexión jerárquica (CSS puro) */
+        .tree-line-vertical {
+            width: 2px;
+            background-color: #cbd5e1; /* slate-300 */
+            margin: 0 auto;
+        }
+        
+        .tree-connector-horizontal {
+            height: 2px;
+            background-color: #cbd5e1;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Efectos de Nodos */
+        .node-card {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .node-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .node-card.active {
+            ring-width: 3px;
+            transform: scale(1.02);
+            border-color: #3b82f6; /* blue-500 */
+        }
+
+        /* Scrollbar personalizada para el panel lateral */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+    </style>
+    <!-- Chosen Palette: "Financial Trust"
+         Background: Slate-50 (Professional/Neutral)
+         Transversal Areas: Slate/Blue (Service oriented)
+         Regulated Units: Emerald (Market facing)
+         Control/Governance: Indigo/Purple (Oversight)
+         Committees: Amber (Decision Bodies)
+    -->
+    
+    <!-- Application Structure Plan:
+         1. Layout: Split screen. Left side = Visual Hierarchy (Org Chart). Right side = Detailed Functional Drill-down.
+         2. Org Chart Logic: 
+            - Top: Board & Committees (Strategy).
+            - Middle: Transversal Managements (The "Factory").
+            - Bottom: Business Units (ALyC Trading & SGFCI Management).
+         3. Detail Panel Logic:
+            - Header: Role scope.
+            - "Mando Medio Transversal": Identifies the key operational pivot.
+            - "Equipo Operativo": Lists specific analyst roles.
+            - "Responsabilidades": Key CNV functions.
+    -->
+
+    <!-- Visualization & Content Choices:
+         - Chart.js Radar Chart: Used in the details panel to show the "Focus Mix" of each area (e.g., Operational vs Strategic vs Control).
+         - Dynamic HTML Generation: For the Organizational Tree to allow custom styling without SVG.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans h-screen overflow-hidden flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-slate-200 px-6 py-3 flex justify-between items-center shadow-sm z-10">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-900 text-white font-bold p-2 rounded-lg text-sm">FINANCIAL HOLDING</div>
+            <h1 class="text-xl font-semibold text-slate-700">Modelo de Fusión Operativa & Funcional</h1>
+        </div>
+        <div class="text-sm text-slate-500">
+            <span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded text-xs font-bold mr-2">CNV COMPLIANT</span>
+            Fusión: ALyC + SGFCI
+        </div>
+    </nav>
+
+    <!-- Main Content Grid -->
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- LEFT PANEL: Visual Org Chart (Interactive) -->
+        <div class="flex-1 overflow-y-auto custom-scroll p-8 bg-slate-50 relative">
+            
+            <!-- Hierarchy Container -->
+            <div class="max-w-5xl mx-auto flex flex-col items-center">
+                
+                <!-- LEVEL 1: Governance -->
+                <div class="flex flex-col items-center mb-8 relative w-full">
+                    <!-- Board -->
+                    <div id="node-board" class="node-card w-64 bg-slate-900 text-white p-4 rounded-xl shadow-lg text-center z-10 border-b-4 border-indigo-500" onclick="loadDetail('board')">
+                        <h2 class="font-bold text-lg">BOARD OF DIRECTORS</h2>
+                        <p class="text-xs text-slate-400">Corporate Governance</p>
+                    </div>
+                    
+                    <div class="h-8 tree-line-vertical"></div>
+                    
+                    <!-- Committees (The Brains) -->
+                    <div class="flex gap-4 justify-center w-full relative">
+                        <!-- Connector for Committees -->
+                        <div class="absolute top-0 w-1/2 border-t-2 border-slate-300"></div>
+                        <div class="h-4 tree-line-vertical absolute top-0 left-1/2 -translate-x-1/2"></div>
+
+                        <!-- Committee: Risk (New Requirement) -->
+                        <div id="node-risk-com" class="node-card bg-amber-50 border-2 border-amber-200 text-amber-900 p-3 rounded-lg shadow-sm w-48 text-center mt-4" onclick="loadDetail('risk-com')">
+                            <h3 class="font-bold text-sm">RISK COMMITTEE</h3>
+                            <p class="text-[10px] text-amber-700 mt-1">Limits & Solvency</p>
+                        </div>
+
+                        <!-- CEO -->
+                        <div id="node-ceo" class="node-card bg-white border-2 border-slate-300 p-3 rounded-lg shadow-md w-48 text-center mt-4 z-10" onclick="loadDetail('ceo')">
+                            <h3 class="font-bold text-slate-800">CEO</h3>
+                            <p class="text-[10px] text-slate-500">Chief Executive Officer</p>
+                        </div>
+
+                        <!-- Committee: Investment -->
+                        <div id="node-inv-com" class="node-card bg-indigo-50 border-2 border-indigo-200 text-indigo-900 p-3 rounded-lg shadow-sm w-48 text-center mt-4" onclick="loadDetail('inv-com')">
+                            <h3 class="font-bold text-sm">INVESTMENT COMMITTEE</h3>
+                            <p class="text-[10px] text-indigo-700 mt-1">Strategy & Portfolio</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LEVEL 2: Transversal Functional Areas (The Service Layer) -->
+                <div class="w-full mb-12">
+                    <div class="flex items-center justify-center mb-4">
+                        <span class="bg-slate-200 text-slate-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Shared Services (C-Level Transversal)</span>
+                    </div>
+                    
+                    <!-- Grid for Managers -->
+                    <div class="grid grid-cols-4 gap-4 relative">
+                        <!-- Horizontal Line connecting them -->
+                        <div class="absolute -top-6 left-8 right-8 border-t-2 border-slate-300"></div>
+                        <!-- Vertical line from CEO -->
+                        <div class="absolute -top-6 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
+
+                        <!-- Compliance -->
+                        <div class="relative pt-6">
+                            <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
+                            <div id="node-compliance" class="node-card bg-white border-l-4 border-rose-500 p-4 rounded shadow hover:shadow-md h-full" onclick="loadDetail('compliance')">
+                                <div class="text-xs text-rose-600 font-bold mb-1">CONTROL</div>
+                                <h4 class="font-bold text-slate-800">CCO</h4>
+                                <p class="text-xs text-slate-500 mt-2">Chief Compliance Officer</p>
+                            </div>
+                        </div>
+
+                        <!-- Back Office -->
+                        <div class="relative pt-6">
+                            <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
+                            <div id="node-ops" class="node-card bg-white border-l-4 border-blue-500 p-4 rounded shadow hover:shadow-md h-full" onclick="loadDetail('ops')">
+                                <div class="text-xs text-blue-600 font-bold mb-1">OPERATIONS</div>
+                                <h4 class="font-bold text-slate-800">COO</h4>
+                                <p class="text-xs text-slate-500 mt-2">Chief Operating Officer</p>
+                            </div>
+                        </div>
+
+                        <!-- Admin & Treasury -->
+                        <div class="relative pt-6">
+                            <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
+                            <div id="node-admin" class="node-card bg-white border-l-4 border-blue-500 p-4 rounded shadow hover:shadow-md h-full" onclick="loadDetail('admin')">
+                                <div class="text-xs text-blue-600 font-bold mb-1">FINANCE</div>
+                                <h4 class="font-bold text-slate-800">CFO</h4>
+                                <p class="text-xs text-slate-500 mt-2">Chief Financial Officer</p>
+                            </div>
+                        </div>
+
+                        <!-- Research -->
+                        <div class="relative pt-6">
+                            <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
+                            <div id="node-research" class="node-card bg-white border-l-4 border-purple-500 p-4 rounded shadow hover:shadow-md h-full" onclick="loadDetail('research')">
+                                <div class="text-xs text-purple-600 font-bold mb-1">STRATEGY</div>
+                                <h4 class="font-bold text-slate-800">CSO</h4>
+                                <p class="text-xs text-slate-500 mt-2">Chief Strategy Officer</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LEVEL 3: Business Units (The Execution Layer) -->
+                <div class="w-full mt-4 flex gap-8 justify-center">
+                    
+                    <!-- ALyC Unit -->
+                    <div class="w-1/2 max-w-sm bg-emerald-50/50 border border-emerald-200 rounded-xl p-4 relative">
+                        <div class="absolute -top-3 left-4 bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded border border-emerald-200">ALYC (Regulated)</div>
+                        
+                        <!-- Trading Desk -->
+                        <div id="node-trading" class="node-card bg-white border-l-4 border-emerald-500 p-4 rounded shadow-sm mt-2" onclick="loadDetail('trading')">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-slate-800">HEAD OF TRADING</h4>
+                                    <p class="text-xs text-emerald-600 font-medium">Execution & Sales</p>
+                                </div>
+                                <span class="text-xs bg-slate-100 px-2 py-1 rounded text-slate-500">Front Office</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2 border-t border-slate-100 pt-2">
+                                *Linked to Holding Strategy
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- SGFCI Unit -->
+                    <div class="w-1/2 max-w-sm bg-indigo-50/50 border border-indigo-200 rounded-xl p-4 relative">
+                        <div class="absolute -top-3 left-4 bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded border border-indigo-200">SGFCI (Regulated)</div>
+                        
+                        <!-- Fund Management -->
+                        <div id="node-sgfci" class="node-card bg-white border-l-4 border-indigo-500 p-4 rounded shadow-sm mt-2" onclick="loadDetail('sgfci')">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-slate-800">CIO (SGFCI)</h4>
+                                    <p class="text-xs text-indigo-600 font-medium">Asset Management</p>
+                                </div>
+                                <span class="text-xs bg-slate-100 px-2 py-1 rounded text-slate-500">Front Office</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2 border-t border-slate-100 pt-2">
+                                *Collegial Decisions
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            
+            <div class="text-center mt-12 text-slate-400 text-xs">
+                * Dotted lines imply transversal services. Solid lines imply direct reporting.
+            </div>
+
+        </div>
+
+        <!-- RIGHT PANEL: Detailed Analysis (Dynamic) -->
+        <div class="w-full lg:w-[480px] bg-white border-l border-slate-200 flex flex-col shadow-xl z-20">
+            
+            <!-- Empty State -->
+            <div id="empty-state" class="flex-1 flex flex-col items-center justify-center p-10 text-center">
+                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-400 text-2xl">⚡</div>
+                <h3 class="text-lg font-bold text-slate-700">Explorador Funcional</h3>
+                <p class="text-sm text-slate-500 mt-2">Seleccione un área del organigrama para ver el desglose de roles operativos y responsabilidades (English Titles Available).</p>
+            </div>
+
+            <!-- Content State -->
+            <div id="detail-content" class="hidden flex-col h-full overflow-y-auto custom-scroll">
+                
+                <!-- Header Area -->
+                <div id="panel-header" class="p-6 bg-slate-50 border-b border-slate-200">
+                    <span id="role-tag" class="text-[10px] font-bold tracking-widest uppercase bg-blue-100 text-blue-700 px-2 py-1 rounded-sm">Transversal</span>
+                    <h2 id="role-title" class="text-2xl font-bold text-slate-800 mt-2">Gerencia de Operaciones</h2>
+                    <p id="role-desc" class="text-sm text-slate-600 mt-1 leading-relaxed">Responsable de la liquidación y administración de custodia.</p>
+                </div>
+
+                <!-- Radar Chart for Focus Area -->
+                <div class="p-4 border-b border-slate-100">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">Enfoque del Área</h4>
+                    <div class="chart-container" style="height: 180px;">
+                        <canvas id="focusChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Structure Breakdown (Sub-Gerencias) -->
+                <div class="p-6 space-y-6">
+                    
+                    <!-- Section: Mandos Medios -->
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 flex items-center mb-3">
+                            <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                            Middle Management / Head
+                        </h3>
+                        <div id="middle-management-container" class="bg-blue-50 border border-blue-100 rounded-lg p-3">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
+
+                    <!-- Section: Roles Operativos -->
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 flex items-center mb-3">
+                            <span class="w-2 h-2 bg-slate-400 rounded-full mr-2"></span>
+                            Operational Roles (Staff)
+                        </h3>
+                        <div id="operational-roles-container" class="space-y-2">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
+
+                    <!-- Section: Alcance & Responsabilidades -->
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 mb-2 border-b border-slate-100 pb-2">Responsabilidades Críticas (CNV)</h3>
+                        <ul id="responsibilities-list" class="text-sm text-slate-600 space-y-2 list-disc pl-4 marker:text-slate-300">
+                            <!-- Dynamic Content -->
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data & Logic -->
+    <script>
+        // Database of Organizational Roles
+        const orgData = {
+            'board': {
+                title: "BOARD OF DIRECTORS",
+                tag: "Governance & Strategy",
+                desc: "Órgano máximo de decisión. Define el apetito de riesgo y lidera la agresividad comercial del grupo.",
+                focus: [0, 5, 5, 5, 0], // Ops: 0, Strat: 5, Exec/Com: 5 (High), Control: 5, Admin: 0
+                middle: "CEO (Chief Executive Officer)",
+                roles: [], // Sin roles operativos ni sub-gerencias directas (directo a CEO).
+                resp: [
+                    "Definición de Estrategia Comercial y de Expansión.",
+                    "Aprobación de Balances y Presupuestos.",
+                    "Designación de Comités (Inversión, Riesgo, PLA/FT).",
+                    "Supervisión directa del desempeño del CEO."
+                ],
+                color: "slate"
+            },
+            'risk-com': {
+                title: "RISK COMMITTEE",
+                tag: "Committee",
+                desc: "Sustituye a la Gerencia de Riesgo. Órgano colegiado que monitorea la solvencia y liquidez de ambas unidades (ALyC y SGFCI).",
+                focus: [0, 5, 0, 5, 0], 
+                middle: "CRO (Chief Risk Officer)",
+                roles: [
+                    { title: "Risk Analyst (Market)", desc: "VaR, Stress Testing, Backtesting." },
+                    { title: "Liquidity Risk Officer", desc: "Gap analysis, aforos, cash flow risk." }
+                ],
+                resp: [
+                    "Aprobación de límites de contraparte.",
+                    "Monitoreo de Régimen Informativo de Solvencia.",
+                    "Aprobación de nuevos productos financieros.",
+                    "Control de aforos para cauciones."
+                ],
+                color: "amber"
+            },
+            'inv-com': {
+                title: "INVESTMENT COMMITTEE",
+                tag: "Strategy",
+                desc: "Define el 'House View' y la estrategia macroeconómica que guiará tanto a la Mesa de la ALyC como a los PMs de la SGFCI.",
+                focus: [0, 5, 5, 2, 0],
+                middle: "CIO (Chief Investment Officer) / Strategist",
+                roles: [
+                    { title: "Board Members", desc: "Visión negocio." },
+                    { title: "Head Portfolio Manager", desc: "Visión táctica SGFCI." },
+                    { title: "Head Trader", desc: "Visión mercado ALyC." }
+                ],
+                resp: [
+                    "Definición de Asset Allocation estratégico.",
+                    "Revisión de performance de fondos.",
+                    "Análisis de coyuntura macroeconómica."
+                ],
+                color: "indigo"
+            },
+            'ceo': {
+                title: "CEO (Chief Executive Officer)",
+                tag: "Executive",
+                desc: "Nexo entre el Directorio y la operación. Garantiza que las unidades reguladas funcionen eficientemente compartiendo servicios.",
+                focus: [3, 5, 5, 3, 3],
+                middle: "C-Suite (COO, CFO, CCO, CSO)", // Cambio aquí: Se eliminó Executive Assistant
+                roles: [
+                    { title: "Direct Report Policy", desc: "El nivel operativo NO tiene acceso directo al CEO. Canalizan vía C-Level." } // Nota explícita sobre la restricción
+                ],
+                resp: [
+                    "Supervisión de P&L consolidado.",
+                    "Arbitraje de recursos entre ALyC y SGFCI.",
+                    "Reporte al Directorio.",
+                    "Liderazgo exclusivo sobre la C-Suite."
+                ],
+                color: "slate"
+            },
+            'ops': {
+                title: "COO (Chief Operating Officer)",
+                tag: "Transversal / Shared Service",
+                desc: "El corazón de la 'fábrica'. Procesa, liquida y custodia los activos de ambas unidades de negocio bajo procesos diferenciados.",
+                focus: [5, 1, 0, 3, 4], // Ops focus high
+                middle: "Head of Operations",
+                roles: [
+                    { title: "Settlement Officer (ALyC)", desc: "Liquidación BYMA, MAE, Rofex. Control de garantías." },
+                    { title: "Fund Administrator (SGFCI)", desc: "Cálculo de Valor Cuota diario. Devengamientos." },
+                    { title: "Onboarding Analyst", desc: "Legajos digitales, onboarding clientes (KYC)." },
+                    { title: "Custody Analyst", desc: "Conciliación con Caja de Valores." }
+                ],
+                resp: [
+                    "Garantizar la liquidación en tiempo y forma (T+0, T+1, T+2).",
+                    "Cálculo preciso del patrimonio de los FCI.",
+                    "Conciliación diaria de saldos comitentes vs. Caja.",
+                    "Reportes operativos a CNV (autopistas de información)."
+                ],
+                color: "blue"
+            },
+            'admin': {
+                title: "CFO (Chief Financial Officer)",
+                tag: "Transversal / Shared Service",
+                desc: "Maneja los flujos monetarios y la contabilidad. CRÍTICO: Debe asegurar la segregación de cuentas bancarias.",
+                focus: [4, 1, 0, 4, 5],
+                middle: "Treasurer / Head of Administration",
+                roles: [
+                    { title: "Treasury Analyst", desc: "Manejo de portales bancarios, transferencias MEP/CCL." },
+                    { title: "Senior Accountant", desc: "Contabilidad bimonetaria, ajuste por inflación." },
+                    { title: "Tax Analyst", desc: "Retenciones, IIBB, IVA." },
+                    { title: "Accounts Payable (AP)", desc: "Gestión administrativa del Holding." }
+                ],
+                resp: [
+                    "Conciliación bancaria diaria.",
+                    "Ejecución de rescates y suscripciones (movimiento de fondos).",
+                    "Presentación de Balances Trimestrales y Anuales.",
+                    "Gestión del cash flow propio del Holding."
+                ],
+                color: "blue"
+            },
+            'compliance': {
+                title: "CCO (Chief Compliance Officer)",
+                tag: "Control / Transversal",
+                desc: "Vela por la integridad normativa. Reporta funcionalmente al Directorio para asegurar independencia. Cubre ALyC y SGFCI.",
+                focus: [2, 1, 0, 5, 1],
+                middle: "Compliance Manager (Titular ante UIF)",
+                roles: [
+                    { title: "AML/CFT Analyst", desc: "Monitoreo transaccional, matrices de riesgo, alertas." },
+                    { title: "Regulatory Affairs Officer", desc: "Seguimiento de nuevas resoluciones CNV, hechos relevantes." },
+                    { title: "Internal Auditor", desc: "Control de legajos y onboarding." }
+                ],
+                resp: [
+                    "Reporte de Operaciones Sospechosas (ROS).",
+                    "Control del Código de Conducta y Conflictos de Interés.",
+                    "Aprobación de clientes de alto riesgo.",
+                    "Respuesta a requerimientos de organismos."
+                ],
+                color: "rose"
+            },
+            'research': {
+                title: "CSO (Chief Strategy Officer) / RESEARCH",
+                tag: "Transversal / Support",
+                desc: "Genera inteligencia de mercado para uso interno (Mesa/PMs) y externo (Clientes). No ejecuta, solo analiza.",
+                focus: [1, 5, 0, 0, 1],
+                middle: "Head of Research",
+                roles: [
+                    { title: "Macro Economist", desc: "Política monetaria, fiscal, FX." },
+                    { title: "Credit Analyst", desc: "Análisis de balances de emisores de ONs." },
+                    { title: "Quantitative Analyst (Quant)", desc: "Modelos de valuación y bases de datos." }
+                ],
+                resp: [
+                    "Daily reports y Weekly reports para clientes.",
+                    "Soporte analítico al Comité de Inversiones.",
+                    "Valuación de activos ilíquidos (para SGFCI)."
+                ],
+                color: "purple"
+            },
+            'trading': {
+                title: "HEAD OF TRADING (ALyC)",
+                tag: "Business Unit / Execution",
+                desc: "Área exclusiva de la ALyC. Ejecuta órdenes propias y de clientes. Se nutre de la estrategia del Holding pero opera independientemente.",
+                focus: [3, 4, 5, 2, 0],
+                middle: "Senior Trader",
+                roles: [
+                    { title: "Fixed Income Trader", desc: "Bonos soberanos, subsoberanos, ONs. Arbitrajes." },
+                    { title: "Equity & Cedears Trader", desc: "Acciones, Equity local e internacional." },
+                    { title: "Institutional Sales Trader", desc: "Atención a grandes clientes y SGFCI (como cliente)." },
+                    { title: "Sales Executive", desc: "Relación directa con clientes activos." }
+                ],
+                resp: [
+                    "Best Execution (Prioridad Precio-Tiempo).",
+                    "Manejo de la cartera propia de la ALyC.",
+                    "Ejecución de órdenes instruidas por la SGFCI.",
+                    "Cierre de mercado y control de boletos."
+                ],
+                color: "emerald"
+            },
+            'sgfci': {
+                title: "CIO (Chief Investment Officer - SGFCI)",
+                tag: "Business Unit / Buy-side",
+                desc: "Área fiduciaria exclusiva de la Sociedad Gerente. Decide la composición de las carteras de los fondos. NO opera, instruye órdenes.",
+                focus: [2, 5, 4, 3, 1],
+                middle: "Head Portfolio Manager",
+                roles: [
+                    { title: "Portfolio Manager (MM/T+1)", desc: "Manejo de liquidez, cauciones, cuentas remuneradas." },
+                    { title: "Portfolio Manager (Fixed Income)", desc: "Fondos de bonos, estrategia de duration." },
+                    { title: "Performance Analyst", desc: "Atribución de retorno, benchmarking." }
+                ],
+                resp: [
+                    "Minutas de inversión diarias.",
+                    "Cumplimiento del Reglamento de Gestión de cada fondo.",
+                    "Instrucción de órdenes a la ALyC (o a otros brokers).",
+                    "Control de liquidez ante rescates."
+                ],
+                color: "indigo"
+            }
+        };
+
+        // Chart Instance
+        let radarChart = null;
+
+        function initChart() {
+            const ctx = document.getElementById('focusChart').getContext('2d');
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Operativo', 'Estratégico', 'Ejecución/Comercial', 'Control/Riesgo', 'Administrativo'],
+                    datasets: [{
+                        label: 'Nivel de Foco',
+                        data: [0, 0, 0, 0, 0],
+                        fill: true,
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        pointBackgroundColor: 'rgb(59, 130, 246)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(59, 130, 246)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { display: true },
+                            min: 0,
+                            max: 5,
+                            ticks: { 
+                                stepSize: 1,
+                                display: false 
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function loadDetail(nodeId) {
+            const data = orgData[nodeId];
+            if (!data) return;
+
+            // Highlight Active Node logic
+            document.querySelectorAll('.node-card').forEach(el => el.classList.remove('active'));
+            const activeNode = document.getElementById(`node-${nodeId}`);
+            if(activeNode) activeNode.classList.add('active');
+
+            // Toggle Panels
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('detail-content').classList.remove('hidden');
+            document.getElementById('detail-content').classList.add('flex');
+
+            // Update Header
+            document.getElementById('role-title').innerText = data.title;
+            document.getElementById('role-tag').innerText = data.tag;
+            document.getElementById('role-desc').innerText = data.desc;
+            
+            // Set Color Theme
+            const header = document.getElementById('panel-header');
+            const tag = document.getElementById('role-tag');
+            
+            // Reset base styles (simplified for this demo, usually toggle classes)
+            if (data.color === 'rose') {
+                tag.className = "text-[10px] font-bold tracking-widest uppercase bg-rose-100 text-rose-700 px-2 py-1 rounded-sm";
+            } else if (data.color === 'emerald') {
+                tag.className = "text-[10px] font-bold tracking-widest uppercase bg-emerald-100 text-emerald-700 px-2 py-1 rounded-sm";
+            } else if (data.color === 'blue') {
+                tag.className = "text-[10px] font-bold tracking-widest uppercase bg-blue-100 text-blue-700 px-2 py-1 rounded-sm";
+            } else {
+                tag.className = "text-[10px] font-bold tracking-widest uppercase bg-slate-200 text-slate-700 px-2 py-1 rounded-sm";
+            }
+
+            // Update Chart
+            if (radarChart) {
+                radarChart.data.datasets[0].data = data.focus;
+                // Update chart color based on section
+                const colorMap = {
+                    'rose': '225, 29, 72',
+                    'emerald': '16, 185, 129',
+                    'blue': '59, 130, 246',
+                    'slate': '100, 116, 139',
+                    'amber': '217, 119, 6',
+                    'purple': '147, 51, 234',
+                    'indigo': '79, 70, 229'
+                };
+                const rgb = colorMap[data.color] || '100, 116, 139';
+                radarChart.data.datasets[0].backgroundColor = `rgba(${rgb}, 0.2)`;
+                radarChart.data.datasets[0].borderColor = `rgb(${rgb})`;
+                radarChart.data.datasets[0].pointBackgroundColor = `rgb(${rgb})`;
+                radarChart.update();
+            }
+
+            // Update Middle Management
+            const middleContainer = document.getElementById('middle-management-container');
+            if (data.middle) {
+                middleContainer.innerHTML = `<div class="font-bold text-slate-700 text-sm">${data.middle}</div><div class="text-xs text-slate-500">Transversal Link / Coordinator</div>`;
+                middleContainer.parentElement.classList.remove('hidden');
+            } else {
+                middleContainer.parentElement.classList.add('hidden');
+            }
+
+            // Update Roles
+            const roleContainer = document.getElementById('operational-roles-container');
+            roleContainer.innerHTML = '';
+            if (data.roles.length > 0) {
+                data.roles.forEach(role => {
+                    const div = document.createElement('div');
+                    div.className = "bg-white border border-slate-200 p-3 rounded shadow-sm hover:border-blue-300 transition-colors";
+                    div.innerHTML = `<div class="font-bold text-slate-700 text-xs">${role.title}</div><div class="text-[10px] text-slate-500 leading-tight mt-1">${role.desc}</div>`;
+                    roleContainer.appendChild(div);
+                });
+                roleContainer.parentElement.classList.remove('hidden');
+            } else {
+                roleContainer.parentElement.classList.add('hidden');
+            }
+
+            // Update Responsibilities
+            const respList = document.getElementById('responsibilities-list');
+            respList.innerHTML = '';
+            data.resp.forEach(item => {
+                const li = document.createElement('li');
+                li.innerText = item;
+                respList.appendChild(li);
+            });
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initChart();
+            loadDetail('board'); // Load Board by default
+        });
+
+    </script>
+</body>
+</html>
