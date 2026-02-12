@@ -34,15 +34,81 @@
         .node-card {
             transition: all 0.2s ease-in-out;
             cursor: pointer;
+            position: relative; /* Para posicionar el badge */
+            z-index: 10;
         }
         .node-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 20;
         }
         .node-card.active {
             ring-width: 3px;
             transform: scale(1.02);
             border-color: #3b82f6; /* blue-500 */
+        }
+
+        /* Estilo para Nodos Externos / Independientes */
+        .node-external {
+            border-style: dashed !important;
+            background-color: #f8fafc;
+        }
+
+        /* Badge de Contador Minimalista */
+        .headcount-badge {
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            background-color: transparent;
+            color: #94a3b8; /* Slate-400 para sutileza */
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            z-index: 20;
+        }
+
+        /* Estilos de Posición (Resaltador) */
+        .pos-badge {
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: 700;
+            display: inline-block;
+            line-height: 1.2;
+        }
+        /* ALyC - Verde */
+        .pos-alyc {
+            background-color: #d1fae5; /* emerald-100 */
+            color: #065f46; /* emerald-800 */
+        }
+        /* SGFCI - Azul */
+        .pos-sg {
+            background-color: #e0e7ff; /* indigo-100 */
+            color: #3730a3; /* indigo-800 */
+        }
+
+        /* Badges Regulatorios Inline */
+        .reg-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            margin-left: 4px;
+            cursor: help;
+            vertical-align: middle;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .reg-badge-alyc {
+            background-color: #d1fae5; /* emerald-100 */
+            color: #065f46; /* emerald-800 */
+        }
+        .reg-badge-sgfci {
+            background-color: #e0e7ff; /* indigo-100 */
+            color: #3730a3; /* indigo-800 */
         }
 
         /* Scrollbar personalizada para el panel lateral */
@@ -56,45 +122,70 @@
             background: #cbd5e1;
             border-radius: 3px;
         }
+        
+        /* Línea de Vinculación Directa (Strategy -> Trading) */
+        .direct-link-line {
+            position: absolute;
+            border-top: 2px dashed #a855f7; /* Purple-500 */
+            border-left: 2px dashed #a855f7;
+            pointer-events: none;
+            opacity: 0.5;
+            z-index: 0;
+        }
     </style>
-    <!-- Chosen Palette: "Financial Trust"
-         Background: Slate-50 (Professional/Neutral)
-         Transversal Areas: Slate/Blue (Service oriented)
-         Regulated Units: Emerald (Market facing)
-         Control/Governance: Indigo/Purple (Oversight)
-         Committees: Amber (Decision Bodies)
-    -->
-    
-    <!-- Application Structure Plan:
-         1. Layout: Split screen. Left side = Visual Hierarchy (Org Chart). Right side = Detailed Functional Drill-down.
-         2. Org Chart Logic: 
-            - Top: Board & Committees (Strategy).
-            - Middle: Transversal Managements (The "Factory").
-            - Bottom: Business Units (ALyC Trading & SGFCI Management).
-         3. Detail Panel Logic:
-            - Header: Role scope.
-            - "Mando Medio Transversal": Identifies the key operational pivot.
-            - "Equipo Operativo": Lists specific analyst roles.
-            - "Responsabilidades": Key CNV functions.
-    -->
-
-    <!-- Visualization & Content Choices:
-         - Chart.js Radar Chart: Used in the details panel to show the "Focus Mix" of each area (e.g., Operational vs Strategic vs Control).
-         - Dynamic HTML Generation: For the Organizational Tree to allow custom styling without SVG.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans h-screen overflow-hidden flex flex-col">
 
     <!-- Navbar -->
-    <nav class="bg-white border-b border-slate-200 px-6 py-3 flex justify-between items-center shadow-sm z-10">
-        <div class="flex items-center gap-3">
-            <div class="bg-blue-900 text-white font-bold p-2 rounded-lg text-sm">FINANCIAL HOLDING</div>
-            <h1 class="text-xl font-semibold text-slate-700">Modelo de Fusión Operativa & Funcional</h1>
+    <nav class="bg-white border-b border-slate-200 shadow-sm z-30">
+        <div class="px-6 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-900 text-white font-bold p-2 rounded-lg text-sm">FINANCIAL HOLDING</div>
+                <h1 class="text-xl font-semibold text-slate-700 hidden md:block">Modelo de Fusión Operativa</h1>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <!-- Total Headcount Counter -->
+                <div class="bg-slate-100 border border-slate-300 rounded-lg px-3 py-1 flex items-center gap-2 shadow-sm">
+                    <div class="bg-slate-700 text-white rounded-full p-1 w-5 h-5 flex items-center justify-center text-[10px]">
+                        ∑
+                    </div>
+                    <div class="flex flex-col leading-none">
+                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Headcount</span>
+                        <span id="total-headcount" class="text-sm font-bold text-slate-800">33</span>
+                    </div>
+                    <div class="text-[9px] text-slate-400 border-l border-slate-300 pl-2 ml-1">
+                        (Excl. Board)
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="text-sm text-slate-500">
-            <span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded text-xs font-bold mr-2">CNV COMPLIANT</span>
-            Fusión: ALyC + SGFCI
+
+        <!-- REFERENCE LEGEND BAR -->
+        <div class="bg-slate-50 border-t border-slate-200 px-6 py-2 flex flex-wrap justify-center gap-8 text-xs text-slate-600 shadow-inner">
+            
+            <div class="flex items-center gap-3 border-r border-slate-300 pr-6">
+                <span class="font-bold text-slate-400 uppercase tracking-widest">Nómina (Cargo):</span>
+                <span class="pos-badge pos-alyc text-[10px]">ALYC</span>
+                <span class="pos-badge pos-sg text-[10px]">SGFCI</span>
+            </div>
+
+            <!-- ALYC LEGEND -->
+            <div class="flex items-center gap-4 border-r border-slate-300 pr-6">
+                <div class="font-bold text-emerald-600 uppercase tracking-widest flex items-center">Resp. ALyC:</div>
+                <div class="flex items-center gap-1" title="Responsable de Cumplimiento Regulatorio"><span class="reg-badge reg-badge-alyc">⚖️</span> Resp. CNV</div>
+                <div class="flex items-center gap-1" title="Oficial de Cumplimiento UIF (Titular)"><span class="reg-badge reg-badge-alyc">🛡️</span> UIF Titular</div>
+                <div class="flex items-center gap-1" title="Oficial de Cumplimiento UIF (Suplente)"><span class="reg-badge reg-badge-alyc">🛟</span> UIF Suplente</div>
+                <div class="flex items-center gap-1" title="Responsable de Relaciones con el Público"><span class="reg-badge reg-badge-alyc">🤝</span> Rel. Público</div>
+            </div>
+
+            <!-- SGFCI LEGEND -->
+            <div class="flex items-center gap-4">
+                <div class="font-bold text-indigo-600 uppercase tracking-widest flex items-center">Resp. SGFCI:</div>
+                <div class="flex items-center gap-1" title="Oficial de Cumplimiento UIF (Titular)"><span class="reg-badge reg-badge-sgfci">🛡️</span> UIF Titular</div>
+                <div class="flex items-center gap-1" title="Oficial de Cumplimiento UIF (Suplente)"><span class="reg-badge reg-badge-sgfci">🛟</span> UIF Suplente</div>
+                <div class="flex items-center gap-1" title="Responsable de Inversiones (Idóneo)"><span class="reg-badge reg-badge-sgfci">✒️</span> Resp. Inversiones</div>
+            </div>
         </div>
     </nav>
 
@@ -105,7 +196,7 @@
         <div class="flex-1 overflow-y-auto custom-scroll p-8 bg-slate-50 relative">
             
             <!-- Hierarchy Container -->
-            <div class="max-w-5xl mx-auto flex flex-col items-center">
+            <div class="max-w-5xl mx-auto flex flex-col items-center relative">
                 
                 <!-- LEVEL 1: Governance -->
                 <div class="flex flex-col items-center mb-8 relative w-full">
@@ -117,125 +208,231 @@
                     
                     <div class="h-8 tree-line-vertical"></div>
                     
-                    <!-- Committees (The Brains) -->
+                    <!-- Committees -->
                     <div class="flex gap-4 justify-center w-full relative">
-                        <!-- Connector for Committees -->
                         <div class="absolute top-0 w-1/2 border-t-2 border-slate-300"></div>
                         <div class="h-4 tree-line-vertical absolute top-0 left-1/2 -translate-x-1/2"></div>
 
-                        <!-- Committee: Risk (New Requirement) -->
+                        <!-- Committee: Risk -->
                         <div id="node-risk-com" class="node-card bg-amber-50 border-2 border-amber-200 text-amber-900 p-3 rounded-lg shadow-sm w-48 text-center mt-4" onclick="loadDetail('risk-com')">
                             <h3 class="font-bold text-sm">RISK COMMITTEE</h3>
-                            <p class="text-[10px] text-amber-700 mt-1">Limits & Solvency</p>
+                            <p class="text-[10px] text-amber-700 mt-1">Chair: CCO</p>
                         </div>
 
                         <!-- CEO -->
                         <div id="node-ceo" class="node-card bg-white border-2 border-slate-300 p-3 rounded-lg shadow-md w-48 text-center mt-4 z-10" onclick="loadDetail('ceo')">
-                            <h3 class="font-bold text-slate-800">CEO</h3>
+                            <div class="flex items-center justify-center gap-1 mb-1">
+                                <h3 class="pos-badge pos-alyc text-sm">CEO</h3>
+                                <!-- ICONS -->
+                                <span class="reg-badge reg-badge-alyc" title="Titular CNV (ALyC)">⚖️</span>
+                                <span class="reg-badge reg-badge-alyc" title="Suplente UIF (ALyC)">🛟</span>
+                            </div>
                             <p class="text-[10px] text-slate-500">Chief Executive Officer</p>
                         </div>
 
                         <!-- Committee: Investment -->
                         <div id="node-inv-com" class="node-card bg-indigo-50 border-2 border-indigo-200 text-indigo-900 p-3 rounded-lg shadow-sm w-48 text-center mt-4" onclick="loadDetail('inv-com')">
                             <h3 class="font-bold text-sm">INVESTMENT COMMITTEE</h3>
-                            <p class="text-[10px] text-indigo-700 mt-1">Strategy & Portfolio</p>
+                            <p class="text-[10px] text-indigo-700 mt-1">Chair: CSO</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- LEVEL 2: Transversal Functional Areas (The Service Layer) -->
-                <div class="w-full mb-12">
-                    <div class="flex items-center justify-center mb-4">
-                        <span class="bg-slate-200 text-slate-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Shared Services (C-Level Transversal)</span>
+                <!-- LEVEL 2: Transversal Functional Areas -->
+                <div class="w-full mb-12 relative">
+                    <div class="flex items-center justify-center mb-10 relative">
+                        <div class="absolute -top-8 left-1/2 -translate-x-1/2 h-8 w-0.5 bg-slate-300"></div>
+                        <span class="bg-slate-200 text-slate-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider relative z-10">Shared Services (C-Level Transversal)</span>
                     </div>
                     
                     <!-- Grid for Managers -->
                     <div class="grid grid-cols-4 gap-4 relative">
-                        <!-- Horizontal Line connecting them -->
-                        <div class="absolute -top-6 left-8 right-8 border-t-2 border-slate-300"></div>
-                        <!-- Vertical line from CEO -->
-                        <div class="absolute -top-6 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
+                        <div class="absolute -top-6 left-10 right-10 border-t-2 border-slate-300"></div>
+                        <div class="absolute -top-10 left-1/2 -translate-x-1/2 h-10 tree-line-vertical"></div>
 
-                        <!-- Compliance -->
+                        <!-- Compliance (4 PAX: 3 ALYC, 1 SG) -->
                         <div class="relative pt-6">
                             <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
-                            <div id="node-compliance" class="node-card bg-white border-l-4 border-rose-500 p-4 rounded shadow hover:shadow-md h-full" onclick="loadDetail('compliance')">
-                                <div class="text-xs text-rose-600 font-bold mb-1">CONTROL</div>
-                                <h4 class="font-bold text-slate-800">CCO</h4>
-                                <p class="text-xs text-slate-500 mt-2">Chief Compliance Officer</p>
+                            <div id="node-compliance" class="node-card bg-white border-l-4 border-rose-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('compliance')">
+                                <div>
+                                    <div class="text-xs text-rose-600 font-bold mb-1">CONTROL</div>
+                                    <div class="flex items-center gap-1 mb-1">
+                                        <h4 class="pos-badge pos-alyc text-xs">CCO</h4>
+                                        <span class="reg-badge reg-badge-alyc" title="Titular UIF (ALyC)">🛡️</span>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 mb-2">Chief Compliance Officer</p>
+                                </div>
+                                <div class="mt-2 pt-2 border-t border-slate-100">
+                                    <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
+                                        <span class="w-1.5 h-1.5 bg-rose-400 rounded-full mr-1"></span>
+                                        <span class="pos-badge pos-alyc text-[9px] ml-1">Compliance Mgr</span>
+                                    </div>
+                                    <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
+                                        <div>• <span class="pos-badge pos-alyc text-[9px]">AML (Ssr)</span></div>
+                                        <div>• <span class="pos-badge pos-sg text-[9px]">Auditor (Jr)</span></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Back Office -->
+                        <!-- Back Office (6 PAX: 5 ALYC, 1 SG) -->
                         <div class="relative pt-6">
                             <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
-                            <div id="node-ops" class="node-card bg-white border-l-4 border-blue-500 p-4 rounded shadow hover:shadow-md h-full" onclick="loadDetail('ops')">
-                                <div class="text-xs text-blue-600 font-bold mb-1">OPERATIONS</div>
-                                <h4 class="font-bold text-slate-800">COO</h4>
-                                <p class="text-xs text-slate-500 mt-2">Chief Operating Officer</p>
+                            <div id="node-ops" class="node-card bg-white border-l-4 border-blue-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('ops')">
+                                <div>
+                                    <div class="text-xs text-blue-600 font-bold mb-1">OPERATIONS</div>
+                                    <div class="flex items-center gap-1 mb-1">
+                                        <h4 class="pos-badge pos-alyc text-xs">COO</h4>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 mb-2">Chief Operating Officer</p>
+                                </div>
+                                <div class="mt-2 pt-2 border-t border-slate-100">
+                                    <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
+                                        <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span>
+                                        <span class="pos-badge pos-alyc text-[9px] ml-1">Head Ops</span>
+                                    </div>
+                                    <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
+                                        <div>• <span class="pos-badge pos-alyc text-[9px]">Settl/Custody</span></div>
+                                        <div>• <span class="pos-badge pos-sg text-[9px]">Fund Admin</span></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Admin & Treasury -->
+                        <!-- Admin & Treasury (6 PAX: 3 SG, 3 ALYC) -->
                         <div class="relative pt-6">
                             <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
-                            <div id="node-admin" class="node-card bg-white border-l-4 border-blue-500 p-4 rounded shadow hover:shadow-md h-full" onclick="loadDetail('admin')">
-                                <div class="text-xs text-blue-600 font-bold mb-1">FINANCE</div>
-                                <h4 class="font-bold text-slate-800">CFO</h4>
-                                <p class="text-xs text-slate-500 mt-2">Chief Financial Officer</p>
+                            <div id="node-admin" class="node-card bg-white border-l-4 border-blue-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('admin')">
+                                <div>
+                                    <div class="text-xs text-blue-600 font-bold mb-1">FINANCE</div>
+                                    <div class="flex items-center gap-1 mb-1">
+                                        <h4 class="pos-badge pos-sg text-xs">CFO</h4>
+                                        <span class="reg-badge reg-badge-sgfci" title="Titular UIF (SGFCI)">🛡️</span>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 mb-2">Chief Financial Officer</p>
+                                </div>
+                                <div class="mt-2 pt-2 border-t border-slate-100">
+                                    <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
+                                        <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span>
+                                        <span class="pos-badge pos-alyc text-[9px] ml-1">Treasurer</span>
+                                    </div>
+                                    <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
+                                        <div>• <span class="pos-badge pos-sg text-[9px]">Treasury/Acct</span></div>
+                                        <div>• <span class="pos-badge pos-alyc text-[9px]">Tax / AP</span></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Research -->
+                        <!-- Research (5 PAX: 1 ALYC, 4 SG) -->
                         <div class="relative pt-6">
                             <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
-                            <div id="node-research" class="node-card bg-white border-l-4 border-purple-500 p-4 rounded shadow hover:shadow-md h-full" onclick="loadDetail('research')">
-                                <div class="text-xs text-purple-600 font-bold mb-1">STRATEGY</div>
-                                <h4 class="font-bold text-slate-800">CSO</h4>
-                                <p class="text-xs text-slate-500 mt-2">Chief Strategy Officer</p>
+                            <div id="node-research" class="node-card bg-white border-l-4 border-purple-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('research')">
+                                <div>
+                                    <div class="text-xs text-purple-600 font-bold mb-1">STRATEGY</div>
+                                    <div class="flex items-center gap-1 mb-1">
+                                        <h4 class="pos-badge pos-alyc text-xs">CSO</h4>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 mb-2">Chief Strategy Officer</p>
+                                </div>
+                                <div class="mt-2 pt-2 border-t border-slate-100">
+                                    <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
+                                        <span class="w-1.5 h-1.5 bg-purple-400 rounded-full mr-1"></span>
+                                        <span class="pos-badge pos-sg text-[9px] ml-1">Head Rsrch</span>
+                                    </div>
+                                    <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
+                                        <div>• <span class="pos-badge pos-sg text-[9px]">Macro/Credit</span></div>
+                                        <div>• <span class="pos-badge pos-sg text-[9px]">Quant</span></div>
+                                    </div>
+                                </div>
                             </div>
+                            
+                            <!-- Visual Anchor for Line -->
+                            <div class="absolute bottom-0 left-1/2 w-0.5 h-10 bg-purple-300 hidden md:block" style="height: 140px; transform: translate(-50%, 0); z-index: -1;"></div>
+                            <div class="absolute bottom-0 left-1/2 h-0.5 bg-purple-300 hidden md:block" style="width: 320%; transform: translate(-100%, 140px); z-index: -1;"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- LEVEL 3: Business Units (The Execution Layer) -->
-                <div class="w-full mt-4 flex gap-8 justify-center">
+                <div class="w-full mt-4 flex gap-8 justify-center items-start">
                     
                     <!-- ALyC Unit -->
-                    <div class="w-1/2 max-w-sm bg-emerald-50/50 border border-emerald-200 rounded-xl p-4 relative">
+                    <div class="w-1/2 max-w-sm bg-emerald-50/30 border-2 border-emerald-100 rounded-xl p-4 relative min-h-[160px]">
                         <div class="absolute -top-3 left-4 bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded border border-emerald-200">ALYC (Regulated)</div>
                         
-                        <!-- Trading Desk -->
-                        <div id="node-trading" class="node-card bg-white border-l-4 border-emerald-500 p-4 rounded shadow-sm mt-2" onclick="loadDetail('trading')">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="font-bold text-slate-800">HEAD OF TRADING</h4>
-                                    <p class="text-xs text-emerald-600 font-medium">Execution & Sales</p>
-                                </div>
-                                <span class="text-xs bg-slate-100 px-2 py-1 rounded text-slate-500">Front Office</span>
+                        <!-- Trading Desk (100% ALYC) -->
+                        <div id="node-trading" class="node-card bg-white border-2 border-purple-300 p-4 rounded shadow-sm mt-2 relative flex flex-col justify-between h-full" onclick="loadDetail('trading')">
+                            
+                            <div class="absolute -top-3 right-0 -mr-2 bg-purple-100 text-purple-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-purple-200 shadow-sm flex items-center">
+                                <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span> Linked to Strategy
                             </div>
-                            <p class="text-xs text-slate-500 mt-2 border-t border-slate-100 pt-2">
-                                *Linked to Holding Strategy
-                            </p>
+
+                            <div>
+                                <!-- Header Area + Role -->
+                                <div class="flex justify-between items-start mb-1">
+                                    <div class="text-xs text-purple-700 font-bold uppercase tracking-wider">TRADING</div>
+                                    <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">Business Unit</span>
+                                </div>
+                                
+                                <div class="flex items-center flex-wrap gap-1 mb-2">
+                                    <h4 class="pos-badge pos-alyc text-xs">HEAD OF TRADING</h4>
+                                    <span class="reg-badge reg-badge-alyc" title="Relaciones Público (ALyC)">🤝</span>
+                                </div>
+                                <p class="text-[10px] text-slate-500 font-semibold mt-0.5 mb-2">Exclusive to ALyC</p>
+                                
+                                <!-- Minimalist Detail Block -->
+                                <div class="mt-1 pt-2 border-t border-purple-50">
+                                    <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
+                                        <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span>
+                                        <span class="pos-badge pos-alyc text-[9px] ml-1">Senior Trader</span>
+                                    </div>
+                                    <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
+                                        <div>• <span class="pos-badge pos-alyc text-[9px]">FI / Equity Traders</span></div>
+                                        <div>• <span class="pos-badge pos-alyc text-[9px]">Sales & Inst.</span></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- SGFCI Unit -->
-                    <div class="w-1/2 max-w-sm bg-indigo-50/50 border border-indigo-200 rounded-xl p-4 relative">
+                    <div class="w-1/2 max-w-sm bg-indigo-50/30 border-2 border-indigo-100 rounded-xl p-4 relative min-h-[160px]">
                         <div class="absolute -top-3 left-4 bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded border border-indigo-200">SGFCI (Regulated)</div>
                         
-                        <!-- Fund Management -->
-                        <div id="node-sgfci" class="node-card bg-white border-l-4 border-indigo-500 p-4 rounded shadow-sm mt-2" onclick="loadDetail('sgfci')">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="font-bold text-slate-800">CIO (SGFCI)</h4>
-                                    <p class="text-xs text-indigo-600 font-medium">Asset Management</p>
-                                </div>
-                                <span class="text-xs bg-slate-100 px-2 py-1 rounded text-slate-500">Front Office</span>
+                        <!-- Fund Management (100% SG) -->
+                        <div id="node-sgfci" class="node-card bg-white border-2 border-purple-300 p-4 rounded shadow-sm mt-2 relative flex flex-col justify-between h-full" onclick="loadDetail('sgfci')">
+                            
+                            <div class="absolute -top-3 right-0 -mr-2 bg-purple-100 text-purple-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-purple-200 shadow-sm flex items-center">
+                                <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span> Linked to Strategy
                             </div>
-                            <p class="text-xs text-slate-500 mt-2 border-t border-slate-100 pt-2">
-                                *Collegial Decisions
-                            </p>
+
+                            <div>
+                                <!-- Header Area + Role -->
+                                <div class="flex justify-between items-start mb-1">
+                                    <div class="text-xs text-purple-700 font-bold uppercase tracking-wider">ASSET MANAGEMENT</div>
+                                    <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">Business Unit</span>
+                                </div>
+
+                                <div class="flex items-center flex-wrap gap-1 mb-2">
+                                    <h4 class="pos-badge pos-sg text-xs">CIO</h4>
+                                    <span class="reg-badge reg-badge-sgfci" title="Suplente UIF (SGFCI)">🛟</span>
+                                    <span class="reg-badge reg-badge-sgfci" title="Resp. Inversiones">✒️</span>
+                                </div>
+                                <p class="text-[10px] text-slate-500 font-semibold mt-0.5 mb-2">Exclusive to SGFCI</p>
+
+                                <!-- Minimalist Detail Block -->
+                                <div class="mt-1 pt-2 border-t border-purple-50">
+                                    <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
+                                        <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span>
+                                        <span class="pos-badge pos-sg text-[9px] ml-1">Head PM</span>
+                                    </div>
+                                    <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
+                                        <div>• <span class="pos-badge pos-sg text-[9px]">Portfolio Mgrs</span></div>
+                                        <div>• <span class="pos-badge pos-sg text-[9px]">Performance</span></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -244,7 +441,7 @@
             </div>
             
             <div class="text-center mt-12 text-slate-400 text-xs">
-                * Dotted lines imply transversal services. Solid lines imply direct reporting.
+                * Dotted lines imply transversal services.
             </div>
 
         </div>
@@ -256,7 +453,7 @@
             <div id="empty-state" class="flex-1 flex flex-col items-center justify-center p-10 text-center">
                 <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-400 text-2xl">⚡</div>
                 <h3 class="text-lg font-bold text-slate-700">Explorador Funcional</h3>
-                <p class="text-sm text-slate-500 mt-2">Seleccione un área del organigrama para ver el desglose de roles operativos y responsabilidades (English Titles Available).</p>
+                <p class="text-sm text-slate-500 mt-2">Seleccione un área del organigrama para ver el desglose de roles, responsabilidades y nómina legal.</p>
             </div>
 
             <!-- Content State -->
@@ -282,9 +479,9 @@
                     
                     <!-- Section: Mandos Medios -->
                     <div>
-                        <h3 class="text-sm font-bold text-slate-800 flex items-center mb-3">
+                        <h3 id="middle-title" class="text-sm font-bold text-slate-800 flex items-center mb-3">
                             <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                            Middle Management / Head
+                            Middle Management / Chair
                         </h3>
                         <div id="middle-management-container" class="bg-blue-50 border border-blue-100 rounded-lg p-3">
                             <!-- Dynamic Content -->
@@ -323,81 +520,83 @@
                 title: "BOARD OF DIRECTORS",
                 tag: "Governance & Strategy",
                 desc: "Órgano máximo de decisión. Define el apetito de riesgo y lidera la agresividad comercial del grupo.",
-                focus: [0, 5, 5, 5, 0], // Ops: 0, Strat: 5, Exec/Com: 5 (High), Control: 5, Admin: 0
+                focus: [0, 5, 5, 5, 0], 
                 middle: "CEO (Chief Executive Officer)",
-                roles: [], // Sin roles operativos ni sub-gerencias directas (directo a CEO).
+                middleEntity: "ALyC",
+                roles: [], 
                 resp: [
                     "Definición de Estrategia Comercial y de Expansión.",
                     "Aprobación de Balances y Presupuestos.",
                     "Designación de Comités (Inversión, Riesgo, PLA/FT).",
                     "Supervisión directa del desempeño del CEO."
                 ],
-                color: "slate"
+                color: "slate",
+                headcount: 5 
             },
             'risk-com': {
                 title: "RISK COMMITTEE",
-                tag: "Committee",
-                desc: "Sustituye a la Gerencia de Riesgo. Órgano colegiado que monitorea la solvencia y liquidez de ambas unidades (ALyC y SGFCI).",
+                tag: "Mandatory C-Suite Body",
+                desc: "Órgano colegiado de control liderado por el CCO. Integrado obligatoriamente por toda la C-Suite. NO posee estructura operativa a cargo.",
                 focus: [0, 5, 0, 5, 0], 
-                middle: "CRO (Chief Risk Officer)",
-                roles: [
-                    { title: "Risk Analyst (Market)", desc: "VaR, Stress Testing, Backtesting." },
-                    { title: "Liquidity Risk Officer", desc: "Gap analysis, aforos, cash flow risk." }
-                ],
+                middle: "Chair: CCO (Chief Compliance Officer)",
+                roles: [],
                 resp: [
-                    "Aprobación de límites de contraparte.",
-                    "Monitoreo de Régimen Informativo de Solvencia.",
-                    "Aprobación de nuevos productos financieros.",
-                    "Control de aforos para cauciones."
+                    "Participantes Obligatorios: CEO, CFO, COO, CCO, CSO.",
+                    "Aprobación de límites de contraparte y solvencia.",
+                    "Validación de nuevos productos.",
+                    "Puede incorporar participantes Ad-hoc según temática."
                 ],
-                color: "amber"
+                color: "amber",
+                headcount: 0 
             },
             'inv-com': {
                 title: "INVESTMENT COMMITTEE",
-                tag: "Strategy",
-                desc: "Define el 'House View' y la estrategia macroeconómica que guiará tanto a la Mesa de la ALyC como a los PMs de la SGFCI.",
+                tag: "Mandatory C-Suite Body",
+                desc: "Órgano colegiado estratégico liderado por el CSO. Integrado obligatoriamente por toda la C-Suite. Define el 'House View' sin ejecutar.",
                 focus: [0, 5, 5, 2, 0],
-                middle: "CIO (Chief Investment Officer) / Strategist",
-                roles: [
-                    { title: "Board Members", desc: "Visión negocio." },
-                    { title: "Head Portfolio Manager", desc: "Visión táctica SGFCI." },
-                    { title: "Head Trader", desc: "Visión mercado ALyC." }
-                ],
+                middle: "Chair: CSO (Chief Strategy Officer)",
+                roles: [],
                 resp: [
+                    "Participantes Obligatorios: CEO, CFO, COO, CCO, CSO.",
                     "Definición de Asset Allocation estratégico.",
                     "Revisión de performance de fondos.",
-                    "Análisis de coyuntura macroeconómica."
+                    "Puede incorporar participantes Ad-hoc según temática."
                 ],
-                color: "indigo"
+                color: "indigo",
+                headcount: 0
             },
             'ceo': {
                 title: "CEO (Chief Executive Officer)",
                 tag: "Executive",
                 desc: "Nexo entre el Directorio y la operación. Garantiza que las unidades reguladas funcionen eficientemente compartiendo servicios.",
                 focus: [3, 5, 5, 3, 3],
-                middle: "C-Suite (COO, CFO, CCO, CSO)", // Cambio aquí: Se eliminó Executive Assistant
+                middle: "C-Suite (COO, CFO, CCO, CSO)", 
+                middleEntity: "ALyC",
                 roles: [
-                    { title: "Direct Report Policy", desc: "El nivel operativo NO tiene acceso directo al CEO. Canalizan vía C-Level." } // Nota explícita sobre la restricción
+                    { title: "Direct Report Policy", desc: "El nivel operativo NO tiene acceso directo al CEO. Canalizan vía C-Level.", entity: "ALyC" } 
                 ],
                 resp: [
+                    "★ ROL CNV (ALyC): Responsable de Cumplimiento Regulatorio (Titular).",
+                    "★ ROL UIF (ALyC): Oficial de Cumplimiento (Suplente).",
                     "Supervisión de P&L consolidado.",
-                    "Arbitraje de recursos entre ALyC y SGFCI.",
-                    "Reporte al Directorio.",
-                    "Liderazgo exclusivo sobre la C-Suite."
+                    "Arbitraje de recursos entre ALyC y SGFCI."
                 ],
-                color: "slate"
+                color: "slate",
+                headcount: 1,
+                entity: "ALyC"
             },
             'ops': {
                 title: "COO (Chief Operating Officer)",
                 tag: "Transversal / Shared Service",
                 desc: "El corazón de la 'fábrica'. Procesa, liquida y custodia los activos de ambas unidades de negocio bajo procesos diferenciados.",
-                focus: [5, 1, 0, 3, 4], // Ops focus high
+                focus: [5, 1, 0, 3, 4], 
                 middle: "Head of Operations",
+                middleEntity: "ALyC",
                 roles: [
-                    { title: "Settlement Officer (ALyC)", desc: "Liquidación BYMA, MAE, Rofex. Control de garantías." },
-                    { title: "Fund Administrator (SGFCI)", desc: "Cálculo de Valor Cuota diario. Devengamientos." },
-                    { title: "Onboarding Analyst", desc: "Legajos digitales, onboarding clientes (KYC)." },
-                    { title: "Custody Analyst", desc: "Conciliación con Caja de Valores." }
+                    { title: "Settlement Officer", desc: "Liquidación BYMA, MAE, Rofex. Control de garantías.", entity: "ALyC" },
+                    { title: "Fund Administrator", desc: "Cálculo de Valor Cuota diario. Devengamientos.", entity: "SG" },
+                    { title: "Onboarding Analyst", desc: "Legajos digitales, onboarding clientes (KYC).", entity: "ALyC" },
+                    { title: "Custody Analyst", desc: "Conciliación con Caja de Valores.", entity: "ALyC" }
                 ],
                 resp: [
                     "Garantizar la liquidación en tiempo y forma (T+0, T+1, T+2).",
@@ -405,7 +604,9 @@
                     "Conciliación diaria de saldos comitentes vs. Caja.",
                     "Reportes operativos a CNV (autopistas de información)."
                 ],
-                color: "blue"
+                color: "blue",
+                headcount: 6,
+                entity: "ALyC"
             },
             'admin': {
                 title: "CFO (Chief Financial Officer)",
@@ -413,19 +614,22 @@
                 desc: "Maneja los flujos monetarios y la contabilidad. CRÍTICO: Debe asegurar la segregación de cuentas bancarias.",
                 focus: [4, 1, 0, 4, 5],
                 middle: "Treasurer / Head of Administration",
+                middleEntity: "ALyC",
                 roles: [
-                    { title: "Treasury Analyst", desc: "Manejo de portales bancarios, transferencias MEP/CCL." },
-                    { title: "Senior Accountant", desc: "Contabilidad bimonetaria, ajuste por inflación." },
-                    { title: "Tax Analyst", desc: "Retenciones, IIBB, IVA." },
-                    { title: "Accounts Payable (AP)", desc: "Gestión administrativa del Holding." }
+                    { title: "Treasury Analyst", desc: "Manejo de portales bancarios, transferencias MEP/CCL.", entity: "SG" },
+                    { title: "Senior Accountant", desc: "Contabilidad bimonetaria, ajuste por inflación.", entity: "SG" },
+                    { title: "Tax Analyst", desc: "Retenciones, IIBB, IVA.", entity: "ALyC" },
+                    { title: "Accounts Payable (AP)", desc: "Gestión administrativa del Holding.", entity: "ALyC" }
                 ],
                 resp: [
-                    "Conciliación bancaria diaria.",
+                    "★ ROL UIF (SGFCI): Oficial de Cumplimiento (Titular).",
+                    "Conciliación bancaria diaria y segregación de cuentas.",
                     "Ejecución de rescates y suscripciones (movimiento de fondos).",
-                    "Presentación de Balances Trimestrales y Anuales.",
-                    "Gestión del cash flow propio del Holding."
+                    "Presentación de Balances Trimestrales y Anuales."
                 ],
-                color: "blue"
+                color: "blue",
+                headcount: 6,
+                entity: "SG"
             },
             'compliance': {
                 title: "CCO (Chief Compliance Officer)",
@@ -433,18 +637,20 @@
                 desc: "Vela por la integridad normativa. Reporta funcionalmente al Directorio para asegurar independencia. Cubre ALyC y SGFCI.",
                 focus: [2, 1, 0, 5, 1],
                 middle: "Compliance Manager (Titular ante UIF)",
+                middleEntity: "ALyC",
                 roles: [
-                    { title: "AML/CFT Analyst", desc: "Monitoreo transaccional, matrices de riesgo, alertas." },
-                    { title: "Regulatory Affairs Officer", desc: "Seguimiento de nuevas resoluciones CNV, hechos relevantes." },
-                    { title: "Internal Auditor", desc: "Control de legajos y onboarding." }
+                    { title: "AML/CFT Analyst (Ssr)", desc: "Monitoreo transaccional, matrices de riesgo, alertas.", entity: "ALyC" },
+                    { title: "Internal Auditor (Jr)", desc: "Control de legajos, onboarding y auditoría básica.", entity: "SG" }
                 ],
                 resp: [
+                    "★ ROL UIF (ALyC): Oficial de Cumplimiento (Titular).",
                     "Reporte de Operaciones Sospechosas (ROS).",
                     "Control del Código de Conducta y Conflictos de Interés.",
-                    "Aprobación de clientes de alto riesgo.",
-                    "Respuesta a requerimientos de organismos."
+                    "Aprobación de clientes de alto riesgo."
                 ],
-                color: "rose"
+                color: "rose",
+                headcount: 4,
+                entity: "ALyC"
             },
             'research': {
                 title: "CSO (Chief Strategy Officer) / RESEARCH",
@@ -452,56 +658,66 @@
                 desc: "Genera inteligencia de mercado para uso interno (Mesa/PMs) y externo (Clientes). No ejecuta, solo analiza.",
                 focus: [1, 5, 0, 0, 1],
                 middle: "Head of Research",
+                middleEntity: "SG",
                 roles: [
-                    { title: "Macro Economist", desc: "Política monetaria, fiscal, FX." },
-                    { title: "Credit Analyst", desc: "Análisis de balances de emisores de ONs." },
-                    { title: "Quantitative Analyst (Quant)", desc: "Modelos de valuación y bases de datos." }
+                    { title: "Macro Economist", desc: "Política monetaria, fiscal, FX.", entity: "SG" },
+                    { title: "Credit Analyst", desc: "Análisis de balances de emisores de ONs.", entity: "SG" },
+                    { title: "Quantitative Analyst (Quant)", desc: "Modelos de valuación y bases de datos.", entity: "SG" }
                 ],
                 resp: [
                     "Daily reports y Weekly reports para clientes.",
                     "Soporte analítico al Comité de Inversiones.",
                     "Valuación de activos ilíquidos (para SGFCI)."
                 ],
-                color: "purple"
+                color: "purple",
+                headcount: 5,
+                entity: "ALyC"
             },
             'trading': {
-                title: "HEAD OF TRADING (ALyC)",
-                tag: "Business Unit / Execution",
-                desc: "Área exclusiva de la ALyC. Ejecuta órdenes propias y de clientes. Se nutre de la estrategia del Holding pero opera independientemente.",
+                title: "TRADING AREA / HEAD OF TRADING",
+                tag: "Business Unit / ALyC",
+                desc: "Unidad de negocio interna de la ALyC. Responsable de la ejecución y generación de ingresos. Se vincula estratégicamente con el CSO.",
                 focus: [3, 4, 5, 2, 0],
                 middle: "Senior Trader",
+                middleEntity: "ALyC",
                 roles: [
-                    { title: "Fixed Income Trader", desc: "Bonos soberanos, subsoberanos, ONs. Arbitrajes." },
-                    { title: "Equity & Cedears Trader", desc: "Acciones, Equity local e internacional." },
-                    { title: "Institutional Sales Trader", desc: "Atención a grandes clientes y SGFCI (como cliente)." },
-                    { title: "Sales Executive", desc: "Relación directa con clientes activos." }
+                    { title: "Fixed Income Trader", desc: "Bonos soberanos, subsoberanos, ONs. Arbitrajes.", entity: "ALyC" },
+                    { title: "Equity & Cedears Trader", desc: "Acciones, Equity local e internacional.", entity: "ALyC" },
+                    { title: "Institutional Sales Trader", desc: "Atención a grandes clientes y SGFCI (como cliente).", entity: "ALyC" },
+                    { title: "Sales Executive", desc: "Relación directa con clientes activos.", entity: "ALyC" }
                 ],
                 resp: [
+                    "★ ROL CNV (ALyC): Responsable de Relaciones con el Público.",
                     "Best Execution (Prioridad Precio-Tiempo).",
-                    "Manejo de la cartera propia de la ALyC.",
+                    "Ejecución de órdenes propias y de clientes.",
                     "Ejecución de órdenes instruidas por la SGFCI.",
-                    "Cierre de mercado y control de boletos."
+                    "Vinculación directa con Estrategia (CSO)."
                 ],
-                color: "emerald"
+                color: "purple", 
+                headcount: 6,
+                entity: "ALyC"
             },
             'sgfci': {
-                title: "CIO (Chief Investment Officer - SGFCI)",
-                tag: "Business Unit / Buy-side",
-                desc: "Área fiduciaria exclusiva de la Sociedad Gerente. Decide la composición de las carteras de los fondos. NO opera, instruye órdenes.",
+                title: "ASSET MANAGEMENT / CIO",
+                tag: "Business Unit / SGFCI",
+                desc: "Unidad fiduciaria interna de la Sociedad Gerente. Decide la composición de las carteras de los fondos. Responsable ante CNV.",
                 focus: [2, 5, 4, 3, 1],
                 middle: "Head Portfolio Manager",
+                middleEntity: "SG",
                 roles: [
-                    { title: "Portfolio Manager (MM/T+1)", desc: "Manejo de liquidez, cauciones, cuentas remuneradas." },
-                    { title: "Portfolio Manager (Fixed Income)", desc: "Fondos de bonos, estrategia de duration." },
-                    { title: "Performance Analyst", desc: "Atribución de retorno, benchmarking." }
+                    { title: "Portfolio Manager (MM/T+1)", desc: "Manejo de liquidez, cauciones, cuentas remuneradas.", entity: "SG" },
+                    { title: "Portfolio Manager (Fixed Income)", desc: "Fondos de bonos, estrategia de duration.", entity: "SG" },
+                    { title: "Performance Analyst", desc: "Atribución de retorno, benchmarking.", entity: "SG" }
                 ],
                 resp: [
-                    "Minutas de inversión diarias.",
-                    "Cumplimiento del Reglamento de Gestión de cada fondo.",
-                    "Instrucción de órdenes a la ALyC (o a otros brokers).",
-                    "Control de liquidez ante rescates."
+                    "★ ROL UIF (SGFCI): Oficial de Cumplimiento (Suplente).",
+                    "★ ROL IDÓNEO: Responsable de Inversiones.",
+                    "Minutas de inversión diarias y administración discrecional.",
+                    "Vinculación directa con Estrategia (CSO)."
                 ],
-                color: "indigo"
+                color: "purple", 
+                headcount: 5,
+                entity: "SG"
             }
         };
 
@@ -570,13 +786,16 @@
             const header = document.getElementById('panel-header');
             const tag = document.getElementById('role-tag');
             
-            // Reset base styles (simplified for this demo, usually toggle classes)
             if (data.color === 'rose') {
                 tag.className = "text-[10px] font-bold tracking-widest uppercase bg-rose-100 text-rose-700 px-2 py-1 rounded-sm";
             } else if (data.color === 'emerald') {
                 tag.className = "text-[10px] font-bold tracking-widest uppercase bg-emerald-100 text-emerald-700 px-2 py-1 rounded-sm";
             } else if (data.color === 'blue') {
                 tag.className = "text-[10px] font-bold tracking-widest uppercase bg-blue-100 text-blue-700 px-2 py-1 rounded-sm";
+            } else if (data.color === 'slate') {
+                tag.className = "text-[10px] font-bold tracking-widest uppercase bg-slate-200 text-slate-700 px-2 py-1 rounded-sm";
+            } else if (data.color === 'purple') {
+                tag.className = "text-[10px] font-bold tracking-widest uppercase bg-purple-100 text-purple-700 px-2 py-1 rounded-sm";
             } else {
                 tag.className = "text-[10px] font-bold tracking-widest uppercase bg-slate-200 text-slate-700 px-2 py-1 rounded-sm";
             }
@@ -584,7 +803,6 @@
             // Update Chart
             if (radarChart) {
                 radarChart.data.datasets[0].data = data.focus;
-                // Update chart color based on section
                 const colorMap = {
                     'rose': '225, 29, 72',
                     'emerald': '16, 185, 129',
@@ -601,23 +819,47 @@
                 radarChart.update();
             }
 
-            // Update Middle Management
+            // Update Middle Management with Highlighter Style
             const middleContainer = document.getElementById('middle-management-container');
+            const middleTitle = document.getElementById('middle-title');
+            
+            if(nodeId === 'risk-com' || nodeId === 'inv-com') {
+                middleTitle.innerHTML = `<span class="w-2 h-2 bg-amber-500 rounded-full mr-2"></span> Chair / President`;
+            } else {
+                middleTitle.innerHTML = `<span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span> Middle Management`;
+            }
+
             if (data.middle) {
-                middleContainer.innerHTML = `<div class="font-bold text-slate-700 text-sm">${data.middle}</div><div class="text-xs text-slate-500">Transversal Link / Coordinator</div>`;
+                // Apply styling to text name
+                let styleClass = 'pos-alyc'; // default
+                if(data.middleEntity === 'SG') styleClass = 'pos-sg';
+                
+                middleContainer.innerHTML = `<div class="font-bold text-slate-700 text-sm flex items-center">
+                                                <span class="pos-badge ${styleClass} text-[11px]">${data.middle}</span>
+                                             </div>
+                                             <div class="text-xs text-slate-500 mt-1">Coordination</div>`;
                 middleContainer.parentElement.classList.remove('hidden');
             } else {
                 middleContainer.parentElement.classList.add('hidden');
             }
 
-            // Update Roles
+            // Update Roles with Highlighter Style
             const roleContainer = document.getElementById('operational-roles-container');
             roleContainer.innerHTML = '';
             if (data.roles.length > 0) {
                 data.roles.forEach(role => {
                     const div = document.createElement('div');
-                    div.className = "bg-white border border-slate-200 p-3 rounded shadow-sm hover:border-blue-300 transition-colors";
-                    div.innerHTML = `<div class="font-bold text-slate-700 text-xs">${role.title}</div><div class="text-[10px] text-slate-500 leading-tight mt-1">${role.desc}</div>`;
+                    div.className = "bg-white border border-slate-200 p-3 rounded shadow-sm hover:border-blue-300 transition-colors flex justify-between items-start";
+                    
+                    let styleClass = 'pos-alyc';
+                    if(role.entity === 'SG') styleClass = 'pos-sg';
+
+                    div.innerHTML = `<div>
+                                        <div class="font-bold text-slate-700 text-xs mb-1">
+                                            <span class="pos-badge ${styleClass} text-[10px]">${role.title}</span>
+                                        </div>
+                                        <div class="text-[10px] text-slate-500 leading-tight">${role.desc}</div>
+                                     </div>`;
                     roleContainer.appendChild(div);
                 });
                 roleContainer.parentElement.classList.remove('hidden');
@@ -635,10 +877,40 @@
             });
         }
 
+        // Logic to calculate total headcount
+        function updateHeadcounts() {
+            let total = 0;
+            
+            Object.keys(orgData).forEach(key => {
+                const data = orgData[key];
+
+                if (key !== 'board') {
+                    total += data.headcount || 0;
+                }
+                
+                if (key !== 'board') {
+                    const node = document.getElementById(`node-${key}`);
+                    if (node) {
+                        const badge = document.createElement('div');
+                        badge.className = 'headcount-badge';
+                        badge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                            </svg>
+                                            <span>${data.headcount}</span>`;
+                        node.appendChild(badge);
+                    }
+                }
+            });
+
+            const totalEl = document.getElementById('total-headcount');
+            if(totalEl) totalEl.innerText = total;
+        }
+
         // Initialize on load
         window.addEventListener('load', () => {
             initChart();
-            loadDetail('board'); // Load Board by default
+            updateHeadcounts();
+            loadDetail('board'); 
         });
 
     </script>
