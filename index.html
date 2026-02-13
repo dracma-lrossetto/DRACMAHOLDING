@@ -132,6 +132,41 @@
             opacity: 0.5;
             z-index: 0;
         }
+
+        /* Nav Tab Styles */
+        .nav-tab {
+            @apply px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent hover:text-blue-600 hover:border-blue-300 transition-colors cursor-pointer text-slate-500;
+        }
+        .nav-tab.active-tab {
+            @apply text-blue-600 border-blue-600 bg-blue-50/50;
+        }
+        
+        /* Input Range Personalizado */
+        input[type=range] {
+            -webkit-appearance: none; 
+            background: transparent; 
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+            margin-top: -6px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #e2e8f0;
+            border-radius: 2px;
+        }
+        /* Custom Colors for Sliders */
+        #acdi-slider::-webkit-slider-thumb { background: #e11d48; } /* Rose-600 */
+        #growth-slider::-webkit-slider-thumb { background: #2563eb; } /* Blue-600 */
+        #fee-slider::-webkit-slider-thumb { background: #9333ea; } /* Purple-600 */
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans h-screen overflow-hidden flex flex-col">
@@ -144,6 +179,16 @@
                 <h1 class="text-xl font-semibold text-slate-700 hidden md:block">Modelo de Fusión Operativa</h1>
             </div>
             
+            <!-- View Switcher Tabs -->
+            <div class="flex space-x-1 bg-slate-100 p-1 rounded-lg">
+                <button onclick="switchView('structure')" id="tab-structure" class="px-4 py-1.5 text-xs font-bold rounded-md transition-all shadow-sm bg-white text-blue-700">
+                    Estructura
+                </button>
+                <button onclick="switchView('revenue')" id="tab-revenue" class="px-4 py-1.5 text-xs font-bold rounded-md transition-all text-slate-500 hover:bg-white/50">
+                    Simulador 2026
+                </button>
+            </div>
+
             <div class="flex items-center gap-4">
                 <!-- Total Headcount Counter -->
                 <div class="bg-slate-100 border border-slate-300 rounded-lg px-3 py-1 flex items-center gap-2 shadow-sm">
@@ -161,9 +206,8 @@
             </div>
         </div>
 
-        <!-- REFERENCE LEGEND BAR -->
-        <div class="bg-slate-50 border-t border-slate-200 px-6 py-2 flex flex-wrap justify-center gap-8 text-xs text-slate-600 shadow-inner">
-            
+        <!-- REFERENCE LEGEND BAR (Solo visible en Estructura) -->
+        <div id="legend-bar" class="bg-slate-50 border-t border-slate-200 px-6 py-2 flex flex-wrap justify-center gap-8 text-xs text-slate-600 shadow-inner">
             <div class="flex items-center gap-3 border-r border-slate-300 pr-6">
                 <span class="font-bold text-slate-400 uppercase tracking-widest">Nómina (Cargo):</span>
                 <span class="pos-badge pos-alyc text-[10px]">ALYC</span>
@@ -175,7 +219,6 @@
                 <div class="font-bold text-emerald-600 uppercase tracking-widest flex items-center">Resp. ALyC:</div>
                 <div class="flex items-center gap-1" title="Responsable de Cumplimiento Regulatorio"><span class="reg-badge reg-badge-alyc">⚖️</span> Resp. CNV</div>
                 <div class="flex items-center gap-1" title="Oficial de Cumplimiento UIF (Titular)"><span class="reg-badge reg-badge-alyc">🛡️</span> UIF Titular</div>
-                <div class="flex items-center gap-1" title="Oficial de Cumplimiento UIF (Suplente)"><span class="reg-badge reg-badge-alyc">🛟</span> UIF Suplente</div>
                 <div class="flex items-center gap-1" title="Responsable de Relaciones con el Público"><span class="reg-badge reg-badge-alyc">🤝</span> Rel. Público</div>
             </div>
 
@@ -183,338 +226,831 @@
             <div class="flex items-center gap-4">
                 <div class="font-bold text-indigo-600 uppercase tracking-widest flex items-center">Resp. SGFCI:</div>
                 <div class="flex items-center gap-1" title="Oficial de Cumplimiento UIF (Titular)"><span class="reg-badge reg-badge-sgfci">🛡️</span> UIF Titular</div>
-                <div class="flex items-center gap-1" title="Oficial de Cumplimiento UIF (Suplente)"><span class="reg-badge reg-badge-sgfci">🛟</span> UIF Suplente</div>
                 <div class="flex items-center gap-1" title="Responsable de Inversiones (Idóneo)"><span class="reg-badge reg-badge-sgfci">✒️</span> Resp. Inversiones</div>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content Grid -->
-    <div class="flex-1 flex overflow-hidden">
-        
-        <!-- LEFT PANEL: Visual Org Chart (Interactive) -->
-        <div class="flex-1 overflow-y-auto custom-scroll p-8 bg-slate-50 relative">
+    <!-- Main Content Container -->
+    <div class="flex-1 relative overflow-hidden">
+
+        <!-- VIEW 1: STRUCTURE (Original Content) -->
+        <div id="view-structure" class="absolute inset-0 flex flex-col md:flex-row transition-opacity duration-300 z-10 bg-slate-50">
             
-            <!-- Hierarchy Container -->
-            <div class="max-w-5xl mx-auto flex flex-col items-center relative">
+            <!-- LEFT PANEL: Visual Org Chart (Interactive) -->
+            <div class="flex-1 overflow-y-auto custom-scroll p-8 bg-slate-50 relative">
                 
-                <!-- LEVEL 1: Governance -->
-                <div class="flex flex-col items-center mb-8 relative w-full">
-                    <!-- Board -->
-                    <div id="node-board" class="node-card w-64 bg-slate-900 text-white p-4 rounded-xl shadow-lg text-center z-10 border-b-4 border-indigo-500" onclick="loadDetail('board')">
-                        <h2 class="font-bold text-lg">BOARD OF DIRECTORS</h2>
-                        <p class="text-xs text-slate-400">Corporate Governance</p>
-                    </div>
+                <!-- Hierarchy Container -->
+                <div class="max-w-5xl mx-auto flex flex-col items-center relative scale-90 origin-top">
                     
-                    <div class="h-8 tree-line-vertical"></div>
-                    
-                    <!-- Committees -->
-                    <div class="flex gap-4 justify-center w-full relative">
-                        <div class="absolute top-0 w-1/2 border-t-2 border-slate-300"></div>
-                        <div class="h-4 tree-line-vertical absolute top-0 left-1/2 -translate-x-1/2"></div>
-
-                        <!-- Committee: Risk -->
-                        <div id="node-risk-com" class="node-card bg-amber-50 border-2 border-amber-200 text-amber-900 p-3 rounded-lg shadow-sm w-48 text-center mt-4" onclick="loadDetail('risk-com')">
-                            <h3 class="font-bold text-sm">RISK COMMITTEE</h3>
-                            <p class="text-[10px] text-amber-700 mt-1">Chair: CCO</p>
+                    <!-- LEVEL 1: Governance -->
+                    <div class="flex flex-col items-center mb-8 relative w-full">
+                        <!-- Board -->
+                        <div id="node-board" class="node-card w-64 bg-slate-900 text-white p-4 rounded-xl shadow-lg text-center z-10 border-b-4 border-indigo-500" onclick="loadDetail('board')">
+                            <h2 class="font-bold text-lg">BOARD OF DIRECTORS</h2>
+                            <p class="text-xs text-slate-400">Corporate Governance</p>
                         </div>
-
-                        <!-- CEO -->
-                        <div id="node-ceo" class="node-card bg-white border-2 border-slate-300 p-3 rounded-lg shadow-md w-48 text-center mt-4 z-10" onclick="loadDetail('ceo')">
-                            <div class="flex items-center justify-center gap-1 mb-1">
-                                <h3 class="pos-badge pos-alyc text-sm">CEO</h3>
-                                <!-- ICONS -->
-                                <span class="reg-badge reg-badge-alyc" title="Titular CNV (ALyC)">⚖️</span>
-                                <span class="reg-badge reg-badge-alyc" title="Suplente UIF (ALyC)">🛟</span>
-                            </div>
-                            <p class="text-[10px] text-slate-500">Chief Executive Officer</p>
-                        </div>
-
-                        <!-- Committee: Investment -->
-                        <div id="node-inv-com" class="node-card bg-indigo-50 border-2 border-indigo-200 text-indigo-900 p-3 rounded-lg shadow-sm w-48 text-center mt-4" onclick="loadDetail('inv-com')">
-                            <h3 class="font-bold text-sm">INVESTMENT COMMITTEE</h3>
-                            <p class="text-[10px] text-indigo-700 mt-1">Chair: CSO</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- LEVEL 2: Transversal Functional Areas -->
-                <div class="w-full mb-12 relative">
-                    <div class="flex items-center justify-center mb-10 relative">
-                        <div class="absolute -top-8 left-1/2 -translate-x-1/2 h-8 w-0.5 bg-slate-300"></div>
-                        <span class="bg-slate-200 text-slate-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider relative z-10">Shared Services (C-Level Transversal)</span>
-                    </div>
-                    
-                    <!-- Grid for Managers -->
-                    <div class="grid grid-cols-4 gap-4 relative">
-                        <div class="absolute -top-6 left-10 right-10 border-t-2 border-slate-300"></div>
-                        <div class="absolute -top-10 left-1/2 -translate-x-1/2 h-10 tree-line-vertical"></div>
-
-                        <!-- Compliance (4 PAX: 3 ALYC, 1 SG) -->
-                        <div class="relative pt-6">
-                            <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
-                            <div id="node-compliance" class="node-card bg-white border-l-4 border-rose-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('compliance')">
-                                <div>
-                                    <div class="text-xs text-rose-600 font-bold mb-1">CONTROL</div>
-                                    <div class="flex items-center gap-1 mb-1">
-                                        <h4 class="pos-badge pos-alyc text-xs">CCO</h4>
-                                        <span class="reg-badge reg-badge-alyc" title="Titular UIF (ALyC)">🛡️</span>
-                                    </div>
-                                    <p class="text-[10px] text-slate-500 mb-2">Chief Compliance Officer</p>
-                                </div>
-                                <div class="mt-2 pt-2 border-t border-slate-100">
-                                    <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                        <span class="w-1.5 h-1.5 bg-rose-400 rounded-full mr-1"></span>
-                                        <span class="pos-badge pos-alyc text-[9px] ml-1">Compliance Mgr</span>
-                                    </div>
-                                    <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
-                                        <div>• <span class="pos-badge pos-alyc text-[9px]">AML (Ssr)</span></div>
-                                        <div>• <span class="pos-badge pos-sg text-[9px]">Auditor (Jr)</span></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Back Office (6 PAX: 5 ALYC, 1 SG) -->
-                        <div class="relative pt-6">
-                            <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
-                            <div id="node-ops" class="node-card bg-white border-l-4 border-blue-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('ops')">
-                                <div>
-                                    <div class="text-xs text-blue-600 font-bold mb-1">OPERATIONS</div>
-                                    <div class="flex items-center gap-1 mb-1">
-                                        <h4 class="pos-badge pos-alyc text-xs">COO</h4>
-                                    </div>
-                                    <p class="text-[10px] text-slate-500 mb-2">Chief Operating Officer</p>
-                                </div>
-                                <div class="mt-2 pt-2 border-t border-slate-100">
-                                    <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                        <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span>
-                                        <span class="pos-badge pos-alyc text-[9px] ml-1">Head Ops</span>
-                                    </div>
-                                    <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
-                                        <div>• <span class="pos-badge pos-alyc text-[9px]">Settl/Custody</span></div>
-                                        <div>• <span class="pos-badge pos-sg text-[9px]">Fund Admin</span></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Admin & Treasury (6 PAX: 3 SG, 3 ALYC) -->
-                        <div class="relative pt-6">
-                            <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
-                            <div id="node-admin" class="node-card bg-white border-l-4 border-blue-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('admin')">
-                                <div>
-                                    <div class="text-xs text-blue-600 font-bold mb-1">FINANCE</div>
-                                    <div class="flex items-center gap-1 mb-1">
-                                        <h4 class="pos-badge pos-sg text-xs">CFO</h4>
-                                        <span class="reg-badge reg-badge-sgfci" title="Titular UIF (SGFCI)">🛡️</span>
-                                    </div>
-                                    <p class="text-[10px] text-slate-500 mb-2">Chief Financial Officer</p>
-                                </div>
-                                <div class="mt-2 pt-2 border-t border-slate-100">
-                                    <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                        <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span>
-                                        <span class="pos-badge pos-alyc text-[9px] ml-1">Treasurer</span>
-                                    </div>
-                                    <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
-                                        <div>• <span class="pos-badge pos-sg text-[9px]">Treasury/Acct</span></div>
-                                        <div>• <span class="pos-badge pos-alyc text-[9px]">Tax / AP</span></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Research (5 PAX: 1 ALYC, 4 SG) -->
-                        <div class="relative pt-6">
-                            <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
-                            <div id="node-research" class="node-card bg-white border-l-4 border-purple-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('research')">
-                                <div>
-                                    <div class="text-xs text-purple-600 font-bold mb-1">STRATEGY</div>
-                                    <div class="flex items-center gap-1 mb-1">
-                                        <h4 class="pos-badge pos-alyc text-xs">CSO</h4>
-                                    </div>
-                                    <p class="text-[10px] text-slate-500 mb-2">Chief Strategy Officer</p>
-                                </div>
-                                <div class="mt-2 pt-2 border-t border-slate-100">
-                                    <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                        <span class="w-1.5 h-1.5 bg-purple-400 rounded-full mr-1"></span>
-                                        <span class="pos-badge pos-sg text-[9px] ml-1">Head Rsrch</span>
-                                    </div>
-                                    <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
-                                        <div>• <span class="pos-badge pos-sg text-[9px]">Macro/Credit</span></div>
-                                        <div>• <span class="pos-badge pos-sg text-[9px]">Quant</span></div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Visual Anchor for Line -->
-                            <div class="absolute bottom-0 left-1/2 w-0.5 h-10 bg-purple-300 hidden md:block" style="height: 140px; transform: translate(-50%, 0); z-index: -1;"></div>
-                            <div class="absolute bottom-0 left-1/2 h-0.5 bg-purple-300 hidden md:block" style="width: 320%; transform: translate(-100%, 140px); z-index: -1;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- LEVEL 3: Business Units (The Execution Layer) -->
-                <div class="w-full mt-4 flex gap-8 justify-center items-start">
-                    
-                    <!-- ALyC Unit -->
-                    <div class="w-1/2 max-w-sm bg-emerald-50/30 border-2 border-emerald-100 rounded-xl p-4 relative min-h-[160px]">
-                        <div class="absolute -top-3 left-4 bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded border border-emerald-200">ALYC (Regulated)</div>
                         
-                        <!-- Trading Desk (100% ALYC) -->
-                        <div id="node-trading" class="node-card bg-white border-2 border-purple-300 p-4 rounded shadow-sm mt-2 relative flex flex-col justify-between h-full" onclick="loadDetail('trading')">
-                            
-                            <div class="absolute -top-3 right-0 -mr-2 bg-purple-100 text-purple-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-purple-200 shadow-sm flex items-center">
-                                <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span> Linked to Strategy
+                        <div class="h-8 tree-line-vertical"></div>
+                        
+                        <!-- Committees -->
+                        <div class="flex gap-4 justify-center w-full relative">
+                            <div class="absolute top-0 w-1/2 border-t-2 border-slate-300"></div>
+                            <div class="h-4 tree-line-vertical absolute top-0 left-1/2 -translate-x-1/2"></div>
+
+                            <!-- Committee: Risk -->
+                            <div id="node-risk-com" class="node-card bg-amber-50 border-2 border-amber-200 text-amber-900 p-3 rounded-lg shadow-sm w-48 text-center mt-4" onclick="loadDetail('risk-com')">
+                                <h3 class="font-bold text-sm">RISK COMMITTEE</h3>
+                                <p class="text-[10px] text-amber-700 mt-1">Chair: CCO</p>
                             </div>
 
-                            <div>
-                                <!-- Header Area + Role -->
-                                <div class="flex justify-between items-start mb-1">
-                                    <div class="text-xs text-purple-700 font-bold uppercase tracking-wider">TRADING</div>
-                                    <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">Business Unit</span>
+                            <!-- CEO -->
+                            <div id="node-ceo" class="node-card bg-white border-2 border-slate-300 p-3 rounded-lg shadow-md w-48 text-center mt-4 z-10" onclick="loadDetail('ceo')">
+                                <div class="flex items-center justify-center gap-1 mb-1">
+                                    <h3 class="pos-badge pos-alyc text-sm">CEO</h3>
+                                    <!-- ICONS -->
+                                    <span class="reg-badge reg-badge-alyc" title="Titular CNV (ALyC)">⚖️</span>
+                                    <span class="reg-badge reg-badge-alyc" title="Suplente UIF (ALyC)">🛟</span>
+                                </div>
+                                <p class="text-[10px] text-slate-500">Chief Executive Officer</p>
+                            </div>
+
+                            <!-- Committee: Investment -->
+                            <div id="node-inv-com" class="node-card bg-indigo-50 border-2 border-indigo-200 text-indigo-900 p-3 rounded-lg shadow-sm w-48 text-center mt-4" onclick="loadDetail('inv-com')">
+                                <h3 class="font-bold text-sm">INVESTMENT COMMITTEE</h3>
+                                <p class="text-[10px] text-indigo-700 mt-1">Chair: CSO</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LEVEL 2: Transversal Functional Areas -->
+                    <div class="w-full mb-12 relative">
+                        <div class="flex items-center justify-center mb-10 relative">
+                            <div class="absolute -top-8 left-1/2 -translate-x-1/2 h-8 w-0.5 bg-slate-300"></div>
+                            <span class="bg-slate-200 text-slate-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider relative z-10">Shared Services (C-Level Transversal)</span>
+                        </div>
+                        
+                        <!-- Grid for Managers -->
+                        <div class="grid grid-cols-4 gap-4 relative">
+                            <div class="absolute -top-6 left-10 right-10 border-t-2 border-slate-300"></div>
+                            <div class="absolute -top-10 left-1/2 -translate-x-1/2 h-10 tree-line-vertical"></div>
+
+                            <!-- Compliance (4 PAX: 3 ALYC, 1 SG) -->
+                            <div class="relative pt-6">
+                                <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
+                                <div id="node-compliance" class="node-card bg-white border-l-4 border-rose-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('compliance')">
+                                    <div>
+                                        <div class="text-xs text-rose-600 font-bold mb-1">CONTROL</div>
+                                        <div class="flex items-center gap-1 mb-1">
+                                            <h4 class="pos-badge pos-alyc text-xs">CCO</h4>
+                                            <span class="reg-badge reg-badge-alyc" title="Titular UIF (ALyC)">🛡️</span>
+                                        </div>
+                                        <p class="text-[10px] text-slate-500 mb-2">Chief Compliance Officer</p>
+                                    </div>
+                                    <div class="mt-2 pt-2 border-t border-slate-100">
+                                        <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
+                                            <span class="w-1.5 h-1.5 bg-rose-400 rounded-full mr-1"></span>
+                                            <span class="pos-badge pos-alyc text-[9px] ml-1">Compliance Mgr</span>
+                                        </div>
+                                        <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
+                                            <div>• <span class="pos-badge pos-alyc text-[9px]">AML (Ssr)</span></div>
+                                            <div>• <span class="pos-badge pos-sg text-[9px]">Auditor (Jr)</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Back Office (6 PAX: 5 ALYC, 1 SG) -->
+                            <div class="relative pt-6">
+                                <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
+                                <div id="node-ops" class="node-card bg-white border-l-4 border-blue-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('ops')">
+                                    <div>
+                                        <div class="text-xs text-blue-600 font-bold mb-1">OPERATIONS</div>
+                                        <div class="flex items-center gap-1 mb-1">
+                                            <h4 class="pos-badge pos-alyc text-xs">COO</h4>
+                                        </div>
+                                        <p class="text-[10px] text-slate-500 mb-2">Chief Operating Officer</p>
+                                    </div>
+                                    <div class="mt-2 pt-2 border-t border-slate-100">
+                                        <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
+                                            <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span>
+                                            <span class="pos-badge pos-alyc text-[9px] ml-1">Head Ops</span>
+                                        </div>
+                                        <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
+                                            <div>• <span class="pos-badge pos-alyc text-[9px]">Settl/Custody</span></div>
+                                            <div>• <span class="pos-badge pos-sg text-[9px]">Fund Admin</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Admin & Treasury (6 PAX: 3 SG, 3 ALYC) -->
+                            <div class="relative pt-6">
+                                <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
+                                <div id="node-admin" class="node-card bg-white border-l-4 border-blue-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('admin')">
+                                    <div>
+                                        <div class="text-xs text-blue-600 font-bold mb-1">FINANCE</div>
+                                        <div class="flex items-center gap-1 mb-1">
+                                            <h4 class="pos-badge pos-sg text-xs">CFO</h4>
+                                            <span class="reg-badge reg-badge-sgfci" title="Titular UIF (SGFCI)">🛡️</span>
+                                        </div>
+                                        <p class="text-[10px] text-slate-500 mb-2">Chief Financial Officer</p>
+                                    </div>
+                                    <div class="mt-2 pt-2 border-t border-slate-100">
+                                        <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
+                                            <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span>
+                                            <span class="pos-badge pos-alyc text-[9px] ml-1">Treasurer</span>
+                                        </div>
+                                        <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
+                                            <div>• <span class="pos-badge pos-sg text-[9px]">Treasury/Acct</span></div>
+                                            <div>• <span class="pos-badge pos-alyc text-[9px]">Tax / AP</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 pt-2 border-t border-slate-100">
+                                        <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
+                                            <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span>
+                                            <span class="pos-badge pos-alyc text-[9px] ml-1">Treasurer</span>
+                                        </div>
+                                        <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
+                                            <div>• <span class="pos-badge pos-sg text-[9px]">Treasury/Acct</span></div>
+                                            <div>• <span class="pos-badge pos-alyc text-[9px]">Tax / AP</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Research (5 PAX: 1 ALYC, 4 SG) -->
+                            <div class="relative pt-6">
+                                <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
+                                <div id="node-research" class="node-card bg-white border-l-4 border-purple-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('research')">
+                                    <div>
+                                        <div class="text-xs text-purple-600 font-bold mb-1">STRATEGY</div>
+                                        <div class="flex items-center gap-1 mb-1">
+                                            <h4 class="pos-badge pos-alyc text-xs">CSO</h4>
+                                        </div>
+                                        <p class="text-[10px] text-slate-500 mb-2">Chief Strategy Officer</p>
+                                    </div>
+                                    <div class="mt-2 pt-2 border-t border-slate-100">
+                                        <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
+                                            <span class="w-1.5 h-1.5 bg-purple-400 rounded-full mr-1"></span>
+                                            <span class="pos-badge pos-sg text-[9px] ml-1">Head Rsrch</span>
+                                        </div>
+                                        <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
+                                            <div>• <span class="pos-badge pos-sg text-[9px]">Macro/Credit</span></div>
+                                            <div>• <span class="pos-badge pos-sg text-[9px]">Quant</span></div>
+                                        </div>
+                                    </div>
                                 </div>
                                 
-                                <div class="flex items-center flex-wrap gap-1 mb-2">
-                                    <h4 class="pos-badge pos-alyc text-xs">HEAD OF TRADING</h4>
-                                    <span class="reg-badge reg-badge-alyc" title="Relaciones Público (ALyC)">🤝</span>
-                                </div>
-                                <p class="text-[10px] text-slate-500 font-semibold mt-0.5 mb-2">Exclusive to ALyC</p>
-                                
-                                <!-- Minimalist Detail Block -->
-                                <div class="mt-1 pt-2 border-t border-purple-50">
-                                    <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                        <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span>
-                                        <span class="pos-badge pos-alyc text-[9px] ml-1">Senior Trader</span>
-                                    </div>
-                                    <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
-                                        <div>• <span class="pos-badge pos-alyc text-[9px]">FI / Equity Traders</span></div>
-                                        <div>• <span class="pos-badge pos-alyc text-[9px]">Sales & Inst.</span></div>
-                                    </div>
-                                </div>
+                                <!-- Visual Anchor for Line -->
+                                <div class="absolute bottom-0 left-1/2 w-0.5 h-10 bg-purple-300 hidden md:block" style="height: 140px; transform: translate(-50%, 0); z-index: -1;"></div>
+                                <div class="absolute bottom-0 left-1/2 h-0.5 bg-purple-300 hidden md:block" style="width: 320%; transform: translate(-100%, 140px); z-index: -1;"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- SGFCI Unit -->
-                    <div class="w-1/2 max-w-sm bg-indigo-50/30 border-2 border-indigo-100 rounded-xl p-4 relative min-h-[160px]">
-                        <div class="absolute -top-3 left-4 bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded border border-indigo-200">SGFCI (Regulated)</div>
+                    <!-- LEVEL 3: Business Units (The Execution Layer) -->
+                    <div class="w-full mt-4 flex gap-8 justify-center items-start">
                         
-                        <!-- Fund Management (100% SG) -->
-                        <div id="node-sgfci" class="node-card bg-white border-2 border-purple-300 p-4 rounded shadow-sm mt-2 relative flex flex-col justify-between h-full" onclick="loadDetail('sgfci')">
+                        <!-- ALyC Unit -->
+                        <div class="w-1/2 max-w-sm bg-emerald-50/30 border-2 border-emerald-100 rounded-xl p-4 relative min-h-[160px]">
+                            <div class="absolute -top-3 left-4 bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded border border-emerald-200">ALYC (Regulated)</div>
                             
-                            <div class="absolute -top-3 right-0 -mr-2 bg-purple-100 text-purple-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-purple-200 shadow-sm flex items-center">
-                                <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span> Linked to Strategy
-                            </div>
-
-                            <div>
-                                <!-- Header Area + Role -->
-                                <div class="flex justify-between items-start mb-1">
-                                    <div class="text-xs text-purple-700 font-bold uppercase tracking-wider">ASSET MANAGEMENT</div>
-                                    <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">Business Unit</span>
+                            <!-- Trading Desk (100% ALYC) -->
+                            <div id="node-trading" class="node-card bg-white border-2 border-purple-300 p-4 rounded shadow-sm mt-2 relative flex flex-col justify-between h-full" onclick="loadDetail('trading')">
+                                
+                                <div class="absolute -top-3 right-0 -mr-2 bg-purple-100 text-purple-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-purple-200 shadow-sm flex items-center">
+                                    <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span> Linked to Strategy
                                 </div>
 
-                                <div class="flex items-center flex-wrap gap-1 mb-2">
-                                    <h4 class="pos-badge pos-sg text-xs">CIO</h4>
-                                    <span class="reg-badge reg-badge-sgfci" title="Suplente UIF (SGFCI)">🛟</span>
-                                    <span class="reg-badge reg-badge-sgfci" title="Resp. Inversiones">✒️</span>
-                                </div>
-                                <p class="text-[10px] text-slate-500 font-semibold mt-0.5 mb-2">Exclusive to SGFCI</p>
-
-                                <!-- Minimalist Detail Block -->
-                                <div class="mt-1 pt-2 border-t border-purple-50">
-                                    <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                        <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span>
-                                        <span class="pos-badge pos-sg text-[9px] ml-1">Head PM</span>
+                                <div>
+                                    <!-- Header Area + Role -->
+                                    <div class="flex justify-between items-start mb-1">
+                                        <div class="text-xs text-purple-700 font-bold uppercase tracking-wider">TRADING</div>
+                                        <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">Business Unit</span>
                                     </div>
-                                    <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
-                                        <div>• <span class="pos-badge pos-sg text-[9px]">Portfolio Mgrs</span></div>
-                                        <div>• <span class="pos-badge pos-sg text-[9px]">Performance</span></div>
+                                    
+                                    <div class="flex items-center flex-wrap gap-1 mb-2">
+                                        <h4 class="pos-badge pos-alyc text-xs">HEAD OF TRADING</h4>
+                                        <span class="reg-badge reg-badge-alyc" title="Relaciones Público (ALyC)">🤝</span>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 font-semibold mt-0.5 mb-2">Exclusive to ALyC</p>
+                                    
+                                    <!-- Minimalist Detail Block -->
+                                    <div class="mt-1 pt-2 border-t border-purple-50">
+                                        <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
+                                            <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span>
+                                            <span class="pos-badge pos-alyc text-[9px] ml-1">Senior Trader</span>
+                                        </div>
+                                        <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
+                                            <div>• <span class="pos-badge pos-alyc text-[9px]">FI / Equity Traders</span></div>
+                                            <div>• <span class="pos-badge pos-alyc text-[9px]">Sales & Inst.</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SGFCI Unit -->
+                        <div class="w-1/2 max-w-sm bg-indigo-50/30 border-2 border-indigo-100 rounded-xl p-4 relative min-h-[160px]">
+                            <div class="absolute -top-3 left-4 bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded border border-indigo-200">SGFCI (Regulated)</div>
+                            
+                            <!-- Fund Management (100% SG) -->
+                            <div id="node-sgfci" class="node-card bg-white border-2 border-purple-300 p-4 rounded shadow-sm mt-2 relative flex flex-col justify-between h-full" onclick="loadDetail('sgfci')">
+                                
+                                <div class="absolute -top-3 right-0 -mr-2 bg-purple-100 text-purple-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-purple-200 shadow-sm flex items-center">
+                                    <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span> Linked to Strategy
+                                </div>
+
+                                <div>
+                                    <!-- Header Area + Role -->
+                                    <div class="flex justify-between items-start mb-1">
+                                        <div class="text-xs text-purple-700 font-bold uppercase tracking-wider">ASSET MANAGEMENT</div>
+                                        <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">Business Unit</span>
+                                    </div>
+
+                                    <div class="flex items-center flex-wrap gap-1 mb-2">
+                                        <h4 class="pos-badge pos-sg text-xs">CIO</h4>
+                                        <span class="reg-badge reg-badge-sgfci" title="Suplente UIF (SGFCI)">🛟</span>
+                                        <span class="reg-badge reg-badge-sgfci" title="Resp. Inversiones">✒️</span>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 font-semibold mt-0.5 mb-2">Exclusive to SGFCI</p>
+
+                                    <!-- Minimalist Detail Block -->
+                                    <div class="mt-1 pt-2 border-t border-purple-50">
+                                        <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
+                                            <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span>
+                                            <span class="pos-badge pos-sg text-[9px] ml-1">Head PM</span>
+                                        </div>
+                                        <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
+                                            <div>• <span class="pos-badge pos-sg text-[9px]">Portfolio Mgrs</span></div>
+                                            <div>• <span class="pos-badge pos-sg text-[9px]">Performance</span></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
-
-            </div>
-            
-            <div class="text-center mt-12 text-slate-400 text-xs">
-                * Dotted lines imply transversal services.
-            </div>
-
-        </div>
-
-        <!-- RIGHT PANEL: Detailed Analysis (Dynamic) -->
-        <div class="w-full lg:w-[480px] bg-white border-l border-slate-200 flex flex-col shadow-xl z-20">
-            
-            <!-- Empty State -->
-            <div id="empty-state" class="flex-1 flex flex-col items-center justify-center p-10 text-center">
-                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-400 text-2xl">⚡</div>
-                <h3 class="text-lg font-bold text-slate-700">Explorador Funcional</h3>
-                <p class="text-sm text-slate-500 mt-2">Seleccione un área del organigrama para ver el desglose de roles, responsabilidades y nómina legal.</p>
-            </div>
-
-            <!-- Content State -->
-            <div id="detail-content" class="hidden flex-col h-full overflow-y-auto custom-scroll">
                 
-                <!-- Header Area -->
-                <div id="panel-header" class="p-6 bg-slate-50 border-b border-slate-200">
-                    <span id="role-tag" class="text-[10px] font-bold tracking-widest uppercase bg-blue-100 text-blue-700 px-2 py-1 rounded-sm">Transversal</span>
-                    <h2 id="role-title" class="text-2xl font-bold text-slate-800 mt-2">Gerencia de Operaciones</h2>
-                    <p id="role-desc" class="text-sm text-slate-600 mt-1 leading-relaxed">Responsable de la liquidación y administración de custodia.</p>
+                <div class="text-center mt-12 text-slate-400 text-xs">
+                    * Dotted lines imply transversal services.
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: Detailed Analysis (Dynamic) -->
+            <div class="w-full lg:w-[480px] bg-white border-l border-slate-200 flex flex-col shadow-xl z-20">
+                
+                <!-- Empty State -->
+                <div id="empty-state" class="flex-1 flex flex-col items-center justify-center p-10 text-center">
+                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-400 text-2xl">⚡</div>
+                    <h3 class="text-lg font-bold text-slate-700">Explorador Funcional</h3>
+                    <p class="text-sm text-slate-500 mt-2">Seleccione un área del organigrama para ver el desglose de roles, responsabilidades y nómina legal.</p>
                 </div>
 
-                <!-- Radar Chart for Focus Area -->
-                <div class="p-4 border-b border-slate-100">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">Enfoque del Área</h4>
-                    <div class="chart-container" style="height: 180px;">
-                        <canvas id="focusChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Structure Breakdown (Sub-Gerencias) -->
-                <div class="p-6 space-y-6">
+                <!-- Content State -->
+                <div id="detail-content" class="hidden flex-col h-full overflow-y-auto custom-scroll">
                     
-                    <!-- Section: Mandos Medios -->
-                    <div>
-                        <h3 id="middle-title" class="text-sm font-bold text-slate-800 flex items-center mb-3">
-                            <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                            Middle Management / Chair
-                        </h3>
-                        <div id="middle-management-container" class="bg-blue-50 border border-blue-100 rounded-lg p-3">
-                            <!-- Dynamic Content -->
+                    <!-- Header Area -->
+                    <div id="panel-header" class="p-6 bg-slate-50 border-b border-slate-200">
+                        <span id="role-tag" class="text-[10px] font-bold tracking-widest uppercase bg-blue-100 text-blue-700 px-2 py-1 rounded-sm">Transversal</span>
+                        <h2 id="role-title" class="text-2xl font-bold text-slate-800 mt-2">Gerencia de Operaciones</h2>
+                        <p id="role-desc" class="text-sm text-slate-600 mt-1 leading-relaxed">Responsable de la liquidación y administración de custodia.</p>
+                    </div>
+
+                    <!-- Radar Chart for Focus Area -->
+                    <div class="p-4 border-b border-slate-100">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">Enfoque del Área</h4>
+                        <div class="chart-container" style="height: 180px;">
+                            <canvas id="focusChart"></canvas>
                         </div>
                     </div>
 
-                    <!-- Section: Roles Operativos -->
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-800 flex items-center mb-3">
-                            <span class="w-2 h-2 bg-slate-400 rounded-full mr-2"></span>
-                            Operational Roles (Staff)
-                        </h3>
-                        <div id="operational-roles-container" class="space-y-2">
-                            <!-- Dynamic Content -->
+                    <!-- Structure Breakdown (Sub-Gerencias) -->
+                    <div class="p-6 space-y-6">
+                        
+                        <!-- Section: Mandos Medios -->
+                        <div>
+                            <h3 id="middle-title" class="text-sm font-bold text-slate-800 flex items-center mb-3">
+                                <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                                Middle Management / Chair
+                            </h3>
+                            <div id="middle-management-container" class="bg-blue-50 border border-blue-100 rounded-lg p-3">
+                                <!-- Dynamic Content -->
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Section: Alcance & Responsabilidades -->
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-800 mb-2 border-b border-slate-100 pb-2">Responsabilidades Críticas (CNV)</h3>
-                        <ul id="responsibilities-list" class="text-sm text-slate-600 space-y-2 list-disc pl-4 marker:text-slate-300">
-                            <!-- Dynamic Content -->
-                        </ul>
-                    </div>
+                        <!-- Section: Roles Operativos -->
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800 flex items-center mb-3">
+                                <span class="w-2 h-2 bg-slate-400 rounded-full mr-2"></span>
+                                Operational Roles (Staff)
+                            </h3>
+                            <div id="operational-roles-container" class="space-y-2">
+                                <!-- Dynamic Content -->
+                            </div>
+                        </div>
 
+                        <!-- Section: Alcance & Responsabilidades -->
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800 mb-2 border-b border-slate-100 pb-2">Responsabilidades Críticas (CNV)</h3>
+                            <ul id="responsibilities-list" class="text-sm text-slate-600 space-y-2 list-disc pl-4 marker:text-slate-300">
+                                <!-- Dynamic Content -->
+                            </ul>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- VIEW 2: REVENUE (Simulator 2026) -->
+        <div id="view-revenue" class="hidden absolute inset-0 bg-slate-100 overflow-hidden flex flex-col z-20">
+            
+            <div class="flex-1 flex overflow-hidden">
+                <!-- LEFT COLUMN: Controls & Dashboard -->
+                <div class="w-1/3 bg-white border-r border-slate-200 flex flex-col overflow-y-auto custom-scroll p-6">
+                    <div class="mb-6">
+                        <h2 class="text-xl font-bold text-slate-800">Proyección SG 2026</h2>
+                        <p class="text-xs text-slate-500 mt-1">Simulación dinámica de crecimiento y comisiones.</p>
+                    </div>
+
+                    <!-- GLOBAL CONTROLS -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
+                        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-widest mb-4">Drivers 2026 (Global)</h3>
+                        
+                        <!-- Control 1 -->
+                        <div class="mb-5">
+                            <div class="flex justify-between text-xs mb-2">
+                                <span class="text-slate-600 font-semibold">Crecimiento Orgánico AUM</span>
+                                <span id="growth-val" class="font-bold text-blue-600">+0%</span>
+                            </div>
+                            <!-- Modified min to -50 -->
+                            <input type="range" id="growth-slider" min="-50" max="100" value="0" step="5" class="w-full">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                                <span>-50%</span>
+                                <span>+100%</span>
+                            </div>
+                        </div>
+
+                        <!-- Control 2 -->
+                        <div class="mb-5">
+                            <div class="flex justify-between text-xs mb-2">
+                                <span class="text-slate-600 font-semibold">Ajuste de Fee (Presión)</span>
+                                <span id="fee-adj-val" class="font-bold text-purple-600">0%</span>
+                            </div>
+                            <input type="range" id="fee-slider" min="-50" max="50" value="0" step="5" class="w-full">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                                <span>-50%</span>
+                                <span>+50%</span>
+                            </div>
+                        </div>
+
+                        <!-- Control 3: ACDI -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-2">
+                                <span class="text-slate-600 font-semibold">Impacto Costo ACDI</span>
+                                <span id="acdi-adj-val" class="font-bold text-rose-600">0%</span>
+                            </div>
+                            <input type="range" id="acdi-slider" min="-50" max="50" value="0" step="5" class="w-full">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                                <span>-50%</span>
+                                <span>+50%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI CARDS -->
+                    <div class="grid grid-cols-1 gap-4 mb-6">
+                        <!-- Revenue Card with Split -->
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100 relative overflow-hidden">
+                            <div class="absolute right-0 top-0 p-2 opacity-10 text-emerald-500">
+                                <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+                            </div>
+                            
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mb-2">INGRESOS NETOS PROYECTADOS</div>
+                            
+                            <div class="flex gap-4">
+                                <!-- Monthly -->
+                                <div class="flex-1 border-r border-slate-100 pr-2">
+                                    <div class="text-[9px] font-bold text-slate-500 uppercase">Mensual</div>
+                                    <div id="kpi-revenue" class="text-xl font-bold text-emerald-600 mt-1">$ 0</div>
+                                </div>
+                                <!-- Annual -->
+                                <div class="flex-1">
+                                    <div class="text-[9px] font-bold text-slate-500 uppercase">Anual</div>
+                                    <div id="kpi-revenue-annual-top" class="text-xl font-bold text-emerald-600 mt-1">$ 0</div>
+                                </div>
+                            </div>
+                            
+                            <div id="kpi-revenue-delta" class="text-[10px] font-semibold text-slate-400 mt-2 border-t border-slate-50 pt-1">vs Base: 0%</div>
+                        </div>
+
+                        <!-- NEW ACDI CARD -->
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100 relative overflow-hidden">
+                             <div class="text-[10px] font-bold text-slate-400 uppercase">Costo Distribución (ACDI)</div>
+                             <div class="flex justify-between items-end mt-1">
+                                <div id="kpi-acdi-annual" class="text-xl font-bold text-rose-600">$ 0</div>
+                                <div id="kpi-acdi-share" class="text-xs font-bold bg-rose-100 text-rose-700 px-2 py-1 rounded">0% del Bruto</div>
+                             </div>
+                             <div class="text-[9px] text-slate-400 mt-1">Ingreso cedido anual</div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100">
+                             <div class="text-[10px] font-bold text-slate-400 uppercase">AUM Total Proy.</div>
+                            <div id="kpi-aum" class="text-xl font-bold text-slate-800 mt-1">$ 0</div>
+                        </div>
+                        
+                         <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100">
+                             <div class="text-[10px] font-bold text-slate-400 uppercase">Fee Neto Promedio (Blend)</div>
+                            <div id="kpi-fee" class="text-xl font-bold text-indigo-600 mt-1">0.00%</div>
+                        </div>
+                    </div>
+
+                    <!-- CHART -->
+                    <div class="flex-1 min-h-[200px]">
+                        <h3 class="text-xs font-bold text-slate-700 mb-2">Proyección vs Base</h3>
+                        <div class="h-full w-full">
+                            <canvas id="projectionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: Detailed Table (Editable) -->
+                <div class="w-2/3 bg-slate-100 flex flex-col p-6 overflow-hidden">
+                    <div class="bg-white rounded-xl shadow-md border border-slate-200 flex-1 flex flex-col overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-700">Cartera de Fondos 2026</h3>
+                                <p class="text-xs text-slate-500">Edite AUM o % ACDI. Fee Total se ajusta por driver global.</p>
+                            </div>
+                            <button onclick="resetSimulation()" class="text-xs bg-white border border-slate-300 px-3 py-1 rounded hover:bg-slate-50 text-slate-600">Restablecer</button>
+                        </div>
+                        
+                        <div class="overflow-auto custom-scroll flex-1">
+                            <table class="w-full text-xs text-left">
+                                <thead class="bg-slate-50 text-slate-500 font-bold uppercase sticky top-0 z-10 shadow-sm">
+                                    <tr>
+                                        <th class="px-2 py-3">Fondo</th>
+                                        <th class="px-2 py-3 bg-blue-50 text-blue-700 border-x border-blue-100 w-28 text-right">AUM Proy</th>
+                                        <th class="px-1 py-3 text-center w-12" title="Fee Total Bruto (Ajustado)">Fee T</th>
+                                        <th class="px-1 py-3 bg-purple-50 text-purple-700 border-x border-purple-100 w-14 text-center" title="Fee Distribución">%ACDI</th>
+                                        <th class="px-1 py-3 text-center w-12 font-bold text-slate-700">Fee N</th>
+                                        <th class="px-2 py-3 text-right text-slate-500 w-24 border-l border-slate-100 bg-slate-50/50">Ing. Bruto</th>
+                                        <th class="px-2 py-3 text-right font-bold text-emerald-700 w-24">Ing. Neto</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="simulation-table-body" class="divide-y divide-slate-100">
+                                    <!-- Rows generated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 text-right flex justify-end gap-8">
+                            <div>
+                                <span class="text-xs font-bold text-slate-400 mr-2">Total Bruto Anual:</span>
+                                <span id="total-gross-annual" class="text-sm font-bold text-slate-600">$ 0</span>
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold text-slate-500 mr-2">Total Neto Anual:</span>
+                                <span id="total-annual" class="text-sm font-bold text-emerald-600">$ 0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Data & Logic -->
     <script>
-        // Database of Organizational Roles
+        // --- DATA FROM IMAGE ---
+        const initialFundsData = [
+            { id: 1, name: "DB", type: "FCI Abierto", cust: "DRACMA", aum: 5589317, feeTotal: 2.50, feeAcdi: 0.00 },
+            { id: 2, name: "DB", type: "FCI Abierto", cust: "OTRO ACDI", aum: 1704303, feeTotal: 2.50, feeAcdi: 1.25 },
+            { id: 3, name: "DED", type: "FCI Dedicado", cust: "DRACMA", aum: 8561309, feeTotal: 1.25, feeAcdi: 0.09 },
+            { id: 4, name: "DED I", type: "FCI Abierto", cust: "DRACMA", aum: 13049115, feeTotal: 1.30, feeAcdi: 0.00 },
+            { id: 5, name: "DED I", type: "FCI Abierto", cust: "OTRO ACDI", aum: 5580465, feeTotal: 1.30, feeAcdi: 0.65 },
+            { id: 6, name: "DM", type: "FCI Dedicado", cust: "DRACMA", aum: 5803519, feeTotal: 2.00, feeAcdi: 0.00 },
+            { id: 7, name: "DM II", type: "FCI Abierto", cust: "OTRO ACDI", aum: 7774969, feeTotal: 2.00, feeAcdi: 1.55 },
+            { id: 8, name: "DP", type: "FCI Abierto", cust: "DRACMA", aum: 215, feeTotal: 2.00, feeAcdi: 0.00 },
+            { id: 9, name: "DP", type: "FCI Abierto", cust: "OTRO ACDI", aum: 154653, feeTotal: 2.00, feeAcdi: 1.00 },
+            { id: 10, name: "DRA", type: "FCI Abierto", cust: "DRACMA", aum: 2699063, feeTotal: 2.00, feeAcdi: 0.00 },
+            { id: 11, name: "DRA", type: "FCI Abierto", cust: "OTRO ACDI", aum: 1111574, feeTotal: 2.00, feeAcdi: 1.00 },
+            { id: 12, name: "BANCOR", type: "FCI Dedicado", cust: "OTRO ACDI", aum: 24647351, feeTotal: 1.30, feeAcdi: 0.00 }, 
+            { id: 13, name: "INMOBILIARIO", type: "FCI Cerrado", cust: "DRACMA", aum: 6500000, feeTotal: 2.00, feeAcdi: 0.00 }
+        ];
+
+        // State for Simulation
+        let simData = JSON.parse(JSON.stringify(initialFundsData)); // Deep copy
+        let globalGrowth = 0;
+        let globalFeeAdj = 0; // Adjusts Total Fee
+        let globalAcdiAdj = 0; // Adjusts ACDI Fee
+        let chartInstance = null;
+
+        // Formatter - No decimals for AUM
+        const moneyFmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        const pctFmt = new Intl.NumberFormat('en-US', { style: 'percent', minimumFractionDigits: 2 });
+        // Formatter for inputs (just dots)
+        const intFmt = new Intl.NumberFormat('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+        // --- SIMULATION LOGIC ---
+
+        function initSimulation() {
+            renderTable();
+            updateCalculations();
+            
+            // Listeners for Global Sliders
+            document.getElementById('growth-slider').addEventListener('input', (e) => {
+                globalGrowth = parseInt(e.target.value);
+                // Sign and color logic
+                const sign = globalGrowth >= 0 ? '+' : '';
+                const valEl = document.getElementById('growth-val');
+                valEl.innerText = `${sign}${globalGrowth}%`;
+                
+                if(globalGrowth < 0) {
+                    valEl.classList.remove('text-blue-600');
+                    valEl.classList.add('text-rose-600');
+                } else {
+                    valEl.classList.remove('text-rose-600');
+                    valEl.classList.add('text-blue-600');
+                }
+
+                applyGlobalGrowth();
+            });
+
+            document.getElementById('fee-slider').addEventListener('input', (e) => {
+                globalFeeAdj = parseInt(e.target.value);
+                const sign = globalFeeAdj >= 0 ? '+' : '';
+                document.getElementById('fee-adj-val').innerText = `${sign}${globalFeeAdj}%`;
+                updateCalculations(); 
+                renderTableValuesOnly();
+            });
+
+            document.getElementById('acdi-slider').addEventListener('input', (e) => {
+                globalAcdiAdj = parseInt(e.target.value);
+                const sign = globalAcdiAdj >= 0 ? '+' : '';
+                document.getElementById('acdi-adj-val').innerText = `${sign}${globalAcdiAdj}%`;
+                applyGlobalAcdiAdj(); 
+            });
+        }
+
+        function applyGlobalGrowth() {
+            simData.forEach(row => {
+                const base = initialFundsData.find(r => r.id === row.id).aum;
+                // Round to Integer
+                row.aum = Math.round(base * (1 + globalGrowth / 100));
+                // Update input in DOM
+                const input = document.getElementById(`input-aum-${row.id}`);
+                if(input) input.value = intFmt.format(row.aum);
+            });
+            updateCalculations();
+        }
+
+        function applyGlobalAcdiAdj() {
+            simData.forEach(row => {
+                const baseAcdi = initialFundsData.find(r => r.id === row.id).feeAcdi;
+                row.feeAcdi = baseAcdi * (1 + globalAcdiAdj / 100);
+                // Update input in DOM
+                const input = document.getElementById(`input-acdi-${row.id}`);
+                if(input) input.value = row.feeAcdi.toFixed(2);
+            });
+            updateCalculations();
+            renderTableValuesOnly();
+        }
+
+        function handleAumInput(el, id) {
+            // Remove dots to parse
+            let val = el.value.replace(/\./g, '');
+            if(isNaN(val)) return;
+            let num = parseInt(val) || 0;
+            
+            // Update Data
+            const row = simData.find(r => r.id === id);
+            if (row) {
+                row.aum = num;
+                updateCalculations();
+                updateRowDisplay(row);
+            }
+        }
+
+        function formatAumInput(el) {
+            let val = el.value.replace(/\./g, '');
+            if(isNaN(val) || val === '') return;
+            let num = parseInt(val);
+            el.value = intFmt.format(num);
+        }
+
+        function handleManualInput(id, field, value) {
+            const row = simData.find(r => r.id === id);
+            if (row) {
+                row[field] = parseFloat(value) || 0;
+                updateCalculations();
+                updateRowDisplay(row);
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('simulation-table-body');
+            tbody.innerHTML = '';
+
+            simData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 group border-b border-slate-50 last:border-0";
+                
+                // Custody Badge Style
+                const custStyle = row.cust === 'DRACMA' 
+                    ? 'bg-indigo-100 text-indigo-700 border-indigo-200' 
+                    : 'bg-slate-100 text-slate-600 border-slate-200';
+
+                // Initial calculation for display
+                const adjustedFeeTotal = row.feeTotal * (1 + globalFeeAdj / 100);
+                const feeNet = adjustedFeeTotal - row.feeAcdi;
+                const revenueNet = row.aum * (feeNet / 100);
+                const revenueGross = row.aum * (adjustedFeeTotal / 100);
+
+                tr.innerHTML = `
+                    <td class="px-2 py-2">
+                        <div class="font-bold text-slate-700 whitespace-nowrap text-[11px]">${row.name}</div>
+                        <div class="flex items-center gap-1 mt-0.5">
+                            <span class="text-[8px] px-1 py-0.5 rounded border ${custStyle} font-semibold">${row.cust}</span>
+                        </div>
+                    </td>
+                    <td class="px-2 py-2 bg-blue-50 border-x border-blue-100">
+                        <input type="text" id="input-aum-${row.id}"
+                            value="${intFmt.format(row.aum)}" 
+                            class="w-full bg-white border border-blue-200 rounded px-1 py-1 text-right text-blue-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-400 text-[11px]"
+                            oninput="handleAumInput(this, ${row.id})" onblur="formatAumInput(this)">
+                    </td>
+                    <td class="px-1 py-2 text-center text-slate-500 text-[10px]" id="cell-feetotal-${row.id}">
+                        ${adjustedFeeTotal.toFixed(2)}%
+                    </td>
+                    <td class="px-1 py-2 bg-purple-50 border-x border-purple-100">
+                        <input type="number" id="input-acdi-${row.id}" step="0.01" 
+                            value="${row.feeAcdi.toFixed(2)}" 
+                            class="w-full bg-white border border-purple-200 rounded px-1 py-1 text-center text-purple-800 font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 text-[11px]"
+                            oninput="handleManualInput(${row.id}, 'feeAcdi', this.value)">
+                    </td>
+                    <td class="px-1 py-2 text-center font-bold text-slate-700 text-[10px]" id="cell-feenet-${row.id}">
+                        ${feeNet.toFixed(2)}%
+                    </td>
+                    <td class="px-2 py-2 text-right text-slate-500 text-[10px] border-l border-slate-100 bg-slate-50/50" id="cell-gross-${row.id}">
+                        ${moneyFmt.format(revenueGross)}
+                    </td>
+                    <td class="px-2 py-2 text-right font-bold text-emerald-700 text-[10px]" id="cell-rev-${row.id}">
+                        ${moneyFmt.format(revenueNet)}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderTableValuesOnly() {
+            simData.forEach(row => {
+                updateRowDisplay(row);
+            });
+        }
+
+        function updateRowDisplay(row) {
+            const adjustedFeeTotal = row.feeTotal * (1 + globalFeeAdj / 100);
+            const feeNet = adjustedFeeTotal - row.feeAcdi;
+            const revenueNet = row.aum * (feeNet / 100);
+            const revenueGross = row.aum * (adjustedFeeTotal / 100);
+
+            const cellFeeTotal = document.getElementById(`cell-feetotal-${row.id}`);
+            const cellFeeNet = document.getElementById(`cell-feenet-${row.id}`);
+            const cellRev = document.getElementById(`cell-rev-${row.id}`);
+            const cellGross = document.getElementById(`cell-gross-${row.id}`);
+
+            if(cellFeeTotal) cellFeeTotal.innerText = `${adjustedFeeTotal.toFixed(2)}%`;
+            if(cellFeeNet) cellFeeNet.innerText = `${feeNet.toFixed(2)}%`;
+            if(cellRev) cellRev.innerText = moneyFmt.format(revenueNet);
+            if(cellGross) cellGross.innerText = moneyFmt.format(revenueGross);
+        }
+
+        function updateCalculations() {
+            let totalBaseRev = 0;
+            let totalProjRev = 0;
+            let totalProjAUM = 0;
+            let totalWeightedFee = 0;
+            
+            let totalAcdiRev = 0;
+            let totalGrossRev = 0;
+
+            simData.forEach(row => {
+                const initial = initialFundsData.find(r => r.id === row.id);
+                
+                // Base Calculation
+                const baseFeeNet = initial.feeTotal - initial.feeAcdi;
+                const baseRev = initial.aum * (baseFeeNet / 100);
+
+                // Projected Calculation
+                const projFeeTotal = row.feeTotal * (1 + globalFeeAdj / 100);
+                const projFeeNet = projFeeTotal - row.feeAcdi; 
+                
+                const projRevNet = row.aum * (projFeeNet / 100);
+                const projRevAcdi = row.aum * (row.feeAcdi / 100);
+                const projRevGross = row.aum * (projFeeTotal / 100);
+
+                totalBaseRev += baseRev;
+                totalProjRev += projRevNet;
+                totalProjAUM += row.aum;
+                
+                totalAcdiRev += projRevAcdi;
+                totalGrossRev += projRevGross;
+            });
+
+            // Calc Weighted Fee (Net)
+            if (totalProjAUM > 0) {
+                totalWeightedFee = (totalProjRev / totalProjAUM) * 100;
+            }
+
+            // Update Net Revenue KPIs
+            document.getElementById('kpi-revenue').innerText = moneyFmt.format(totalProjRev / 12);
+            document.getElementById('kpi-revenue-annual-top').innerText = moneyFmt.format(totalProjRev);
+            
+            const delta = totalBaseRev > 0 ? ((totalProjRev - totalBaseRev) / totalBaseRev) * 100 : 0;
+            const deltaSign = delta >= 0 ? '+' : '';
+            const deltaColor = delta >= 0 ? 'text-emerald-500' : 'text-rose-500';
+            document.getElementById('kpi-revenue-delta').innerHTML = `vs Base: <span class="${deltaColor}">${deltaSign}${delta.toFixed(1)}%</span>`;
+
+            // Update ACDI KPIs
+            document.getElementById('kpi-acdi-annual').innerText = moneyFmt.format(totalAcdiRev);
+            const acdiShare = totalGrossRev > 0 ? (totalAcdiRev / totalGrossRev) * 100 : 0;
+            document.getElementById('kpi-acdi-share').innerText = `${acdiShare.toFixed(1)}% del Bruto`;
+
+            // Other KPIs
+            document.getElementById('kpi-aum').innerText = moneyFmt.format(totalProjAUM);
+            document.getElementById('kpi-fee').innerText = totalWeightedFee.toFixed(2) + '%';
+            
+            // Footer Totals
+            document.getElementById('total-annual').innerText = moneyFmt.format(totalProjRev);
+            document.getElementById('total-gross-annual').innerText = moneyFmt.format(totalGrossRev);
+
+            // Update Chart
+            updateChart(totalBaseRev, totalProjRev);
+        }
+
+        function updateChart(base, proj) {
+            const ctx = document.getElementById('projectionChart').getContext('2d');
+            
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Base (Actual)', 'Proyección 2026'],
+                    datasets: [{
+                        label: 'Ingresos Anuales (ARS)',
+                        data: [base, proj],
+                        backgroundColor: ['#94a3b8', '#4f46e5'],
+                        borderRadius: 6,
+                        barThickness: 40
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            display: false
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function resetSimulation() {
+            simData = JSON.parse(JSON.stringify(initialFundsData));
+            globalGrowth = 0;
+            globalFeeAdj = 0;
+            globalAcdiAdj = 0;
+            document.getElementById('growth-slider').value = 0;
+            document.getElementById('fee-slider').value = 0;
+            document.getElementById('acdi-slider').value = 0;
+            
+            document.getElementById('growth-val').innerText = '+0%';
+            document.getElementById('fee-adj-val').innerText = '0%';
+            document.getElementById('acdi-adj-val').innerText = '0%';
+            
+            // Reset colors
+            const valEl = document.getElementById('growth-val');
+            valEl.classList.remove('text-rose-600');
+            valEl.classList.add('text-blue-600');
+
+            renderTable();
+            updateCalculations();
+        }
+
+        // --- OLD LOGIC (STRUCTURE VIEW) ---
         const orgData = {
             'board': {
                 title: "BOARD OF DIRECTORS",
@@ -721,10 +1257,38 @@
             }
         };
 
-        // Chart Instance
+        // Chart Instance for Structure View
         let radarChart = null;
+        
+        function updateHeadcounts() {
+            let total = 0;
+            Object.keys(orgData).forEach(key => {
+                const data = orgData[key];
+                if (key !== 'board') {
+                    total += data.headcount || 0;
+                }
+                
+                if (key !== 'board') {
+                    const node = document.getElementById(`node-${key}`);
+                    if (node) {
+                        const existingBadge = node.querySelector('.headcount-badge');
+                        if(existingBadge) existingBadge.remove();
 
-        function initChart() {
+                        const badge = document.createElement('div');
+                        badge.className = 'headcount-badge';
+                        badge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                            </svg>
+                                            <span>${data.headcount}</span>`;
+                        node.appendChild(badge);
+                    }
+                }
+            });
+            const totalEl = document.getElementById('total-headcount');
+            if(totalEl) totalEl.innerText = total;
+        }
+
+        function initStructureChart() {
             const ctx = document.getElementById('focusChart').getContext('2d');
             radarChart = new Chart(ctx, {
                 type: 'radar',
@@ -767,50 +1331,33 @@
             const data = orgData[nodeId];
             if (!data) return;
 
-            // Highlight Active Node logic
             document.querySelectorAll('.node-card').forEach(el => el.classList.remove('active'));
             const activeNode = document.getElementById(`node-${nodeId}`);
             if(activeNode) activeNode.classList.add('active');
 
-            // Toggle Panels
             document.getElementById('empty-state').classList.add('hidden');
             document.getElementById('detail-content').classList.remove('hidden');
             document.getElementById('detail-content').classList.add('flex');
 
-            // Update Header
             document.getElementById('role-title').innerText = data.title;
             document.getElementById('role-tag').innerText = data.tag;
             document.getElementById('role-desc').innerText = data.desc;
             
-            // Set Color Theme
             const header = document.getElementById('panel-header');
             const tag = document.getElementById('role-tag');
             
-            if (data.color === 'rose') {
-                tag.className = "text-[10px] font-bold tracking-widest uppercase bg-rose-100 text-rose-700 px-2 py-1 rounded-sm";
-            } else if (data.color === 'emerald') {
-                tag.className = "text-[10px] font-bold tracking-widest uppercase bg-emerald-100 text-emerald-700 px-2 py-1 rounded-sm";
-            } else if (data.color === 'blue') {
-                tag.className = "text-[10px] font-bold tracking-widest uppercase bg-blue-100 text-blue-700 px-2 py-1 rounded-sm";
-            } else if (data.color === 'slate') {
-                tag.className = "text-[10px] font-bold tracking-widest uppercase bg-slate-200 text-slate-700 px-2 py-1 rounded-sm";
-            } else if (data.color === 'purple') {
-                tag.className = "text-[10px] font-bold tracking-widest uppercase bg-purple-100 text-purple-700 px-2 py-1 rounded-sm";
-            } else {
-                tag.className = "text-[10px] font-bold tracking-widest uppercase bg-slate-200 text-slate-700 px-2 py-1 rounded-sm";
-            }
+            let colorCls = 'bg-slate-200 text-slate-700';
+            if (data.color === 'rose') colorCls = 'bg-rose-100 text-rose-700';
+            else if (data.color === 'emerald') colorCls = 'bg-emerald-100 text-emerald-700';
+            else if (data.color === 'blue') colorCls = 'bg-blue-100 text-blue-700';
+            else if (data.color === 'purple') colorCls = 'bg-purple-100 text-purple-700';
+            tag.className = `text-[10px] font-bold tracking-widest uppercase px-2 py-1 rounded-sm ${colorCls}`;
 
-            // Update Chart
             if (radarChart) {
                 radarChart.data.datasets[0].data = data.focus;
                 const colorMap = {
-                    'rose': '225, 29, 72',
-                    'emerald': '16, 185, 129',
-                    'blue': '59, 130, 246',
-                    'slate': '100, 116, 139',
-                    'amber': '217, 119, 6',
-                    'purple': '147, 51, 234',
-                    'indigo': '79, 70, 229'
+                    'rose': '225, 29, 72', 'emerald': '16, 185, 129', 'blue': '59, 130, 246',
+                    'slate': '100, 116, 139', 'amber': '217, 119, 6', 'purple': '147, 51, 234', 'indigo': '79, 70, 229'
                 };
                 const rgb = colorMap[data.color] || '100, 116, 139';
                 radarChart.data.datasets[0].backgroundColor = `rgba(${rgb}, 0.2)`;
@@ -819,7 +1366,6 @@
                 radarChart.update();
             }
 
-            // Update Middle Management with Highlighter Style
             const middleContainer = document.getElementById('middle-management-container');
             const middleTitle = document.getElementById('middle-title');
             
@@ -830,8 +1376,7 @@
             }
 
             if (data.middle) {
-                // Apply styling to text name
-                let styleClass = 'pos-alyc'; // default
+                let styleClass = 'pos-alyc'; 
                 if(data.middleEntity === 'SG') styleClass = 'pos-sg';
                 
                 middleContainer.innerHTML = `<div class="font-bold text-slate-700 text-sm flex items-center">
@@ -843,17 +1388,14 @@
                 middleContainer.parentElement.classList.add('hidden');
             }
 
-            // Update Roles with Highlighter Style
             const roleContainer = document.getElementById('operational-roles-container');
             roleContainer.innerHTML = '';
             if (data.roles.length > 0) {
                 data.roles.forEach(role => {
                     const div = document.createElement('div');
                     div.className = "bg-white border border-slate-200 p-3 rounded shadow-sm hover:border-blue-300 transition-colors flex justify-between items-start";
-                    
                     let styleClass = 'pos-alyc';
                     if(role.entity === 'SG') styleClass = 'pos-sg';
-
                     div.innerHTML = `<div>
                                         <div class="font-bold text-slate-700 text-xs mb-1">
                                             <span class="pos-badge ${styleClass} text-[10px]">${role.title}</span>
@@ -867,7 +1409,6 @@
                 roleContainer.parentElement.classList.add('hidden');
             }
 
-            // Update Responsibilities
             const respList = document.getElementById('responsibilities-list');
             respList.innerHTML = '';
             data.resp.forEach(item => {
@@ -877,38 +1418,39 @@
             });
         }
 
-        // Logic to calculate total headcount
-        function updateHeadcounts() {
-            let total = 0;
-            
-            Object.keys(orgData).forEach(key => {
-                const data = orgData[key];
+        function switchView(viewId) {
+            const structureView = document.getElementById('view-structure');
+            const revenueView = document.getElementById('view-revenue');
+            const tabStructure = document.getElementById('tab-structure');
+            const tabRevenue = document.getElementById('tab-revenue');
+            const legendBar = document.getElementById('legend-bar');
 
-                if (key !== 'board') {
-                    total += data.headcount || 0;
-                }
+            if (viewId === 'structure') {
+                structureView.classList.remove('hidden');
+                revenueView.classList.add('hidden');
+                legendBar.style.display = 'flex';
+                tabStructure.classList.remove('text-slate-500', 'hover:bg-white/50');
+                tabStructure.classList.add('bg-white', 'text-blue-700', 'shadow-sm');
+                tabRevenue.classList.add('text-slate-500', 'hover:bg-white/50');
+                tabRevenue.classList.remove('bg-white', 'text-blue-700', 'shadow-sm');
+            } else {
+                structureView.classList.add('hidden');
+                revenueView.classList.remove('hidden');
+                legendBar.style.display = 'none';
+                tabStructure.classList.add('text-slate-500', 'hover:bg-white/50');
+                tabStructure.classList.remove('bg-white', 'text-blue-700', 'shadow-sm');
+                tabRevenue.classList.remove('text-slate-500', 'hover:bg-white/50');
+                tabRevenue.classList.add('bg-white', 'text-blue-700', 'shadow-sm');
                 
-                if (key !== 'board') {
-                    const node = document.getElementById(`node-${key}`);
-                    if (node) {
-                        const badge = document.createElement('div');
-                        badge.className = 'headcount-badge';
-                        badge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                                              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                                            </svg>
-                                            <span>${data.headcount}</span>`;
-                        node.appendChild(badge);
-                    }
+                // Init Simulator if not ready
+                if(chartInstance === null) {
+                    initSimulation();
                 }
-            });
-
-            const totalEl = document.getElementById('total-headcount');
-            if(totalEl) totalEl.innerText = total;
+            }
         }
 
-        // Initialize on load
         window.addEventListener('load', () => {
-            initChart();
+            initStructureChart();
             updateHeadcounts();
             loadDetail('board'); 
         });
