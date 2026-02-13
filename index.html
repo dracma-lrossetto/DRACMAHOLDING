@@ -7,20 +7,31 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
-        /* Estilos para contenedores de gráficos */
+        /* --- ESTILOS COMPARTIDOS --- */
         .chart-container {
             position: relative;
             width: 100%;
             height: 250px;
         }
         
-        /* Líneas de conexión jerárquica (CSS puro) */
+        /* Scrollbar personalizada */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        /* --- ESTILOS ESTRUCTURA (ORGANIGRAMA) --- */
         .tree-line-vertical {
             width: 2px;
-            background-color: #cbd5e1; /* slate-300 */
+            background-color: #cbd5e1;
             margin: 0 auto;
         }
-        
         .tree-connector-horizontal {
             height: 2px;
             background-color: #cbd5e1;
@@ -29,12 +40,10 @@
             left: 50%;
             transform: translateX(-50%);
         }
-
-        /* Efectos de Nodos */
         .node-card {
             transition: all 0.2s ease-in-out;
             cursor: pointer;
-            position: relative; /* Para posicionar el badge */
+            position: relative;
             z-index: 10;
         }
         .node-card:hover {
@@ -45,22 +54,14 @@
         .node-card.active {
             ring-width: 3px;
             transform: scale(1.02);
-            border-color: #3b82f6; /* blue-500 */
+            border-color: #3b82f6;
         }
-
-        /* Estilo para Nodos Externos / Independientes */
-        .node-external {
-            border-style: dashed !important;
-            background-color: #f8fafc;
-        }
-
-        /* Badge de Contador Minimalista */
         .headcount-badge {
             position: absolute;
             top: 6px;
             right: 8px;
             background-color: transparent;
-            color: #94a3b8; /* Slate-400 para sutileza */
+            color: #94a3b8;
             font-size: 0.7rem;
             font-weight: 600;
             display: flex;
@@ -68,8 +69,6 @@
             gap: 2px;
             z-index: 20;
         }
-
-        /* Estilos de Posición (Resaltador) */
         .pos-badge {
             padding: 2px 6px;
             border-radius: 6px;
@@ -77,18 +76,9 @@
             display: inline-block;
             line-height: 1.2;
         }
-        /* ALyC - Verde */
-        .pos-alyc {
-            background-color: #d1fae5; /* emerald-100 */
-            color: #065f46; /* emerald-800 */
-        }
-        /* SGFCI - Azul */
-        .pos-sg {
-            background-color: #e0e7ff; /* indigo-100 */
-            color: #3730a3; /* indigo-800 */
-        }
-
-        /* Badges Regulatorios Inline */
+        .pos-alyc { background-color: #d1fae5; color: #065f46; }
+        .pos-sg { background-color: #e0e7ff; color: #3730a3; }
+        
         .reg-badge {
             display: inline-flex;
             align-items: center;
@@ -102,46 +92,10 @@
             vertical-align: middle;
             border: 1px solid rgba(0,0,0,0.05);
         }
-        .reg-badge-alyc {
-            background-color: #d1fae5; /* emerald-100 */
-            color: #065f46; /* emerald-800 */
-        }
-        .reg-badge-sgfci {
-            background-color: #e0e7ff; /* indigo-100 */
-            color: #3730a3; /* indigo-800 */
-        }
+        .reg-badge-alyc { background-color: #d1fae5; color: #065f46; }
+        .reg-badge-sgfci { background-color: #e0e7ff; color: #3730a3; }
 
-        /* Scrollbar personalizada para el panel lateral */
-        .custom-scroll::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scroll::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-        
-        /* Línea de Vinculación Directa (Strategy -> Trading) */
-        .direct-link-line {
-            position: absolute;
-            border-top: 2px dashed #a855f7; /* Purple-500 */
-            border-left: 2px dashed #a855f7;
-            pointer-events: none;
-            opacity: 0.5;
-            z-index: 0;
-        }
-
-        /* Nav Tab Styles */
-        .nav-tab {
-            @apply px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent hover:text-blue-600 hover:border-blue-300 transition-colors cursor-pointer text-slate-500;
-        }
-        .nav-tab.active-tab {
-            @apply text-blue-600 border-blue-600 bg-blue-50/50;
-        }
-        
-        /* Input Range Personalizado */
+        /* --- ESTILOS SIMULADORES (INPUTS) --- */
         input[type=range] {
             -webkit-appearance: none; 
             background: transparent; 
@@ -164,18 +118,12 @@
             border-radius: 2px;
         }
         /* Custom Colors for Sliders */
-        #acdi-slider::-webkit-slider-thumb { background: #e11d48; } /* Rose-600 */
-        #growth-slider::-webkit-slider-thumb { background: #2563eb; } /* Blue-600 */
-        #fee-slider::-webkit-slider-thumb { background: #9333ea; } /* Purple-600 */
-        
-        /* Switch Toggle */
-        .toggle-checkbox:checked {
-            right: 0;
-            border-color: #4f46e5;
-        }
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: #4f46e5;
-        }
+        #acdi-slider::-webkit-slider-thumb { background: #e11d48; }
+        #growth-slider::-webkit-slider-thumb { background: #2563eb; }
+        #fee-slider::-webkit-slider-thumb { background: #9333ea; }
+        #alyc-penetration-slider::-webkit-slider-thumb { background: #059669; }
+        #alyc-transact-slider::-webkit-slider-thumb { background: #d97706; }
+        #alyc-growth-slider::-webkit-slider-thumb { background: #2563eb; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans h-screen overflow-hidden flex flex-col">
@@ -185,7 +133,7 @@
         <div class="px-6 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <div class="bg-blue-900 text-white font-bold p-2 rounded-lg text-sm">FINANCIAL HOLDING</div>
-                <h1 class="text-xl font-semibold text-slate-700 hidden md:block">Modelo de Fusión Operativa</h1>
+                <h1 class="text-xl font-semibold text-slate-700 hidden md:block">Modelo Operativo</h1>
             </div>
             
             <!-- View Switcher Tabs -->
@@ -194,22 +142,20 @@
                     Estructura
                 </button>
                 <button onclick="switchView('revenue')" id="tab-revenue" class="px-4 py-1.5 text-xs font-bold rounded-md transition-all text-slate-500 hover:bg-white/50">
-                    Simulador 2026
+                    SGFCI 2026
+                </button>
+                <button onclick="switchView('alyc')" id="tab-alyc" class="px-4 py-1.5 text-xs font-bold rounded-md transition-all text-slate-500 hover:bg-white/50">
+                    ALYC 2026
                 </button>
             </div>
 
             <div class="flex items-center gap-4">
                 <!-- Total Headcount Counter -->
                 <div class="bg-slate-100 border border-slate-300 rounded-lg px-3 py-1 flex items-center gap-2 shadow-sm">
-                    <div class="bg-slate-700 text-white rounded-full p-1 w-5 h-5 flex items-center justify-center text-[10px]">
-                        ∑
-                    </div>
+                    <div class="bg-slate-700 text-white rounded-full p-1 w-5 h-5 flex items-center justify-center text-[10px]">∑</div>
                     <div class="flex flex-col leading-none">
                         <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Headcount</span>
                         <span id="total-headcount" class="text-sm font-bold text-slate-800">33</span>
-                    </div>
-                    <div class="text-[9px] text-slate-400 border-l border-slate-300 pl-2 ml-1">
-                        (Excl. Board)
                     </div>
                 </div>
             </div>
@@ -222,7 +168,6 @@
                 <span class="pos-badge pos-alyc text-[10px]">ALYC</span>
                 <span class="pos-badge pos-sg text-[10px]">SGFCI</span>
             </div>
-
             <!-- ALYC LEGEND -->
             <div class="flex items-center gap-4 border-r border-slate-300 pr-6">
                 <div class="font-bold text-emerald-600 uppercase tracking-widest flex items-center">Resp. ALyC:</div>
@@ -230,7 +175,6 @@
                 <div class="flex items-center gap-1" title="Oficial de Cumplimiento UIF (Titular)"><span class="reg-badge reg-badge-alyc">🛡️</span> UIF Titular</div>
                 <div class="flex items-center gap-1" title="Responsable de Relaciones con el Público"><span class="reg-badge reg-badge-alyc">🤝</span> Rel. Público</div>
             </div>
-
             <!-- SGFCI LEGEND -->
             <div class="flex items-center gap-4">
                 <div class="font-bold text-indigo-600 uppercase tracking-widest flex items-center">Resp. SGFCI:</div>
@@ -243,15 +187,12 @@
     <!-- Main Content Container -->
     <div class="flex-1 relative overflow-hidden">
 
-        <!-- VIEW 1: STRUCTURE (Original Content) -->
-        <div id="view-structure" class="absolute inset-0 flex flex-col md:flex-row transition-opacity duration-300 z-10 bg-slate-50">
-            
+        <!-- VIEW 1: STRUCTURE -->
+        <div id="view-structure" class="absolute inset-0 flex flex-col md:flex-row bg-slate-50 transition-opacity duration-300 z-10">
             <!-- LEFT PANEL: Visual Org Chart (Interactive) -->
             <div class="flex-1 overflow-y-auto custom-scroll p-8 bg-slate-50 relative">
-                
                 <!-- Hierarchy Container -->
                 <div class="max-w-5xl mx-auto flex flex-col items-center relative scale-90 origin-top">
-                    
                     <!-- LEVEL 1: Governance -->
                     <div class="flex flex-col items-center mb-8 relative w-full">
                         <!-- Board -->
@@ -259,31 +200,25 @@
                             <h2 class="font-bold text-lg">BOARD OF DIRECTORS</h2>
                             <p class="text-xs text-slate-400">Corporate Governance</p>
                         </div>
-                        
                         <div class="h-8 tree-line-vertical"></div>
-                        
                         <!-- Committees -->
                         <div class="flex gap-4 justify-center w-full relative">
                             <div class="absolute top-0 w-1/2 border-t-2 border-slate-300"></div>
                             <div class="h-4 tree-line-vertical absolute top-0 left-1/2 -translate-x-1/2"></div>
-
                             <!-- Committee: Risk -->
                             <div id="node-risk-com" class="node-card bg-amber-50 border-2 border-amber-200 text-amber-900 p-3 rounded-lg shadow-sm w-48 text-center mt-4" onclick="loadDetail('risk-com')">
                                 <h3 class="font-bold text-sm">RISK COMMITTEE</h3>
                                 <p class="text-[10px] text-amber-700 mt-1">Chair: CCO</p>
                             </div>
-
                             <!-- CEO -->
                             <div id="node-ceo" class="node-card bg-white border-2 border-slate-300 p-3 rounded-lg shadow-md w-48 text-center mt-4 z-10" onclick="loadDetail('ceo')">
                                 <div class="flex items-center justify-center gap-1 mb-1">
                                     <h3 class="pos-badge pos-alyc text-sm">CEO</h3>
-                                    <!-- ICONS -->
                                     <span class="reg-badge reg-badge-alyc" title="Titular CNV (ALyC)">⚖️</span>
                                     <span class="reg-badge reg-badge-alyc" title="Suplente UIF (ALyC)">🛟</span>
                                 </div>
                                 <p class="text-[10px] text-slate-500">Chief Executive Officer</p>
                             </div>
-
                             <!-- Committee: Investment -->
                             <div id="node-inv-com" class="node-card bg-indigo-50 border-2 border-indigo-200 text-indigo-900 p-3 rounded-lg shadow-sm w-48 text-center mt-4" onclick="loadDetail('inv-com')">
                                 <h3 class="font-bold text-sm">INVESTMENT COMMITTEE</h3>
@@ -298,13 +233,11 @@
                             <div class="absolute -top-8 left-1/2 -translate-x-1/2 h-8 tree-line-vertical"></div>
                             <span class="bg-slate-200 text-slate-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider relative z-10">Shared Services (C-Level Transversal)</span>
                         </div>
-                        
                         <!-- Grid for Managers -->
                         <div class="grid grid-cols-4 gap-4 relative">
                             <div class="absolute -top-6 left-10 right-10 border-t-2 border-slate-300"></div>
                             <div class="absolute -top-10 left-1/2 -translate-x-1/2 h-10 tree-line-vertical"></div>
-
-                            <!-- Compliance (4 PAX: 3 ALYC, 1 SG) -->
+                            <!-- Compliance -->
                             <div class="relative pt-6">
                                 <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
                                 <div id="node-compliance" class="node-card bg-white border-l-4 border-rose-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('compliance')">
@@ -318,8 +251,7 @@
                                     </div>
                                     <div class="mt-2 pt-2 border-t border-slate-100">
                                         <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                            <span class="w-1.5 h-1.5 bg-rose-400 rounded-full mr-1"></span>
-                                            <span class="pos-badge pos-alyc text-[9px] ml-1">Compliance Mgr</span>
+                                            <span class="w-1.5 h-1.5 bg-rose-400 rounded-full mr-1"></span><span class="pos-badge pos-alyc text-[9px] ml-1">Compliance Mgr</span>
                                         </div>
                                         <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
                                             <div>• <span class="pos-badge pos-alyc text-[9px]">AML (Ssr)</span></div>
@@ -328,22 +260,18 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Back Office (6 PAX: 5 ALYC, 1 SG) -->
+                            <!-- Back Office -->
                             <div class="relative pt-6">
                                 <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
                                 <div id="node-ops" class="node-card bg-white border-l-4 border-blue-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('ops')">
                                     <div>
                                         <div class="text-xs text-blue-600 font-bold mb-1">OPERATIONS</div>
-                                        <div class="flex items-center gap-1 mb-1">
-                                            <h4 class="pos-badge pos-alyc text-xs">COO</h4>
-                                        </div>
+                                        <div class="flex items-center gap-1 mb-1"><h4 class="pos-badge pos-alyc text-xs">COO</h4></div>
                                         <p class="text-[10px] text-slate-500 mb-2">Chief Operating Officer</p>
                                     </div>
                                     <div class="mt-2 pt-2 border-t border-slate-100">
                                         <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                            <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span>
-                                            <span class="pos-badge pos-alyc text-[9px] ml-1">Head Ops</span>
+                                            <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span><span class="pos-badge pos-alyc text-[9px] ml-1">Head Ops</span>
                                         </div>
                                         <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
                                             <div>• <span class="pos-badge pos-alyc text-[9px]">Settl/Custody</span></div>
@@ -352,8 +280,7 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Admin & Treasury (6 PAX: 3 SG, 3 ALYC) -->
+                            <!-- Admin & Treasury -->
                             <div class="relative pt-6">
                                 <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
                                 <div id="node-admin" class="node-card bg-white border-l-4 border-blue-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('admin')">
@@ -367,8 +294,7 @@
                                     </div>
                                     <div class="mt-2 pt-2 border-t border-slate-100">
                                         <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                            <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span>
-                                            <span class="pos-badge pos-alyc text-[9px] ml-1">Treasurer</span>
+                                            <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span><span class="pos-badge pos-alyc text-[9px] ml-1">Treasurer</span>
                                         </div>
                                         <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
                                             <div>• <span class="pos-badge pos-sg text-[9px]">Treasury/Acct</span></div>
@@ -377,22 +303,18 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Research (5 PAX: 1 ALYC, 4 SG) -->
+                            <!-- Research -->
                             <div class="relative pt-6">
                                 <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
                                 <div id="node-research" class="node-card bg-white border-l-4 border-purple-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('research')">
                                     <div>
                                         <div class="text-xs text-purple-600 font-bold mb-1">STRATEGY</div>
-                                        <div class="flex items-center gap-1 mb-1">
-                                            <h4 class="pos-badge pos-alyc text-xs">CSO</h4>
-                                        </div>
+                                        <div class="flex items-center gap-1 mb-1"><h4 class="pos-badge pos-alyc text-xs">CSO</h4></div>
                                         <p class="text-[10px] text-slate-500 mb-2">Chief Strategy Officer</p>
                                     </div>
                                     <div class="mt-2 pt-2 border-t border-slate-100">
                                         <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                            <span class="w-1.5 h-1.5 bg-purple-400 rounded-full mr-1"></span>
-                                            <span class="pos-badge pos-sg text-[9px] ml-1">Head Rsrch</span>
+                                            <span class="w-1.5 h-1.5 bg-purple-400 rounded-full mr-1"></span><span class="pos-badge pos-sg text-[9px] ml-1">Head Rsrch</span>
                                         </div>
                                         <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
                                             <div>• <span class="pos-badge pos-sg text-[9px]">Macro/Credit</span></div>
@@ -400,46 +322,34 @@
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <!-- Visual Anchor for Line -->
                                 <div class="absolute bottom-0 left-1/2 w-0.5 h-10 bg-purple-300 hidden md:block" style="height: 140px; transform: translate(-50%, 0); z-index: -1;"></div>
                                 <div class="absolute bottom-0 left-1/2 h-0.5 bg-purple-300 hidden md:block" style="width: 320%; transform: translate(-100%, 140px); z-index: -1;"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- LEVEL 3: Business Units (The Execution Layer) -->
+                    <!-- LEVEL 3: Business Units -->
                     <div class="w-full mt-4 flex gap-8 justify-center items-start">
-                        
                         <!-- ALyC Unit -->
                         <div class="w-1/2 max-w-sm bg-emerald-50/30 border-2 border-emerald-100 rounded-xl p-4 relative min-h-[160px]">
                             <div class="absolute -top-3 left-4 bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded border border-emerald-200">ALYC (Regulated)</div>
-                            
-                            <!-- Trading Desk (100% ALYC) -->
                             <div id="node-trading" class="node-card bg-white border-2 border-purple-300 p-4 rounded shadow-sm mt-2 relative flex flex-col justify-between h-full" onclick="loadDetail('trading')">
-                                
                                 <div class="absolute -top-3 right-0 -mr-2 bg-purple-100 text-purple-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-purple-200 shadow-sm flex items-center">
                                     <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span> Linked to Strategy
                                 </div>
-
                                 <div>
-                                    <!-- Header Area + Role -->
                                     <div class="flex justify-between items-start mb-1">
                                         <div class="text-xs text-purple-700 font-bold uppercase tracking-wider">TRADING</div>
                                         <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">Business Unit</span>
                                     </div>
-                                    
                                     <div class="flex items-center flex-wrap gap-1 mb-2">
                                         <h4 class="pos-badge pos-alyc text-xs">HEAD OF TRADING</h4>
                                         <span class="reg-badge reg-badge-alyc" title="Relaciones Público (ALyC)">🤝</span>
                                     </div>
                                     <p class="text-[10px] text-slate-500 font-semibold mt-0.5 mb-2">Exclusive to ALyC</p>
-                                    
-                                    <!-- Minimalist Detail Block -->
                                     <div class="mt-1 pt-2 border-t border-purple-50">
                                         <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                            <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span>
-                                            <span class="pos-badge pos-alyc text-[9px] ml-1">Senior Trader</span>
+                                            <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span><span class="pos-badge pos-alyc text-[9px] ml-1">Senior Trader</span>
                                         </div>
                                         <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
                                             <div>• <span class="pos-badge pos-alyc text-[9px]">FI / Equity Traders</span></div>
@@ -449,37 +359,27 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- SGFCI Unit -->
                         <div class="w-1/2 max-w-sm bg-indigo-50/30 border-2 border-indigo-100 rounded-xl p-4 relative min-h-[160px]">
                             <div class="absolute -top-3 left-4 bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded border border-indigo-200">SGFCI (Regulated)</div>
-                            
-                            <!-- Fund Management (100% SG) -->
                             <div id="node-sgfci" class="node-card bg-white border-2 border-purple-300 p-4 rounded shadow-sm mt-2 relative flex flex-col justify-between h-full" onclick="loadDetail('sgfci')">
-                                
                                 <div class="absolute -top-3 right-0 -mr-2 bg-purple-100 text-purple-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-purple-200 shadow-sm flex items-center">
                                     <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span> Linked to Strategy
                                 </div>
-
                                 <div>
-                                    <!-- Header Area + Role -->
                                     <div class="flex justify-between items-start mb-1">
                                         <div class="text-xs text-purple-700 font-bold uppercase tracking-wider">ASSET MANAGEMENT</div>
                                         <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">Business Unit</span>
                                     </div>
-
                                     <div class="flex items-center flex-wrap gap-1 mb-2">
                                         <h4 class="pos-badge pos-sg text-xs">CIO</h4>
                                         <span class="reg-badge reg-badge-sgfci" title="Suplente UIF (SGFCI)">🛟</span>
                                         <span class="reg-badge reg-badge-sgfci" title="Resp. Inversiones">✒️</span>
                                     </div>
                                     <p class="text-[10px] text-slate-500 font-semibold mt-0.5 mb-2">Exclusive to SGFCI</p>
-
-                                    <!-- Minimalist Detail Block -->
                                     <div class="mt-1 pt-2 border-t border-purple-50">
                                         <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                            <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span>
-                                            <span class="pos-badge pos-sg text-[9px] ml-1">Head PM</span>
+                                            <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span><span class="pos-badge pos-sg text-[9px] ml-1">Head PM</span>
                                         </div>
                                         <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
                                             <div>• <span class="pos-badge pos-sg text-[9px]">Portfolio Mgrs</span></div>
@@ -491,269 +391,177 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="text-center mt-12 text-slate-400 text-xs">
-                    * Dotted lines imply transversal services.
-                </div>
+                <div class="text-center mt-12 text-slate-400 text-xs">* Dotted lines imply transversal services.</div>
             </div>
 
-            <!-- RIGHT PANEL: Detailed Analysis (Dynamic) -->
+            <!-- RIGHT PANEL: Detailed Analysis -->
             <div class="w-full lg:w-[480px] bg-white border-l border-slate-200 flex flex-col shadow-xl z-20">
-                
-                <!-- Empty State -->
                 <div id="empty-state" class="flex-1 flex flex-col items-center justify-center p-10 text-center">
                     <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-400 text-2xl">⚡</div>
                     <h3 class="text-lg font-bold text-slate-700">Explorador Funcional</h3>
-                    <p class="text-sm text-slate-500 mt-2">Seleccione un área del organigrama para ver el desglose de roles, responsabilidades y nómina legal.</p>
+                    <p class="text-sm text-slate-500 mt-2">Seleccione un área del organigrama para ver el desglose.</p>
                 </div>
-
-                <!-- Content State -->
                 <div id="detail-content" class="hidden flex-col h-full overflow-y-auto custom-scroll">
-                    
-                    <!-- Header Area -->
                     <div id="panel-header" class="p-6 bg-slate-50 border-b border-slate-200">
                         <span id="role-tag" class="text-[10px] font-bold tracking-widest uppercase bg-blue-100 text-blue-700 px-2 py-1 rounded-sm">Transversal</span>
-                        <h2 id="role-title" class="text-2xl font-bold text-slate-800 mt-2">Gerencia de Operaciones</h2>
-                        <p id="role-desc" class="text-sm text-slate-600 mt-1 leading-relaxed">Responsable de la liquidación y administración de custodia.</p>
+                        <h2 id="role-title" class="text-2xl font-bold text-slate-800 mt-2">Gerencia</h2>
+                        <p id="role-desc" class="text-sm text-slate-600 mt-1 leading-relaxed">Descripción.</p>
                     </div>
-
-                    <!-- Radar Chart for Focus Area -->
                     <div class="p-4 border-b border-slate-100">
                         <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">Enfoque del Área</h4>
-                        <div class="chart-container" style="height: 180px;">
-                            <canvas id="focusChart"></canvas>
-                        </div>
+                        <div class="chart-container" style="height: 180px;"><canvas id="focusChart"></canvas></div>
                     </div>
-
-                    <!-- Structure Breakdown (Sub-Gerencias) -->
                     <div class="p-6 space-y-6">
-                        
-                        <!-- Section: Mandos Medios -->
                         <div>
-                            <h3 id="middle-title" class="text-sm font-bold text-slate-800 flex items-center mb-3">
-                                <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                                Middle Management / Chair
-                            </h3>
-                            <div id="middle-management-container" class="bg-blue-50 border border-blue-100 rounded-lg p-3">
-                                <!-- Dynamic Content -->
-                            </div>
+                            <h3 id="middle-title" class="text-sm font-bold text-slate-800 flex items-center mb-3"><span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>Middle Management</h3>
+                            <div id="middle-management-container" class="bg-blue-50 border border-blue-100 rounded-lg p-3"></div>
                         </div>
-
-                        <!-- Section: Roles Operativos -->
                         <div>
-                            <h3 class="text-sm font-bold text-slate-800 flex items-center mb-3">
-                                <span class="w-2 h-2 bg-slate-400 rounded-full mr-2"></span>
-                                Operational Roles (Staff)
-                            </h3>
-                            <div id="operational-roles-container" class="space-y-2">
-                                <!-- Dynamic Content -->
-                            </div>
+                            <h3 class="text-sm font-bold text-slate-800 flex items-center mb-3"><span class="w-2 h-2 bg-slate-400 rounded-full mr-2"></span>Operational Roles</h3>
+                            <div id="operational-roles-container" class="space-y-2"></div>
                         </div>
-
-                        <!-- Section: Alcance & Responsabilidades -->
                         <div>
-                            <h3 class="text-sm font-bold text-slate-800 mb-2 border-b border-slate-100 pb-2">Responsabilidades Críticas (CNV)</h3>
-                            <ul id="responsibilities-list" class="text-sm text-slate-600 space-y-2 list-disc pl-4 marker:text-slate-300">
-                                <!-- Dynamic Content -->
-                            </ul>
+                            <h3 class="text-sm font-bold text-slate-800 mb-2 border-b border-slate-100 pb-2">Responsabilidades Críticas</h3>
+                            <ul id="responsibilities-list" class="text-sm text-slate-600 space-y-2 list-disc pl-4 marker:text-slate-300"></ul>
                         </div>
-
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- VIEW 2: REVENUE (Simulator 2026) -->
+        <!-- VIEW 2: SGFCI 2026 -->
         <div id="view-revenue" class="hidden absolute inset-0 bg-slate-100 overflow-hidden flex flex-col z-20">
-            
             <div class="flex-1 flex overflow-hidden">
-                <!-- LEFT COLUMN: Controls & Dashboard -->
+                <!-- LEFT COLUMN: Controls -->
                 <div class="w-1/3 bg-white border-r border-slate-200 flex flex-col overflow-y-auto custom-scroll p-6">
-                    <div class="mb-6 flex justify-between items-start">
-                        <div>
-                            <h2 class="text-xl font-bold text-slate-800">Proyección SG 2026</h2>
-                            <p class="text-xs text-slate-500 mt-1">Simulación dinámica de crecimiento y comisiones.</p>
-                        </div>
-                    </div>
-
-                    <!-- GLOBAL CONTROLS -->
+                    <div class="mb-6"><h2 class="text-xl font-bold text-slate-800">SGFCI 2026</h2><p class="text-xs text-slate-500 mt-1">Proyección de Fondos Comunes de Inversión (USD).</p></div>
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
                         <h3 class="text-xs font-bold text-slate-700 uppercase tracking-widest mb-4">Drivers 2026 (Global)</h3>
-                        
-                        <!-- Control 1 -->
-                        <div class="mb-5">
-                            <div class="flex justify-between text-xs mb-2">
-                                <span class="text-slate-600 font-semibold">Crecimiento Orgánico AUM</span>
-                                <span id="growth-val" class="font-bold text-blue-600">+0%</span>
-                            </div>
-                            <!-- Modified min to -50 -->
-                            <input type="range" id="growth-slider" min="-50" max="100" value="0" step="5" class="w-full">
-                            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
-                                <span>-50%</span>
-                                <span>+100%</span>
-                            </div>
-                        </div>
-
-                        <!-- Control 2 -->
-                        <div class="mb-5">
-                            <div class="flex justify-between text-xs mb-2">
-                                <span class="text-slate-600 font-semibold">Ajuste de Fee (Presión)</span>
-                                <span id="fee-adj-val" class="font-bold text-purple-600">0%</span>
-                            </div>
-                            <input type="range" id="fee-slider" min="-50" max="50" value="0" step="5" class="w-full">
-                            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
-                                <span>-50%</span>
-                                <span>+50%</span>
-                            </div>
-                        </div>
-
-                        <!-- Control 3: ACDI -->
-                        <div>
-                            <div class="flex justify-between text-xs mb-2">
-                                <span class="text-slate-600 font-semibold">Impacto Costo ACDI</span>
-                                <span id="acdi-adj-val" class="font-bold text-rose-600">0%</span>
-                            </div>
-                            <input type="range" id="acdi-slider" min="-50" max="50" value="0" step="5" class="w-full">
-                            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
-                                <span>-50%</span>
-                                <span>+50%</span>
-                            </div>
-                        </div>
+                        <div class="mb-5"><div class="flex justify-between text-xs mb-2"><span class="text-slate-600 font-semibold">Crecimiento Orgánico AUM</span><span id="growth-val" class="font-bold text-blue-600">+0%</span></div><input type="range" id="growth-slider" min="-50" max="100" value="0" step="5" class="w-full"><div class="flex justify-between text-[10px] text-slate-400 mt-1"><span>-50%</span><span>+100%</span></div></div>
+                        <div class="mb-5"><div class="flex justify-between text-xs mb-2"><span class="text-slate-600 font-semibold">Ajuste de Fee (Presión)</span><span id="fee-adj-val" class="font-bold text-purple-600">0%</span></div><input type="range" id="fee-slider" min="-50" max="50" value="0" step="5" class="w-full"><div class="flex justify-between text-[10px] text-slate-400 mt-1"><span>-50%</span><span>+50%</span></div></div>
+                        <div><div class="flex justify-between text-xs mb-2"><span class="text-slate-600 font-semibold">Impacto Costo ACDI</span><span id="acdi-adj-val" class="font-bold text-rose-600">0%</span></div><input type="range" id="acdi-slider" min="-50" max="50" value="0" step="5" class="w-full"><div class="flex justify-between text-[10px] text-slate-400 mt-1"><span>-50%</span><span>+50%</span></div></div>
                     </div>
-
-                    <!-- KPI CARDS -->
                     <div class="grid grid-cols-1 gap-4 mb-6">
-                        <!-- Revenue Card with Split -->
                         <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100 relative overflow-hidden">
-                            <div class="absolute right-0 top-0 p-2 opacity-10 text-emerald-500">
-                                <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
-                            </div>
-                            
                             <div class="text-[10px] font-bold text-slate-400 uppercase mb-2">INGRESOS NETOS PROYECTADOS</div>
-                            
-                            <div class="flex gap-4">
-                                <!-- Monthly -->
-                                <div class="flex-1 border-r border-slate-100 pr-2">
-                                    <div class="text-[9px] font-bold text-slate-500 uppercase">Mensual</div>
-                                    <div id="kpi-revenue" class="text-xl font-bold text-emerald-600 mt-1">$ 0</div>
-                                </div>
-                                <!-- Annual -->
-                                <div class="flex-1">
-                                    <div class="text-[9px] font-bold text-slate-500 uppercase">Anual</div>
-                                    <div id="kpi-revenue-annual-top" class="text-xl font-bold text-emerald-600 mt-1">$ 0</div>
-                                </div>
-                            </div>
-                            
-                            <div id="kpi-revenue-delta" class="text-[10px] font-semibold text-slate-400 mt-2 border-t border-slate-50 pt-1">vs Base: 0%</div>
+                            <div class="flex gap-4"><div class="flex-1 border-r border-slate-100 pr-2"><div class="text-[9px] font-bold text-slate-500 uppercase">Mensual</div><div id="kpi-revenue" class="text-xl font-bold text-emerald-600 mt-1">$ 0</div></div><div class="flex-1"><div class="text-[9px] font-bold text-slate-500 uppercase">Anual</div><div id="kpi-revenue-annual-top" class="text-xl font-bold text-emerald-600 mt-1">$ 0</div></div></div><div id="kpi-revenue-delta" class="text-[10px] font-semibold text-slate-400 mt-2 border-t border-slate-50 pt-1">vs Base: 0%</div>
                         </div>
-
-                        <!-- NEW AUM BREAKDOWN CARD -->
                         <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100">
-                             <div class="flex justify-between items-center mb-2">
-                                 <div class="text-[10px] font-bold text-slate-400 uppercase">AUM Total Proy.</div>
-                                 <div class="text-[10px] font-bold text-slate-400 uppercase">Q Fondos: <span id="kpi-count" class="text-slate-700 ml-1">0</span></div>
-                             </div>
+                            <div class="flex justify-between items-center mb-2"><div class="text-[10px] font-bold text-slate-400 uppercase">AUM Total Proy.</div><div class="text-[10px] font-bold text-slate-400 uppercase">Q Fondos: <span id="kpi-count" class="text-slate-700 ml-1">0</span></div></div>
                             <div id="kpi-aum" class="text-xl font-bold text-slate-800 mt-1 mb-3">$ 0</div>
-                            <!-- Breakdown -->
                             <div class="space-y-1 text-[9px] border-t border-slate-100 pt-2">
-                                <div class="flex justify-between">
-                                    <span class="text-slate-500">Abiertos:</span>
-                                    <span id="kpi-aum-abiertos" class="font-bold text-slate-700">$ 0</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-slate-500">Dedicados:</span>
-                                    <span id="kpi-aum-dedicados" class="font-bold text-slate-700">$ 0</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-slate-500">Cerrados:</span>
-                                    <span id="kpi-aum-cerrados" class="font-bold text-slate-700">$ 0</span>
-                                </div>
+                                <div class="flex justify-between"><span class="text-slate-500">Abiertos:</span><span class="font-bold text-slate-700"><span id="kpi-aum-abiertos">$ 0</span> <span id="kpi-pct-abiertos" class="text-blue-500 text-[8px] font-normal ml-1"></span></span></div>
+                                <div class="flex justify-between"><span class="text-slate-500">Dedicados:</span><span class="font-bold text-slate-700"><span id="kpi-aum-dedicados">$ 0</span> <span id="kpi-pct-dedicados" class="text-blue-500 text-[8px] font-normal ml-1"></span></span></div>
+                                <div class="flex justify-between"><span class="text-slate-500">Cerrados:</span><span class="font-bold text-slate-700"><span id="kpi-aum-cerrados">$ 0</span> <span id="kpi-pct-cerrados" class="text-blue-500 text-[8px] font-normal ml-1"></span></span></div>
+                            </div>
+                            <div class="space-y-1 text-[9px] border-t border-slate-100 pt-2 mt-2">
+                                <div class="flex justify-between"><span class="text-indigo-600 font-semibold">Cust. DRACMA:</span><span class="font-bold text-indigo-700"><span id="kpi-aum-cust-dracma">$ 0</span> <span id="kpi-pct-cust-dracma" class="text-indigo-400 text-[8px] font-normal ml-1"></span></span></div>
+                                <div class="flex justify-between"><span class="text-slate-500">Cust. OTROS:</span><span class="font-bold text-slate-700"><span id="kpi-aum-cust-otros">$ 0</span> <span id="kpi-pct-cust-otros" class="text-blue-400 text-[8px] font-normal ml-1"></span></span></div>
                             </div>
                         </div>
-                        
-                        <!-- Fee Avg -->
-                         <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100">
-                             <div class="text-[10px] font-bold text-slate-400 uppercase mb-2">Promedios Ponderados (Fees)</div>
-                             <div class="flex gap-4">
-                                <div class="flex-1 border-r border-slate-100 pr-2">
-                                    <div class="text-[9px] text-slate-500">Neto (Revenue)</div>
-                                    <div id="kpi-fee" class="text-lg font-bold text-indigo-600 mt-1">0.00%</div>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="text-[9px] text-slate-500">Total (Client)</div>
-                                    <div id="kpi-fee-total" class="text-lg font-bold text-slate-600 mt-1">0.00%</div>
-                                </div>
-                             </div>
-                        </div>
-
-                        <!-- ACDI Card -->
-                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100 relative overflow-hidden">
-                             <div class="text-[10px] font-bold text-slate-400 uppercase">Costo Distribución (ACDI)</div>
-                             <div class="flex justify-between items-end mt-1">
-                                <div id="kpi-acdi-annual" class="text-xl font-bold text-rose-600">$ 0</div>
-                                <div id="kpi-acdi-share" class="text-xs font-bold bg-rose-100 text-rose-700 px-2 py-1 rounded">0% del Bruto</div>
-                             </div>
-                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100"><div class="text-[10px] font-bold text-slate-400 uppercase mb-2">Promedios Ponderados (Fees)</div><div class="flex gap-4"><div class="flex-1 border-r border-slate-100 pr-2"><div class="text-[9px] text-slate-500">Neto (Revenue)</div><div id="kpi-fee" class="text-lg font-bold text-indigo-600 mt-1">0.00%</div></div><div class="flex-1"><div class="text-[9px] text-slate-500">Total (Client)</div><div id="kpi-fee-total" class="text-lg font-bold text-slate-600 mt-1">0.00%</div></div></div></div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100 relative overflow-hidden"><div class="text-[10px] font-bold text-slate-400 uppercase">Costo Distribución (ACDI)</div><div class="flex justify-between items-end mt-1"><div id="kpi-acdi-annual" class="text-xl font-bold text-rose-600">$ 0</div><div id="kpi-acdi-share" class="text-xs font-bold bg-rose-100 text-rose-700 px-2 py-1 rounded">0% del Bruto</div></div></div>
                     </div>
-
-                    <!-- CHART -->
-                    <div class="flex-1 min-h-[200px]">
-                        <h3 class="text-xs font-bold text-slate-700 mb-2">Proyección vs Base</h3>
-                        <div class="h-full w-full">
-                            <canvas id="projectionChart"></canvas>
-                        </div>
-                    </div>
+                    <div class="flex-1 min-h-[200px]"><h3 class="text-xs font-bold text-slate-700 mb-2">Proyección vs Base</h3><div class="h-full w-full"><canvas id="projectionChart"></canvas></div></div>
                 </div>
-
-                <!-- RIGHT COLUMN: Detailed Table (Editable) -->
+                <!-- RIGHT COLUMN: Table -->
                 <div class="w-2/3 bg-slate-100 flex flex-col p-6 overflow-hidden">
                     <div class="bg-white rounded-xl shadow-md border border-slate-200 flex-1 flex flex-col overflow-hidden">
                         <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                            <div>
-                                <h3 class="text-sm font-bold text-slate-700">Cartera de Fondos 2026</h3>
-                                <p class="text-xs text-slate-500">Edite los campos azules. Fee Total también es editable.</p>
-                            </div>
-                            <div class="flex items-center gap-4">
-                                <!-- Group Toggle -->
-                                <div class="flex items-center">
-                                    <label for="group-toggle" class="flex items-center cursor-pointer relative">
-                                        <input type="checkbox" id="group-toggle" class="sr-only" onchange="toggleGroupMode(this)">
-                                        <div class="w-10 h-5 bg-slate-200 rounded-full shadow-inner"></div>
-                                        <div class="dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full shadow transition transform duration-300 ease-in-out"></div>
-                                        <span class="ml-2 text-xs font-bold text-slate-600">Agrupar por FCI</span>
-                                    </label>
-                                </div>
-                                <button onclick="resetSimulation()" class="text-xs bg-white border border-slate-300 px-3 py-1 rounded hover:bg-slate-50 text-slate-600">Restablecer</button>
+                            <div><h3 class="text-sm font-bold text-slate-700">Cartera de Fondos 2026</h3><p class="text-xs text-slate-500">Edite los campos azules. Fee Total también es editable.</p></div>
+                            <div class="flex items-center gap-4"><div class="flex items-center"><label for="group-toggle" class="flex items-center cursor-pointer relative"><input type="checkbox" id="group-toggle" class="sr-only" onchange="toggleGroupMode(this)"><div class="w-10 h-5 bg-slate-200 rounded-full shadow-inner"></div><div class="dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full shadow transition transform duration-300 ease-in-out"></div><span class="ml-2 text-xs font-bold text-slate-600">Agrupar por FCI</span></label></div><button onclick="resetSimulation()" class="text-xs bg-white border border-slate-300 px-3 py-1 rounded hover:bg-slate-50 text-slate-600">Restablecer</button></div>
+                        </div>
+                        <div class="overflow-auto custom-scroll flex-1">
+                            <table class="w-full text-xs text-left">
+                                <thead class="bg-slate-50 text-slate-500 font-bold uppercase sticky top-0 z-10 shadow-sm">
+                                    <tr><th class="px-2 py-3 w-32">Fondo</th><th class="px-2 py-3 bg-blue-50 text-blue-700 border-x border-blue-100 w-28 text-right">AUM Proy</th><th class="px-1 py-3 bg-blue-50 text-blue-700 border-x border-blue-100 w-16 text-center" title="Fee Total (Editable)">Fee T</th><th class="px-1 py-3 bg-purple-50 text-purple-700 border-x border-purple-100 w-14 text-center" title="Fee Distribución">%ACDI</th><th class="px-1 py-3 text-center w-12 font-bold text-slate-700">Fee N</th><th class="px-2 py-3 text-right text-slate-500 w-24 border-l border-slate-100 bg-slate-50/50">Ing. Bruto</th><th class="px-2 py-3 text-right font-bold text-emerald-700 w-28">Ing. Neto</th></tr>
+                                </thead>
+                                <tbody id="simulation-table-body" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                        <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 text-right flex justify-end gap-8">
+                            <div><span class="text-xs font-bold text-slate-400 mr-2">Total Bruto Anual:</span><span id="total-gross-annual" class="text-sm font-bold text-slate-600">$ 0</span></div>
+                            <div><span class="text-xs font-bold text-slate-500 mr-2">Total Neto Anual:</span><span id="total-annual" class="text-sm font-bold text-emerald-600">$ 0</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: ALYC 2026 -->
+        <div id="view-alyc" class="hidden absolute inset-0 bg-slate-100 overflow-hidden flex flex-col z-20">
+            <div class="flex-1 flex overflow-hidden">
+                <!-- LEFT COLUMN: Drivers -->
+                <div class="w-1/3 bg-white border-r border-slate-200 flex flex-col overflow-y-auto custom-scroll p-6">
+                    <div class="mb-6"><h2 class="text-xl font-bold text-slate-800">ALYC 2026</h2><p class="text-xs text-slate-500 mt-1">Negocio de Carteras Administradas & Asesoría (USD).</p></div>
+                    
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-6 shadow-sm">
+                        <h3 class="text-xs font-bold text-blue-800 uppercase tracking-widest mb-3">Crecimiento Global</h3>
+                        <div class="mb-2"><div class="flex justify-between text-xs mb-1"><span class="text-slate-600 font-semibold">Crecimiento AUM</span><span id="alyc-growth-val" class="font-bold text-blue-600">+0%</span></div><input type="range" id="alyc-growth-slider" min="-50" max="100" value="0" step="5" class="w-full accent-blue-500"><p class="text-[9px] text-slate-400 mt-1">Aplica al stock total de activos de cada manager.</p></div>
+                    </div>
+                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 mb-6 shadow-sm">
+                        <h3 class="text-xs font-bold text-emerald-800 uppercase tracking-widest mb-3">Driver Principal</h3>
+                        <div class="mb-2"><div class="flex justify-between text-xs mb-1"><span class="text-slate-600 font-semibold">Penetración (% de AUM Total)</span><span id="alyc-penetration-val" class="font-bold text-emerald-600">20%</span></div><input type="range" id="alyc-penetration-slider" min="0" max="100" value="20" step="1" class="w-full accent-emerald-500"><p class="text-[9px] text-slate-400 mt-1">Aplica sobre el stock para calcular el estimado inicial.</p></div>
+                    </div>
+                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 mb-6 shadow-sm">
+                        <h3 class="text-xs font-bold text-amber-800 uppercase tracking-widest mb-3">Fee Transaccional</h3>
+                        <div class="mb-2"><div class="flex justify-between text-xs mb-1"><span class="text-slate-600 font-semibold">Fee sobre AUM Restante</span><span id="alyc-transact-val" class="font-bold text-amber-600">2.00%</span></div><input type="range" id="alyc-transact-slider" min="0" max="5.0" value="2.0" step="0.1" class="w-full accent-amber-500"><p class="text-[9px] text-slate-400 mt-1">Aplica sobre el saldo NO administrado ni en SGFCI.</p></div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm">
+                        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-widest mb-3">Mix de Carteras (100%)</h3>
+                        <div class="space-y-3" id="portfolio-mix-container"></div>
+                        <div class="mt-2 text-right text-[10px] text-slate-400 font-mono">Total Mix: <span id="mix-total-check">100%</span></div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100 relative">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">Fee Anual Proyectado (Revenue)</div>
+                            <div id="alyc-kpi-revenue" class="text-2xl font-bold text-blue-600">$ 0</div>
+                            <div class="text-[10px] text-slate-400 mt-1">Total Consolidado</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mb-2">AUM Breakdown (USD)</div>
+                            <div class="space-y-1 text-[10px]">
+                                <div class="flex justify-between"><span class="text-slate-500">Total:</span><span id="alyc-kpi-total-aum" class="font-bold text-slate-800">470 M</span></div>
+                                <div class="flex justify-between border-t border-slate-50 pt-1"><span class="text-emerald-600">Administrado:</span><span class="font-bold text-emerald-700"><span id="alyc-kpi-breakdown-admin">$ 0</span> <span id="alyc-pct-admin" class="text-[9px] text-emerald-400 font-normal ml-1"></span></span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">SGFCI (Sin Rev):</span><span class="font-bold text-slate-500"><span id="alyc-kpi-breakdown-sgfci">$ 0</span> <span id="alyc-pct-sgfci" class="text-[9px] text-slate-300 font-normal ml-1"></span></span></div>
+                                <div class="flex justify-between"><span class="text-amber-600">Transaccional:</span><span class="font-bold text-amber-700"><span id="alyc-kpi-breakdown-transac">$ 0</span> <span id="alyc-pct-transac" class="text-[9px] text-amber-400 font-normal ml-1"></span></span></div>
                             </div>
                         </div>
-                        
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mb-2">Yield / Fees Promedio</div>
+                            <div class="grid grid-cols-3 gap-2 text-center">
+                                <div class="border-r border-slate-100"><div class="text-[9px] text-slate-400">Mgmt</div><div id="alyc-kpi-blend-fee" class="text-sm font-bold text-emerald-600">0%</div></div>
+                                <div class="border-r border-slate-100"><div class="text-[9px] text-slate-400">Trans</div><div id="alyc-kpi-transac-fee" class="text-sm font-bold text-amber-600">0%</div></div>
+                                <div><div class="text-[9px] text-slate-400">Total</div><div id="alyc-kpi-total-yield" class="text-sm font-bold text-blue-600">0%</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- RIGHT COLUMN: Table -->
+                <div class="w-2/3 bg-slate-100 flex flex-col p-6 overflow-hidden">
+                    <div class="bg-white rounded-xl shadow-md border border-slate-200 flex-1 flex flex-col overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                            <div><h3 class="text-sm font-bold text-slate-700">Proyección por Manager (Comercial)</h3><p class="text-xs text-slate-500">AUM SGFCI no genera revenue aquí. Transaccional aplica al saldo.</p></div>
+                            <button onclick="resetAlycSimulation()" class="text-xs bg-white border border-slate-300 px-3 py-1 rounded hover:bg-slate-50 text-slate-600">Restablecer</button>
+                        </div>
                         <div class="overflow-auto custom-scroll flex-1">
                             <table class="w-full text-xs text-left">
                                 <thead class="bg-slate-50 text-slate-500 font-bold uppercase sticky top-0 z-10 shadow-sm">
                                     <tr>
-                                        <th class="px-2 py-3 w-32">Fondo</th>
-                                        <th class="px-2 py-3 bg-blue-50 text-blue-700 border-x border-blue-100 w-28 text-right">AUM Proy</th>
-                                        <th class="px-1 py-3 bg-blue-50 text-blue-700 border-x border-blue-100 w-16 text-center" title="Fee Total (Editable)">Fee T</th>
-                                        <th class="px-1 py-3 bg-purple-50 text-purple-700 border-x border-purple-100 w-14 text-center" title="Fee Distribución">%ACDI</th>
-                                        <th class="px-1 py-3 text-center w-12 font-bold text-slate-700">Fee N</th>
-                                        <th class="px-2 py-3 text-right text-slate-500 w-24 border-l border-slate-100 bg-slate-50/50">Ing. Bruto</th>
-                                        <th class="px-2 py-3 text-right font-bold text-emerald-700 w-24">Ing. Neto</th>
+                                        <th class="px-3 py-3 w-32">Manager</th>
+                                        <th class="px-2 py-3 text-right text-[10px] text-slate-400 w-32">Total AUM</th>
+                                        <th class="px-2 py-3 text-center bg-emerald-50 text-emerald-700 border-x border-emerald-100 w-24" title="Editable">AUM Admin</th>
+                                        <th class="px-2 py-3 text-center bg-slate-50 text-slate-600 border-r border-slate-100 w-24" title="Editable">AUM SGFCI</th>
+                                        <th class="px-2 py-3 text-right bg-amber-50 text-amber-700 border-r border-amber-100 w-24">AUM Transac.</th>
+                                        <th class="px-3 py-3 text-right font-bold text-blue-700 w-32">Revenue Total</th>
                                     </tr>
                                 </thead>
-                                <tbody id="simulation-table-body" class="divide-y divide-slate-100">
-                                    <!-- Rows generated by JS -->
-                                </tbody>
+                                <tbody id="alyc-table-body" class="divide-y divide-slate-100"></tbody>
                             </table>
                         </div>
-                        <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 text-right flex justify-end gap-8">
-                            <div>
-                                <span class="text-xs font-bold text-slate-400 mr-2">Total Bruto Anual:</span>
-                                <span id="total-gross-annual" class="text-sm font-bold text-slate-600">$ 0</span>
-                            </div>
-                            <div>
-                                <span class="text-xs font-bold text-slate-500 mr-2">Total Neto Anual:</span>
-                                <span id="total-annual" class="text-sm font-bold text-emerald-600">$ 0</span>
-                            </div>
+                        <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 text-right">
+                            <span class="text-xs font-bold text-slate-500 mr-2">Total AUM ALyC:</span><span id="alyc-total-aum-footer" class="text-sm font-bold text-slate-800 mr-6">USD 470.000.000</span>
+                            <span class="text-xs font-bold text-blue-600 mr-2">Total Revenue:</span><span id="alyc-total-revenue" class="text-sm font-bold text-blue-700">$ 0</span>
                         </div>
                     </div>
                 </div>
@@ -764,8 +572,214 @@
 
     <!-- Data & Logic -->
     <script>
-        // --- INITIAL DATA ---
-        // Added AGRO as requested.
+        // --- STRUCTURE DATA (RESTORED FULL VERSION) ---
+        const orgData = {
+            'board': {
+                title: "BOARD OF DIRECTORS",
+                tag: "Governance & Strategy",
+                desc: "Órgano máximo de decisión. Define el apetito de riesgo y lidera la agresividad comercial del grupo.",
+                focus: [0, 5, 5, 5, 0], 
+                middle: "CEO (Chief Executive Officer)",
+                middleEntity: "ALyC",
+                roles: [], 
+                resp: [
+                    "Definición de Estrategia Comercial y de Expansión.",
+                    "Aprobación de Balances y Presupuestos.",
+                    "Designación de Comités (Inversión, Riesgo, PLA/FT).",
+                    "Supervisión directa del desempeño del CEO."
+                ],
+                color: "slate",
+                headcount: 5 
+            },
+            'risk-com': {
+                title: "RISK COMMITTEE",
+                tag: "Mandatory C-Suite Body",
+                desc: "Órgano colegiado de control liderado por el CCO. Integrado obligatoriamente por toda la C-Suite. NO posee estructura operativa a cargo.",
+                focus: [0, 5, 0, 5, 0], 
+                middle: "Chair: CCO (Chief Compliance Officer)",
+                roles: [],
+                resp: [
+                    "Participantes Obligatorios: CEO, CFO, COO, CCO, CSO.",
+                    "Aprobación de límites de contraparte y solvencia.",
+                    "Validación de nuevos productos.",
+                    "Puede incorporar participantes Ad-hoc según temática."
+                ],
+                color: "amber",
+                headcount: 0 
+            },
+            'inv-com': {
+                title: "INVESTMENT COMMITTEE",
+                tag: "Mandatory C-Suite Body",
+                desc: "Órgano colegiado estratégico liderado por el CSO. Integrado obligatoriamente por toda la C-Suite. Define el 'House View' sin ejecutar.",
+                focus: [0, 5, 5, 2, 0],
+                middle: "Chair: CSO (Chief Strategy Officer)",
+                roles: [],
+                resp: [
+                    "Participantes Obligatorios: CEO, CFO, COO, CCO, CSO.",
+                    "Definición de Asset Allocation estratégico.",
+                    "Revisión de performance de fondos.",
+                    "Puede incorporar participantes Ad-hoc según temática."
+                ],
+                color: "indigo",
+                headcount: 0
+            },
+            'ceo': {
+                title: "CEO (Chief Executive Officer)",
+                tag: "Executive",
+                desc: "Nexo entre el Directorio y la operación. Garantiza que las unidades reguladas funcionen eficientemente compartiendo servicios.",
+                focus: [3, 5, 5, 3, 3],
+                middle: "C-Suite (COO, CFO, CCO, CSO)", 
+                middleEntity: "ALyC",
+                roles: [
+                    { title: "Direct Report Policy", desc: "El nivel operativo NO tiene acceso directo al CEO. Canalizan vía C-Level.", entity: "ALyC" } 
+                ],
+                resp: [
+                    "★ ROL CNV (ALyC): Responsable de Cumplimiento Regulatorio (Titular).",
+                    "★ ROL UIF (ALyC): Oficial de Cumplimiento (Suplente).",
+                    "Supervisión de P&L consolidado.",
+                    "Arbitraje de recursos entre ALyC y SGFCI."
+                ],
+                color: "slate",
+                headcount: 1,
+                entity: "ALyC"
+            },
+            'ops': {
+                title: "COO (Chief Operating Officer)",
+                tag: "Transversal / Shared Service",
+                desc: "El corazón de la 'fábrica'. Procesa, liquida y custodia los activos de ambas unidades de negocio bajo procesos diferenciados.",
+                focus: [5, 1, 0, 3, 4], 
+                middle: "Head of Operations",
+                middleEntity: "ALyC",
+                roles: [
+                    { title: "Settlement Officer", desc: "Liquidación BYMA, MAE, Rofex. Control de garantías.", entity: "ALyC" },
+                    { title: "Fund Administrator", desc: "Cálculo de Valor Cuota diario. Devengamientos.", entity: "SG" },
+                    { title: "Onboarding Analyst", desc: "Legajos digitales, onboarding clientes (KYC).", entity: "ALyC" },
+                    { title: "Custody Analyst", desc: "Conciliación con Caja de Valores.", entity: "ALyC" }
+                ],
+                resp: [
+                    "Garantizar la liquidación en tiempo y forma (T+0, T+1, T+2).",
+                    "Cálculo preciso del patrimonio de los FCI.",
+                    "Conciliación diaria de saldos comitentes vs. Caja.",
+                    "Reportes operativos a CNV (autopistas de información)."
+                ],
+                color: "blue",
+                headcount: 6,
+                entity: "ALyC"
+            },
+            'admin': {
+                title: "CFO (Chief Financial Officer)",
+                tag: "Transversal / Shared Service",
+                desc: "Maneja los flujos monetarios y la contabilidad. CRÍTICO: Debe asegurar la segregación de cuentas bancarias.",
+                focus: [4, 1, 0, 4, 5],
+                middle: "Treasurer / Head of Administration",
+                middleEntity: "ALyC",
+                roles: [
+                    { title: "Treasury Analyst", desc: "Manejo de portales bancarios, transferencias MEP/CCL.", entity: "SG" },
+                    { title: "Senior Accountant", desc: "Contabilidad bimonetaria, ajuste por inflación.", entity: "SG" },
+                    { title: "Tax Analyst", desc: "Retenciones, IIBB, IVA.", entity: "ALyC" },
+                    { title: "Accounts Payable (AP)", desc: "Gestión administrativa del Holding.", entity: "ALyC" }
+                ],
+                resp: [
+                    "★ ROL UIF (SGFCI): Oficial de Cumplimiento (Titular).",
+                    "Conciliación bancaria diaria y segregación de cuentas.",
+                    "Ejecución de rescates y suscripciones (movimiento de fondos).",
+                    "Presentación de Balances Trimestrales y Anuales."
+                ],
+                color: "blue",
+                headcount: 6,
+                entity: "SG"
+            },
+            'compliance': {
+                title: "CCO (Chief Compliance Officer)",
+                tag: "Control / Transversal",
+                desc: "Vela por la integridad normativa. Reporta funcionalmente al Directorio para asegurar independencia. Cubre ALyC y SGFCI.",
+                focus: [2, 1, 0, 5, 1],
+                middle: "Compliance Manager (Titular ante UIF)",
+                middleEntity: "ALyC",
+                roles: [
+                    { title: "AML/CFT Analyst (Ssr)", desc: "Monitoreo transaccional, matrices de riesgo, alertas.", entity: "ALyC" },
+                    { title: "Internal Auditor (Jr)", desc: "Control de legajos, onboarding y auditoría básica.", entity: "SG" }
+                ],
+                resp: [
+                    "★ ROL UIF (ALyC): Oficial de Cumplimiento (Titular).",
+                    "Reporte de Operaciones Sospechosas (ROS).",
+                    "Control del Código de Conducta y Conflictos de Interés.",
+                    "Aprobación de clientes de alto riesgo."
+                ],
+                color: "rose",
+                headcount: 4,
+                entity: "ALyC"
+            },
+            'research': {
+                title: "CSO (Chief Strategy Officer) / RESEARCH",
+                tag: "Transversal / Support",
+                desc: "Genera inteligencia de mercado para uso interno (Mesa/PMs) y externo (Clientes). No ejecuta, solo analiza.",
+                focus: [1, 5, 0, 0, 1],
+                middle: "Head of Research",
+                middleEntity: "SG",
+                roles: [
+                    { title: "Macro Economist", desc: "Política monetaria, fiscal, FX.", entity: "SG" },
+                    { title: "Credit Analyst", desc: "Análisis de balances de emisores de ONs.", entity: "SG" },
+                    { title: "Quantitative Analyst (Quant)", desc: "Modelos de valuación y bases de datos.", entity: "SG" }
+                ],
+                resp: [
+                    "Daily reports y Weekly reports para clientes.",
+                    "Soporte analítico al Comité de Inversiones.",
+                    "Valuación de activos ilíquidos (para SGFCI)."
+                ],
+                color: "purple",
+                headcount: 5,
+                entity: "ALyC"
+            },
+            'trading': {
+                title: "TRADING AREA / HEAD OF TRADING",
+                tag: "Business Unit / ALyC",
+                desc: "Unidad de negocio interna de la ALyC. Responsable de la ejecución y generación de ingresos. Se vincula estratégicamente con el CSO.",
+                focus: [3, 4, 5, 2, 0],
+                middle: "Senior Trader",
+                middleEntity: "ALyC",
+                roles: [
+                    { title: "Fixed Income Trader", desc: "Bonos soberanos, subsoberanos, ONs. Arbitrajes.", entity: "ALyC" },
+                    { title: "Equity & Cedears Trader", desc: "Acciones, Equity local e internacional.", entity: "ALyC" },
+                    { title: "Institutional Sales Trader", desc: "Atención a grandes clientes y SGFCI (como cliente).", entity: "ALyC" },
+                    { title: "Sales Executive", desc: "Relación directa con clientes activos.", entity: "ALyC" }
+                ],
+                resp: [
+                    "★ ROL CNV (ALyC): Responsable de Relaciones con el Público.",
+                    "Best Execution (Prioridad Precio-Tiempo).",
+                    "Ejecución de órdenes propias y de clientes.",
+                    "Ejecución de órdenes instruidas por la SGFCI.",
+                    "Vinculación directa con Estrategia (CSO)."
+                ],
+                color: "purple", 
+                headcount: 6,
+                entity: "ALyC"
+            },
+            'sgfci': {
+                title: "ASSET MANAGEMENT / CIO",
+                tag: "Business Unit / SGFCI",
+                desc: "Unidad fiduciaria interna de la Sociedad Gerente. Decide la composición de las carteras de los fondos. Responsable ante CNV.",
+                focus: [2, 5, 4, 3, 1],
+                middle: "Head Portfolio Manager",
+                middleEntity: "SG",
+                roles: [
+                    { title: "Portfolio Manager (MM/T+1)", desc: "Manejo de liquidez, cauciones, cuentas remuneradas.", entity: "SG" },
+                    { title: "Portfolio Manager (Fixed Income)", desc: "Fondos de bonos, estrategia de duration.", entity: "SG" },
+                    { title: "Performance Analyst", desc: "Atribución de retorno, benchmarking.", entity: "SG" }
+                ],
+                resp: [
+                    "★ ROL UIF (SGFCI): Oficial de Cumplimiento (Suplente).",
+                    "★ ROL IDÓNEO: Responsable de Inversiones.",
+                    "Minutas de inversión diarias y administración discrecional.",
+                    "Vinculación directa con Estrategia (CSO)."
+                ],
+                color: "purple", 
+                headcount: 5,
+                entity: "SG"
+            }
+        };
+
+        // --- SGFCI DATA ---
         const initialFundsData = [
             { id: 1, name: "DB", type: "FCI Abierto", cust: "DRACMA", aum: 5589317, feeTotal: 2.50, feeAcdi: 0.00 },
             { id: 2, name: "DB", type: "FCI Abierto", cust: "OTRO ACDI", aum: 1704303, feeTotal: 2.50, feeAcdi: 1.25 },
@@ -779,441 +793,262 @@
             { id: 10, name: "DRA", type: "FCI Abierto", cust: "DRACMA", aum: 2699063, feeTotal: 2.00, feeAcdi: 0.00 },
             { id: 11, name: "DRA", type: "FCI Abierto", cust: "OTRO ACDI", aum: 1111574, feeTotal: 2.00, feeAcdi: 1.00 },
             { id: 12, name: "BANCOR", type: "FCI Dedicado", cust: "OTRO ACDI", aum: 24647351, feeTotal: 1.30, feeAcdi: 0.00 }, 
-            { id: 13, name: "INMOBILIARIO", type: "FCI Cerrado", cust: "DRACMA", aum: 6500000, feeTotal: 2.00, feeAcdi: 0.00 },
-            { id: 14, name: "AGRO", type: "FCI Abierto", cust: "DRACMA", aum: 0, feeTotal: 2.00, feeAcdi: 0.00 } // New
+            { id: 13, name: "INMOBILIARIO", type: "FCI Cerrado", cust: "DRACMA", aum: 1500000, feeTotal: 2.00, feeAcdi: 0.00 },
+            { id: 15, name: "INMOBILIARIO", type: "FCI Cerrado", cust: "OTRO ACDI", aum: 5000000, feeTotal: 2.00, feeAcdi: 0.00 },
+            { id: 14, name: "AGRO", type: "FCI Abierto", cust: "DRACMA", aum: 0, feeTotal: 2.00, feeAcdi: 0.00 }
         ];
 
-        // State
-        let simData = JSON.parse(JSON.stringify(initialFundsData)); 
-        let globalGrowth = 0;
-        let globalFeeAdj = 0; 
-        let globalAcdiAdj = 0; 
-        let chartInstance = null;
-        let groupedMode = false; // New toggle state
+        // --- ALYC DATA ---
+        const alycManagersStatic = [
+            { name: "DRACMA", aum: 141000000 }, { name: "TOMAS R", aum: 47000000 }, { name: "SANTIAGO S", aum: 40000000 },
+            { name: "MIGUEL MH", aum: 28000000 }, { name: "ENRIQUE RM", aum: 27000000 }, { name: "FNV CAPITAL AAGI", aum: 26000000 },
+            { name: "GASTON T", aum: 21000000 }, { name: "LACOSTE", aum: 18000000 }, { name: "SANTIAGO LA", aum: 16000000 },
+            { name: "FERI SANDOR", aum: 10000000 }, { name: "LEO C", aum: 10000000 }, { name: "CRISTOPHER DEL BOCA", aum: 10000000 },
+            { name: "OTROS MANAGER", aum: 76000000 }
+        ];
 
-        // Formatters
-        const moneyFmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        let portfolios = [
+            { id: 'dinamica', name: "Cartera Dinámica", weight: 60, fee: 2.50 },
+            { id: 'pura', name: "Cartera Pura Sangre", weight: 1, fee: 3.00 },
+            { id: 'pesos', name: "Cartera Renta Pesos", weight: 1, fee: 2.00 },
+            { id: 'usd', name: "Cartera Renta USD", weight: 2, fee: 1.75 },
+            { id: 'asesorada', name: "Cartera Asesorada", weight: 36, fee: 2.00 }
+        ];
+
+        // State & Formatters
+        let radarChart = null, chartInstance = null;
+        let simData = JSON.parse(JSON.stringify(initialFundsData));
+        let globalGrowth = 0, globalFeeAdj = 0, globalAcdiAdj = 0, groupedMode = false;
+        let alycSimData = [], alycPenetration = 20, alycTransactionalFee = 2.0, alycGlobalGrowth = 0;
+
+        const usdFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 });
         const intFmt = new Intl.NumberFormat('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        const pctFmt = new Intl.NumberFormat('en-US', { style: 'percent', minimumFractionDigits: 1 });
 
-        // --- SIMULATION LOGIC ---
+        // --- STRUCTURE LOGIC ---
+        function updateHeadcounts() {
+            let total = 0;
+            Object.keys(orgData).forEach(key => {
+                const data = orgData[key];
+                if (key !== 'board') total += data.headcount || 0;
+                const node = document.getElementById(`node-${key}`);
+                if (node) {
+                    const existingBadge = node.querySelector('.headcount-badge');
+                    if(existingBadge) existingBadge.remove();
+                    if (key !== 'board') {
+                        const badge = document.createElement('div');
+                        badge.className = 'headcount-badge';
+                        badge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg><span>${data.headcount}</span>`;
+                        node.appendChild(badge);
+                    }
+                }
+            });
+            document.getElementById('total-headcount').innerText = total;
+        }
 
+        function initStructureChart() {
+            const ctx = document.getElementById('focusChart').getContext('2d');
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: { labels: ['Operativo', 'Estratégico', 'Ejecución/Comercial', 'Control/Riesgo', 'Administrativo'], datasets: [{ label: 'Nivel de Foco', data: [0,0,0,0,0], fill: true, backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: 'rgb(59, 130, 246)', pointBackgroundColor: 'rgb(59, 130, 246)' }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { display: true }, min: 0, max: 5, ticks: { display: false } } }, plugins: { legend: { display: false } } }
+            });
+        }
+
+        function loadDetail(nodeId) {
+            const data = orgData[nodeId];
+            if (!data) return;
+            document.querySelectorAll('.node-card').forEach(el => el.classList.remove('active'));
+            document.getElementById(`node-${nodeId}`)?.classList.add('active');
+            document.getElementById('empty-state').classList.add('hidden');
+            const content = document.getElementById('detail-content');
+            content.classList.remove('hidden'); content.classList.add('flex');
+            
+            document.getElementById('role-title').innerText = data.title;
+            document.getElementById('role-tag').innerText = data.tag;
+            document.getElementById('role-desc').innerText = data.desc;
+            
+            let colorCls = 'bg-slate-200 text-slate-700';
+            if (data.color === 'rose') colorCls = 'bg-rose-100 text-rose-700';
+            else if (data.color === 'emerald') colorCls = 'bg-emerald-100 text-emerald-700';
+            else if (data.color === 'blue') colorCls = 'bg-blue-100 text-blue-700';
+            else if (data.color === 'purple') colorCls = 'bg-purple-100 text-purple-700';
+            document.getElementById('role-tag').className = `text-[10px] font-bold tracking-widest uppercase px-2 py-1 rounded-sm ${colorCls}`;
+
+            if (radarChart) {
+                radarChart.data.datasets[0].data = data.focus;
+                const rgb = data.color === 'rose' ? '225, 29, 72' : data.color === 'emerald' ? '16, 185, 129' : data.color === 'blue' ? '59, 130, 246' : '147, 51, 234';
+                radarChart.data.datasets[0].backgroundColor = `rgba(${rgb}, 0.2)`;
+                radarChart.data.datasets[0].borderColor = `rgb(${rgb})`;
+                radarChart.data.datasets[0].pointBackgroundColor = `rgb(${rgb})`;
+                radarChart.update();
+            }
+
+            const middleContainer = document.getElementById('middle-management-container');
+            if (data.middle) {
+                let styleClass = data.middleEntity === 'SG' ? 'pos-sg' : 'pos-alyc';
+                middleContainer.innerHTML = `<div class="font-bold text-slate-700 text-sm flex items-center"><span class="pos-badge ${styleClass} text-[11px]">${data.middle}</span></div><div class="text-xs text-slate-500 mt-1">Coordination</div>`;
+                middleContainer.parentElement.classList.remove('hidden');
+            } else middleContainer.parentElement.classList.add('hidden');
+
+            const roleContainer = document.getElementById('operational-roles-container');
+            roleContainer.innerHTML = '';
+            if (data.roles.length > 0) {
+                data.roles.forEach(role => {
+                    const div = document.createElement('div');
+                    div.className = "bg-white border border-slate-200 p-3 rounded shadow-sm hover:border-blue-300 transition-colors flex justify-between items-start";
+                    div.innerHTML = `<div><div class="font-bold text-slate-700 text-xs mb-1"><span class="pos-badge ${role.entity === 'SG' ? 'pos-sg' : 'pos-alyc'} text-[10px]">${role.title}</span></div><div class="text-[10px] text-slate-500 leading-tight">${role.desc}</div></div>`;
+                    roleContainer.appendChild(div);
+                });
+                roleContainer.parentElement.classList.remove('hidden');
+            } else roleContainer.parentElement.classList.add('hidden');
+
+            const respList = document.getElementById('responsibilities-list');
+            respList.innerHTML = '';
+            data.resp.forEach(item => { const li = document.createElement('li'); li.innerText = item; respList.appendChild(li); });
+        }
+
+        // --- SGFCI LOGIC ---
         function initSimulation() {
-            renderTable();
-            updateCalculations();
-            
-            // Listeners
-            document.getElementById('growth-slider').addEventListener('input', (e) => {
-                globalGrowth = parseInt(e.target.value);
-                updateDriverDisplay('growth-val', globalGrowth);
-                applyGlobalGrowth();
-            });
-
-            document.getElementById('fee-slider').addEventListener('input', (e) => {
-                globalFeeAdj = parseInt(e.target.value);
-                updateDriverDisplay('fee-adj-val', globalFeeAdj, true); // true = purple
-                updateCalculations(); 
-                if(!groupedMode) renderTableValuesOnly(); // Optimization only for detail mode
-                else renderTable(); // Re-render for grouping
-            });
-
-            document.getElementById('acdi-slider').addEventListener('input', (e) => {
-                globalAcdiAdj = parseInt(e.target.value);
-                updateDriverDisplay('acdi-adj-val', globalAcdiAdj, false, true); // rose
-                applyGlobalAcdiAdj(); 
-            });
+            renderTable(); updateCalculations();
+            document.getElementById('growth-slider').addEventListener('input', (e) => { globalGrowth = parseInt(e.target.value); updateDriverDisplay('growth-val', globalGrowth); applyGlobalGrowth(); });
+            document.getElementById('fee-slider').addEventListener('input', (e) => { globalFeeAdj = parseInt(e.target.value); updateDriverDisplay('fee-adj-val', globalFeeAdj, true); updateCalculations(); if(!groupedMode) renderTableValuesOnly(); else renderTable(); });
+            document.getElementById('acdi-slider').addEventListener('input', (e) => { globalAcdiAdj = parseInt(e.target.value); updateDriverDisplay('acdi-adj-val', globalAcdiAdj, false, true); applyGlobalAcdiAdj(); });
         }
-
         function updateDriverDisplay(id, val, isPurple=false, isRose=false) {
-            const el = document.getElementById(id);
-            const sign = val >= 0 ? '+' : '';
-            el.innerText = `${sign}${val}%`;
-            el.className = "font-bold";
-            if(val < 0) el.classList.add('text-rose-600');
-            else if(isPurple) el.classList.add('text-purple-600');
-            else if(isRose) el.classList.add('text-rose-600');
-            else el.classList.add('text-blue-600');
+            const el = document.getElementById(id); el.innerText = `${val >= 0 ? '+' : ''}${val}%`;
+            el.className = "font-bold " + (val < 0 ? 'text-rose-600' : isPurple ? 'text-purple-600' : isRose ? 'text-rose-600' : 'text-blue-600');
         }
-
-        function toggleGroupMode(checkbox) {
-            groupedMode = checkbox.checked;
-            renderTable();
-        }
-
-        function applyGlobalGrowth() {
+        function toggleGroupMode(checkbox) { groupedMode = checkbox.checked; renderTable(); }
+        function applyGlobalGrowth() { simData.forEach(row => { const base = initialFundsData.find(r => r.id === row.id).aum; row.aum = Math.round(base * (1 + globalGrowth / 100)); }); if(!groupedMode) simData.forEach(row => { const inp = document.getElementById(`input-aum-${row.id}`); if(inp) inp.value = intFmt.format(row.aum); }); else renderTable(); updateCalculations(); }
+        function applyGlobalAcdiAdj() { simData.forEach(row => { const base = initialFundsData.find(r => r.id === row.id).feeAcdi; row.feeAcdi = base * (1 + globalAcdiAdj / 100); }); if(!groupedMode) { simData.forEach(row => { const inp = document.getElementById(`input-acdi-${row.id}`); if(inp) inp.value = row.feeAcdi.toFixed(2); }); renderTableValuesOnly(); } else renderTable(); updateCalculations(); }
+        function handleAumInput(el, id) { let val = parseInt(el.value.replace(/\./g, '')) || 0; const row = simData.find(r => r.id === id); if (row) { row.aum = val; updateCalculations(); updateRowDisplay(row, calculateCurrentTotals()); } }
+        function formatAumInput(el) { let val = parseInt(el.value.replace(/\./g, '')); if(!isNaN(val)) el.value = intFmt.format(val); }
+        function handleManualInput(id, field, value) { const row = simData.find(r => r.id === id); if (row) { row[field] = parseFloat(value) || 0; updateCalculations(); updateRowDisplay(row, calculateCurrentTotals()); } }
+        function calculateCurrentTotals() { let tAUM = 0, tNetRev = 0; simData.forEach(r => { tAUM += r.aum; tNetRev += r.aum * ((r.feeTotal*(1+globalFeeAdj/100) - r.feeAcdi)/100); }); return { totalAUM: tAUM, totalNetRevenue: tNetRev }; }
+        function renderTable() { const tbody = document.getElementById('simulation-table-body'); tbody.innerHTML = ''; const totals = calculateCurrentTotals(); if (groupedMode) renderGroupedTable(tbody, totals); else renderDetailTable(tbody, totals); }
+        
+        function renderDetailTable(tbody, totals) {
             simData.forEach(row => {
-                const base = initialFundsData.find(r => r.id === row.id).aum;
-                row.aum = Math.round(base * (1 + globalGrowth / 100));
-            });
-            // Update table inputs directly if in detail mode, else re-render
-            if(!groupedMode) {
-                simData.forEach(row => {
-                    const input = document.getElementById(`input-aum-${row.id}`);
-                    if(input) input.value = intFmt.format(row.aum);
-                });
-            } else {
-                renderTable();
-            }
-            updateCalculations();
-        }
-
-        function applyGlobalAcdiAdj() {
-            simData.forEach(row => {
-                const baseAcdi = initialFundsData.find(r => r.id === row.id).feeAcdi;
-                row.feeAcdi = baseAcdi * (1 + globalAcdiAdj / 100);
-            });
-            if(!groupedMode) {
-                simData.forEach(row => {
-                    const input = document.getElementById(`input-acdi-${row.id}`);
-                    if(input) input.value = row.feeAcdi.toFixed(2);
-                });
-                renderTableValuesOnly();
-            } else {
-                renderTable();
-            }
-            updateCalculations();
-        }
-
-        // --- HANDLERS FOR DETAIL MODE ---
-        function handleAumInput(el, id) {
-            let val = el.value.replace(/\./g, '');
-            if(isNaN(val)) return;
-            let num = parseInt(val) || 0;
-            const row = simData.find(r => r.id === id);
-            if (row) {
-                row.aum = num;
-                updateCalculations();
-                updateRowDisplay(row);
-            }
-        }
-
-        function formatAumInput(el) {
-            let val = el.value.replace(/\./g, '');
-            if(isNaN(val) || val === '') return;
-            let num = parseInt(val);
-            el.value = intFmt.format(num);
-        }
-
-        function handleManualInput(id, field, value) {
-            const row = simData.find(r => r.id === id);
-            if (row) {
-                row[field] = parseFloat(value) || 0;
-                updateCalculations();
-                updateRowDisplay(row);
-            }
-        }
-
-        // --- RENDERING ---
-        function renderTable() {
-            const tbody = document.getElementById('simulation-table-body');
-            tbody.innerHTML = '';
-
-            if (groupedMode) {
-                renderGroupedTable(tbody);
-            } else {
-                renderDetailTable(tbody);
-            }
-        }
-
-        function renderDetailTable(tbody) {
-            simData.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 group border-b border-slate-50 last:border-0";
-                
-                const custStyle = row.cust === 'DRACMA' ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : 'bg-slate-100 text-slate-600 border-slate-200';
-                
-                const adjustedFeeTotal = row.feeTotal * (1 + globalFeeAdj / 100);
-                const feeNet = adjustedFeeTotal - row.feeAcdi;
-                const revenueNet = row.aum * (feeNet / 100);
-                const revenueGross = row.aum * (adjustedFeeTotal / 100);
-
-                tr.innerHTML = `
-                    <td class="px-2 py-2">
-                        <div class="flex flex-col justify-center h-full">
-                            <span class="font-bold text-slate-700 text-[11px] leading-tight">${row.name}</span>
-                            <span class="text-[8px] px-1 py-0.5 rounded border ${custStyle} font-semibold w-fit mt-0.5">${row.cust}</span>
-                        </div>
-                    </td>
-                    <td class="px-2 py-2 bg-blue-50 border-x border-blue-100">
-                        <input type="text" id="input-aum-${row.id}"
-                            value="${intFmt.format(row.aum)}" 
-                            class="w-full bg-white border border-blue-200 rounded px-1 py-1 text-right text-blue-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-400 text-[11px]"
-                            oninput="handleAumInput(this, ${row.id})" onblur="formatAumInput(this)">
-                    </td>
-                    <td class="px-1 py-2 bg-blue-50 border-x border-blue-100">
-                        <input type="number" id="input-feetot-${row.id}" step="0.01"
-                            value="${row.feeTotal.toFixed(2)}"
-                            class="w-full bg-white border border-blue-200 rounded px-1 py-1 text-center text-blue-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-400 text-[11px]"
-                            oninput="handleManualInput(${row.id}, 'feeTotal', this.value)">
-                    </td>
-                    <td class="px-1 py-2 bg-purple-50 border-x border-purple-100">
-                        <input type="number" id="input-acdi-${row.id}" step="0.01" 
-                            value="${row.feeAcdi.toFixed(2)}" 
-                            class="w-full bg-white border border-purple-200 rounded px-1 py-1 text-center text-purple-800 font-bold focus:outline-none focus:ring-2 focus:ring-purple-400 text-[11px]"
-                            oninput="handleManualInput(${row.id}, 'feeAcdi', this.value)">
-                    </td>
-                    <td class="px-1 py-2 text-center font-bold text-slate-700 text-[10px]" id="cell-feenet-${row.id}">
-                        ${feeNet.toFixed(2)}%
-                    </td>
-                    <td class="px-2 py-2 text-right text-slate-500 text-[10px] border-l border-slate-100 bg-slate-50/50" id="cell-gross-${row.id}">
-                        ${moneyFmt.format(revenueGross)}
-                    </td>
-                    <td class="px-2 py-2 text-right font-bold text-emerald-700 text-[10px]" id="cell-rev-${row.id}">
-                        ${moneyFmt.format(revenueNet)}
-                    </td>
-                `;
+                const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 border-b border-slate-50 last:border-0";
+                const adjFee = row.feeTotal * (1 + globalFeeAdj / 100), netFee = adjFee - row.feeAcdi, revNet = row.aum * (netFee / 100);
+                tr.innerHTML = `<td class="px-2 py-2"><div class="flex items-center gap-2 h-full"><span class="font-bold text-slate-700 text-[11px]">${row.name}</span><span class="text-[8px] px-1 py-0.5 rounded border ${row.cust === 'DRACMA' ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : 'bg-slate-100 text-slate-600 border-slate-200'} font-semibold">${row.cust}</span></div></td>
+                    <td class="px-2 py-2 bg-blue-50 border-x border-blue-100"><div class="flex items-center justify-end gap-1"><input type="text" id="input-aum-${row.id}" value="${intFmt.format(row.aum)}" class="w-full bg-transparent text-right text-blue-800 font-bold focus:outline-none text-[11px]" oninput="handleAumInput(this, ${row.id})" onblur="formatAumInput(this)"><span class="text-[9px] text-blue-400 font-medium w-8 text-right">${pctFmt.format(totals.totalAUM > 0 ? row.aum/totals.totalAUM : 0)}</span></div></td>
+                    <td class="px-1 py-2 bg-blue-50 border-x border-blue-100"><input type="number" id="input-feetot-${row.id}" step="0.01" value="${row.feeTotal.toFixed(2)}" class="w-full bg-white border border-blue-200 rounded px-1 py-1 text-center text-blue-800 font-bold text-[11px]" oninput="handleManualInput(${row.id}, 'feeTotal', this.value)"></td>
+                    <td class="px-1 py-2 bg-purple-50 border-x border-purple-100"><input type="number" id="input-acdi-${row.id}" step="0.01" value="${row.feeAcdi.toFixed(2)}" class="w-full bg-white border border-purple-200 rounded px-1 py-1 text-center text-purple-800 font-bold text-[11px]" oninput="handleManualInput(${row.id}, 'feeAcdi', this.value)"></td>
+                    <td class="px-1 py-2 text-center font-bold text-slate-700 text-[10px]" id="cell-feenet-${row.id}">${netFee.toFixed(2)}%</td>
+                    <td class="px-2 py-2 text-right text-slate-500 text-[10px] border-l border-slate-100 bg-slate-50/50" id="cell-gross-${row.id}">${usdFmt.format(row.aum * (adjFee / 100))}</td>
+                    <td class="px-2 py-2 text-right font-bold text-emerald-700 text-[10px] w-28"><div class="flex items-center justify-end gap-1"><span id="cell-rev-${row.id}">${usdFmt.format(revNet)}</span><span id="cell-rev-pct-${row.id}" class="text-[9px] text-emerald-400 font-normal whitespace-nowrap">${pctFmt.format(totals.totalNetRevenue > 0 ? revNet/totals.totalNetRevenue : 0)}</span></div></td>`;
                 tbody.appendChild(tr);
             });
         }
-
-        function renderGroupedTable(tbody) {
-            // Group logic
-            const groups = {};
-            simData.forEach(row => {
-                if (!groups[row.name]) {
-                    groups[row.name] = { name: row.name, aum: 0, feeTotalWeighted: 0, feeAcdiWeighted: 0 };
-                }
-                groups[row.name].aum += row.aum;
-            });
-
-            // Calculate weighted averages
+        function renderGroupedTable(tbody, totals) {
+            const groups = {}; simData.forEach(r => { if(!groups[r.name]) groups[r.name] = { name: r.name, aum: 0, wFeeT: 0, wFeeA: 0 }; groups[r.name].aum += r.aum; });
+            Object.values(groups).forEach(g => { let wt=0, wa=0; simData.filter(r => r.name === g.name).forEach(r => { const w = g.aum > 0 ? r.aum/g.aum : 0; wt += r.feeTotal*(1+globalFeeAdj/100)*w; wa += r.feeAcdi*w; }); g.wFeeT=wt; g.wFeeA=wa; });
             Object.values(groups).forEach(g => {
-                let wFeeTot = 0;
-                let wFeeAcdi = 0;
-                simData.filter(r => r.name === g.name).forEach(r => {
-                    const weight = g.aum > 0 ? r.aum / g.aum : 0;
-                    // Apply global adjustments for display
-                    const adjFeeTot = r.feeTotal * (1 + globalFeeAdj / 100);
-                    wFeeTot += adjFeeTot * weight;
-                    wFeeAcdi += r.feeAcdi * weight;
-                });
-                g.feeTotalWeighted = wFeeTot;
-                g.feeAcdiWeighted = wFeeAcdi;
-            });
-
-            Object.values(groups).forEach(g => {
-                const feeNet = g.feeTotalWeighted - g.feeAcdiWeighted;
-                const revenueGross = g.aum * (g.feeTotalWeighted / 100);
-                const revenueNet = g.aum * (feeNet / 100);
-
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 border-b border-slate-50 last:border-0";
-                tr.innerHTML = `
-                    <td class="px-2 py-3">
-                        <div class="font-bold text-slate-800 text-xs">${g.name}</div>
-                        <div class="text-[9px] text-slate-400">Agrupado</div>
-                    </td>
-                    <td class="px-2 py-3 text-right font-bold text-blue-700 text-xs bg-slate-50/50">
-                        ${intFmt.format(g.aum)}
-                    </td>
-                    <td class="px-1 py-3 text-center text-slate-500 text-xs">
-                        ${g.feeTotalWeighted.toFixed(2)}%
-                    </td>
-                    <td class="px-1 py-3 text-center text-purple-600 text-xs">
-                        ${g.feeAcdiWeighted.toFixed(2)}%
-                    </td>
-                    <td class="px-1 py-3 text-center font-bold text-slate-700 text-xs">
-                        ${feeNet.toFixed(2)}%
-                    </td>
-                    <td class="px-2 py-3 text-right text-slate-500 text-xs border-l border-slate-100">
-                        ${moneyFmt.format(revenueGross)}
-                    </td>
-                    <td class="px-2 py-3 text-right font-bold text-emerald-700 text-xs">
-                        ${moneyFmt.format(revenueNet)}
-                    </td>
-                `;
+                const net = g.wFeeT - g.wFeeA, rev = g.aum * (net/100), tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 border-b border-slate-50 last:border-0";
+                tr.innerHTML = `<td class="px-2 py-3"><div class="font-bold text-slate-800 text-xs">${g.name}</div><div class="text-[9px] text-slate-400">Agrupado</div></td>
+                    <td class="px-2 py-3 text-right font-bold text-blue-700 text-xs bg-slate-50/50">${intFmt.format(g.aum)} <span class="text-[9px] text-blue-400 ml-1 font-normal">${pctFmt.format(totals.totalAUM > 0 ? g.aum/totals.totalAUM : 0)}</span></td>
+                    <td class="px-1 py-3 text-center text-slate-500 text-xs">${g.wFeeT.toFixed(2)}%</td><td class="px-1 py-3 text-center text-purple-600 text-xs">${g.wFeeA.toFixed(2)}%</td><td class="px-1 py-3 text-center font-bold text-slate-700 text-xs">${net.toFixed(2)}%</td><td class="px-2 py-3 text-right text-slate-500 text-xs border-l border-slate-100">${usdFmt.format(g.aum*(g.wFeeT/100))}</td>
+                    <td class="px-2 py-3 text-right font-bold text-emerald-700 text-xs w-28"><div class="flex items-center justify-end gap-1">${usdFmt.format(rev)} <span class="text-[9px] text-emerald-400 font-normal whitespace-nowrap">${pctFmt.format(totals.totalNetRevenue > 0 ? rev/totals.totalNetRevenue : 0)}</span></div></td>`;
                 tbody.appendChild(tr);
             });
         }
-
-        function renderTableValuesOnly() {
-            if(groupedMode) return; // Full re-render for grouped
-            simData.forEach(row => {
-                updateRowDisplay(row);
-            });
+        function renderTableValuesOnly() { if(groupedMode) return; const totals = calculateCurrentTotals(); simData.forEach(row => updateRowDisplay(row, totals)); }
+        function updateRowDisplay(row, totals) {
+            const adj = row.feeTotal * (1 + globalFeeAdj / 100), net = adj - row.feeAcdi, rev = row.aum * (net / 100);
+            document.getElementById(`cell-feenet-${row.id}`).innerText = `${net.toFixed(2)}%`; document.getElementById(`cell-rev-${row.id}`).innerText = usdFmt.format(rev);
+            document.getElementById(`cell-gross-${row.id}`).innerText = usdFmt.format(row.aum * (adj / 100)); document.getElementById(`cell-rev-pct-${row.id}`).innerText = pctFmt.format(totals.totalNetRevenue > 0 ? rev/totals.totalNetRevenue : 0);
         }
-
-        function updateRowDisplay(row) {
-            const adjustedFeeTotal = row.feeTotal * (1 + globalFeeAdj / 100);
-            const feeNet = adjustedFeeTotal - row.feeAcdi;
-            const revenueNet = row.aum * (feeNet / 100);
-            const revenueGross = row.aum * (adjustedFeeTotal / 100);
-
-            const cellFeeNet = document.getElementById(`cell-feenet-${row.id}`);
-            const cellRev = document.getElementById(`cell-rev-${row.id}`);
-            const cellGross = document.getElementById(`cell-gross-${row.id}`);
-            
-            // Also update the input itself if the driver changed the visual "adjusted" base? 
-            // Wait, I made feeTotal editable. The input shows the BASE fee. 
-            // The table should probably show the ADJUSTED fee if the column says "Fee T".
-            // However, editing usually implies editing the base. 
-            // Let's decide: Input shows Base. Next to it or tooltip shows adjusted?
-            // Simplified: Input is Base. Calculation uses Base * Driver.
-            // But visually the user might want to see the resulting Fee T.
-            // Since it's an input, it must show the value being edited (Base).
-            
-            if(cellFeeNet) cellFeeNet.innerText = `${feeNet.toFixed(2)}%`;
-            if(cellRev) cellRev.innerText = moneyFmt.format(revenueNet);
-            if(cellGross) cellGross.innerText = moneyFmt.format(revenueGross);
-        }
-
         function updateCalculations() {
-            let totalBaseRev = 0;
-            let totalProjRev = 0;
-            let totalProjAUM = 0;
-            let totalWeightedFeeNet = 0;
-            let totalWeightedFeeTot = 0;
-            
-            let totalAcdiRev = 0;
-            let totalGrossRev = 0;
-            
-            // Breakdowns
-            let aumAbiertos = 0;
-            let aumDedicados = 0;
-            let aumCerrados = 0;
-            let countFCI = 0;
-
-            simData.forEach(row => {
-                // Base Calc
-                const initial = initialFundsData.find(r => r.id === row.id);
-                const baseRev = initial.aum * ((initial.feeTotal - initial.feeAcdi) / 100);
-                totalBaseRev += baseRev;
-
-                // Proj Calc
-                const projFeeTotal = row.feeTotal * (1 + globalFeeAdj / 100);
-                const projFeeNet = projFeeTotal - row.feeAcdi; 
-                
-                const projRevNet = row.aum * (projFeeNet / 100);
-                const projRevGross = row.aum * (projFeeTotal / 100);
-                const projRevAcdi = row.aum * (row.feeAcdi / 100);
-
-                totalProjRev += projRevNet;
-                totalProjAUM += row.aum;
-                totalAcdiRev += projRevAcdi;
-                totalGrossRev += projRevGross;
-
-                // Breakdown
-                if (row.aum > 0) countFCI++; // Only count active funds? Or all? User asked for count. Usually all rows or rows with balance. Let's count rows with ID.
-                // Actually, let's count all unique funds or just rows? Rows = share classes/custodians. 
-                // "Cantidad de FCI" usually means unique portfolios.
-                // Let's count rows for now as requested by context "Conteo de cantidad de FCI" likely means rows in this view.
-                
-                if(row.type.includes("Abierto") && !row.type.includes("Dedicado")) aumAbiertos += row.aum;
-                if(row.type.includes("Dedicado")) aumDedicados += row.aum;
-                if(row.type.includes("Cerrado")) aumCerrados += row.aum;
+            let tBase=0, tProj=0, tAUM=0, tAcdi=0, tGross=0, aOpen=0, aDed=0, aClos=0, aDracma=0, aOtros=0;
+            simData.forEach(r => {
+                const init = initialFundsData.find(x => x.id === r.id) || r; tBase += init.aum * ((init.feeTotal - init.feeAcdi)/100);
+                const adj = r.feeTotal * (1+globalFeeAdj/100), net = adj - r.feeAcdi; tProj += r.aum*(net/100); tAUM += r.aum; tAcdi += r.aum*(r.feeAcdi/100); tGross += r.aum*(adj/100);
+                if(r.type.includes("Abierto") && !r.type.includes("Dedicado")) aOpen += r.aum; if(r.type.includes("Dedicado")) aDed += r.aum; if(r.type.includes("Cerrado")) aClos += r.aum;
+                if(r.cust === 'DRACMA') aDracma += r.aum; else aOtros += r.aum;
             });
-            
-            // Unique Fund Count logic if needed, but rows are distinct sub-funds/classes.
-            // Let's assume unique Names for "FCI Count"
-            const uniqueNames = new Set(simData.filter(r => r.aum > 0).map(r => r.name));
-            countFCI = uniqueNames.size; // Active funds
-
-            // Averages
-            if (totalProjAUM > 0) {
-                totalWeightedFeeNet = (totalProjRev / totalProjAUM) * 100;
-                totalWeightedFeeTot = (totalGrossRev / totalProjAUM) * 100;
-            }
-
-            // Update DOM
-            document.getElementById('kpi-revenue').innerText = moneyFmt.format(totalProjRev / 12);
-            document.getElementById('kpi-revenue-annual-top').innerText = moneyFmt.format(totalProjRev);
-            
-            const delta = totalBaseRev > 0 ? ((totalProjRev - totalBaseRev) / totalBaseRev) * 100 : 0;
-            const deltaSign = delta >= 0 ? '+' : '';
-            const deltaColor = delta >= 0 ? 'text-emerald-500' : 'text-rose-500';
-            document.getElementById('kpi-revenue-delta').innerHTML = `vs Base: <span class="${deltaColor}">${deltaSign}${delta.toFixed(1)}%</span>`;
-
-            document.getElementById('kpi-acdi-annual').innerText = moneyFmt.format(totalAcdiRev);
-            const acdiShare = totalGrossRev > 0 ? (totalAcdiRev / totalGrossRev) * 100 : 0;
-            document.getElementById('kpi-acdi-share').innerText = `${acdiShare.toFixed(1)}% del Bruto`;
-
-            document.getElementById('kpi-aum').innerText = moneyFmt.format(totalProjAUM);
-            document.getElementById('kpi-count').innerText = countFCI;
-            
-            // Breakdown AUM
-            document.getElementById('kpi-aum-abiertos').innerText = moneyFmt.format(aumAbiertos);
-            document.getElementById('kpi-aum-dedicados').innerText = moneyFmt.format(aumDedicados);
-            document.getElementById('kpi-aum-cerrados').innerText = moneyFmt.format(aumCerrados);
-
-            document.getElementById('kpi-fee').innerText = totalWeightedFeeNet.toFixed(2) + '%';
-            document.getElementById('kpi-fee-total').innerText = totalWeightedFeeTot.toFixed(2) + '%';
-            
-            document.getElementById('total-annual').innerText = moneyFmt.format(totalProjRev);
-            document.getElementById('total-gross-annual').innerText = moneyFmt.format(totalGrossRev);
-
-            updateChart(totalBaseRev, totalProjRev);
+            const updateKpi = (id, val, total) => { document.getElementById(id).innerText = usdFmt.format(val); document.getElementById(id.replace('aum','pct')).innerText = pctFmt.format(total > 0 ? val/total : 0); };
+            updateKpi('kpi-aum-abiertos', aOpen, tAUM); updateKpi('kpi-aum-dedicados', aDed, tAUM); updateKpi('kpi-aum-cerrados', aClos, tAUM);
+            updateKpi('kpi-aum-cust-dracma', aDracma, tAUM); updateKpi('kpi-aum-cust-otros', aOtros, tAUM);
+            document.getElementById('kpi-revenue').innerText = usdFmt.format(tProj/12); document.getElementById('kpi-revenue-annual-top').innerText = usdFmt.format(tProj);
+            const delta = tBase > 0 ? ((tProj-tBase)/tBase)*100 : 0; document.getElementById('kpi-revenue-delta').innerHTML = `vs Base: <span class="${delta >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${delta >= 0 ? '+' : ''}${delta.toFixed(1)}%</span>`;
+            document.getElementById('kpi-acdi-annual').innerText = usdFmt.format(tAcdi); document.getElementById('kpi-acdi-share').innerText = `${(tGross>0?tAcdi/tGross*100:0).toFixed(1)}% del Bruto`;
+            document.getElementById('kpi-aum').innerText = usdFmt.format(tAUM); document.getElementById('kpi-count').innerText = new Set(simData.filter(r=>r.aum>0).map(r=>r.name)).size;
+            document.getElementById('kpi-fee').innerText = (tAUM>0?tProj/tAUM*100:0).toFixed(2)+'%'; document.getElementById('kpi-fee-total').innerText = (tAUM>0?tGross/tAUM*100:0).toFixed(2)+'%';
+            document.getElementById('total-annual').innerText = usdFmt.format(tProj); document.getElementById('total-gross-annual').innerText = usdFmt.format(tGross);
+            updateChart(tBase, tProj);
+            if (alycSimData.length > 0) { const m = alycSimData.find(m => m.name === 'DRACMA'); if(m) { m.aumSgfci = aDracma; updateAlycValues(); } }
         }
-
-        // ... chart functions same as before ...
         function updateChart(base, proj) {
-            const chartCanvas = document.getElementById('projectionChart');
-            if (!chartCanvas) return; // Guard clause
-            const ctx = chartCanvas.getContext('2d');
-            
+            const ctx = document.getElementById('projectionChart')?.getContext('2d'); if(!ctx) return;
             if (chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Base', 'Proyección'],
-                    datasets: [{
-                        label: 'Ingresos Anuales (ARS)',
-                        data: [base, proj],
-                        backgroundColor: ['#94a3b8', '#4f46e5'],
-                        borderRadius: 6,
-                        barThickness: 40
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { display: false }, x: { grid: { display: false } } }
-                }
+            chartInstance = new Chart(ctx, { type: 'bar', data: { labels: ['Base', 'Proyección'], datasets: [{ label: 'Ingresos (USD)', data: [base, proj], backgroundColor: ['#94a3b8', '#4f46e5'], borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } } });
+        }
+        function resetSimulation() { simData = JSON.parse(JSON.stringify(initialFundsData)); globalGrowth=0; globalFeeAdj=0; globalAcdiAdj=0; ['growth','fee','acdi'].forEach(x => { document.getElementById(x+'-slider').value=0; updateDriverDisplay(x+(x==='growth'?'':'l')+'-val', 0, x==='fee', x==='acdi'); }); renderTable(); updateCalculations(); }
+
+        // --- ALYC LOGIC ---
+        function initAlycSimulation() {
+            if (alycSimData.length === 0) { alycSimData = alycManagersStatic.map(m => ({ name: m.name, totalAum: m.aum, aumAdmin: m.aum*(alycPenetration/100), aumSgfci: m.name==='DRACMA' ? getSgfciDracmaAum() : 0 })); }
+            renderPortfolioConfig(); renderAlycTable();
+            document.getElementById('alyc-penetration-slider').addEventListener('input', (e) => { alycPenetration = parseInt(e.target.value); document.getElementById('alyc-penetration-val').innerText = `${alycPenetration}%`; applyAlycGlobalPenetration(); });
+            document.getElementById('alyc-transact-slider').addEventListener('input', (e) => { alycTransactionalFee = parseFloat(e.target.value); document.getElementById('alyc-transact-val').innerText = `${alycTransactionalFee}%`; updateAlycValues(); });
+            document.getElementById('alyc-growth-slider').addEventListener('input', (e) => { alycGlobalGrowth = parseInt(e.target.value); const el=document.getElementById('alyc-growth-val'); el.innerText=`${alycGlobalGrowth>=0?'+':''}${alycGlobalGrowth}%`; if(alycGlobalGrowth<0){el.classList.remove('text-blue-600');el.classList.add('text-rose-600')}else{el.classList.remove('text-rose-600');el.classList.add('text-blue-600')} applyAlycGlobalGrowth(); });
+        }
+        function getSgfciDracmaAum() { return simData.reduce((s, r) => r.cust === 'DRACMA' ? s + r.aum : s, 0); }
+        function applyAlycGlobalGrowth() { alycSimData.forEach((m, i) => { m.totalAum = alycManagersStatic[i].aum * (1 + alycGlobalGrowth / 100); m.aumAdmin = m.totalAum * (alycPenetration / 100); if(m.name==='DRACMA') m.aumSgfci = getSgfciDracmaAum() * (1 + alycGlobalGrowth / 100); }); updateAlycValues(); }
+        function applyAlycGlobalPenetration() { alycSimData.forEach(m => { m.aumAdmin = m.totalAum * (alycPenetration / 100); }); updateAlycValues(); }
+        function handleAlycManualInput(idx, fld, val) { const num = parseInt(val.replace(/\./g, '')) || 0; alycSimData[idx][fld] = num; if(fld==='totalAum') alycSimData[idx].aumAdmin = num*(alycPenetration/100); updateAlycValues(); }
+        function formatAlycInput(el) { const num=parseInt(el.value.replace(/\./g,'')); if(!isNaN(num)) el.value=intFmt.format(num); }
+        function updatePortfolioConfig(id, fld, val) { const p = portfolios.find(x => x.id === id); if(p) { p[fld] = parseFloat(val) || 0; updateAlycValues(); } }
+        function renderPortfolioConfig() { const c = document.getElementById('portfolio-mix-container'); c.innerHTML=''; portfolios.forEach(p => { c.innerHTML += `<div class="flex items-center justify-between text-xs"><span class="text-slate-600 w-1/3 truncate">${p.name}</span><div class="flex gap-2 w-2/3"><div class="relative w-1/2"><input type="number" value="${p.weight}" oninput="updatePortfolioConfig('${p.id}', 'weight', this.value)" class="w-full border border-slate-300 rounded px-1 text-center font-bold text-slate-700 outline-none"><span class="absolute right-4 top-0.5 text-[9px] text-slate-400">%</span></div><div class="relative w-1/2"><input type="number" value="${p.fee}" step="0.01" oninput="updatePortfolioConfig('${p.id}', 'fee', this.value)" class="w-full border border-slate-300 rounded px-1 text-center font-bold text-blue-600 outline-none"><span class="absolute right-4 top-0.5 text-[9px] text-slate-400">Fee</span></div></div></div>`; }); }
+        function renderAlycTable() {
+            const tbody = document.getElementById('alyc-table-body'); tbody.innerHTML = '';
+            alycSimData.forEach((m, i) => { tbody.innerHTML += `<tr class="hover:bg-slate-50 border-b border-slate-50 last:border-0"><td class="px-3 py-3 font-bold text-slate-700 text-xs">${m.name}</td><td class="px-2 py-3 text-right w-32"><div class="flex items-center justify-end gap-2"><input type="text" id="alyc-total-${i}" value="${intFmt.format(m.totalAum)}" class="w-full bg-white border border-slate-200 rounded px-1 py-1 text-right text-slate-600 font-bold focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs" oninput="handleAlycManualInput(${i}, 'totalAum', this.value)" onblur="formatAlycInput(this)"><span id="alyc-share-${i}" class="text-[9px] text-slate-400 font-medium whitespace-nowrap"></span></div></td><td class="px-2 py-3 bg-emerald-50/30 border-x border-emerald-50 w-24"><input type="text" id="alyc-admin-${i}" value="${intFmt.format(m.aumAdmin)}" class="w-full bg-white border border-emerald-200 rounded px-1 py-1 text-right text-emerald-700 font-bold focus:outline-none focus:ring-1 focus:ring-emerald-400 text-xs" oninput="handleAlycManualInput(${i}, 'aumAdmin', this.value)" onblur="formatAlycInput(this)"></td><td class="px-2 py-3 bg-slate-50 border-r border-slate-100 w-24"><input type="text" id="alyc-sgfci-${i}" value="${intFmt.format(m.aumSgfci)}" class="w-full bg-white border border-slate-200 rounded px-1 py-1 text-right text-slate-600 focus:outline-none focus:ring-1 focus:ring-slate-400 text-xs" oninput="handleAlycManualInput(${i}, 'aumSgfci', this.value)" onblur="formatAlycInput(this)"></td><td class="px-2 py-3 text-right text-amber-700 bg-amber-50/30 border-r border-amber-100 text-xs w-24" id="alyc-trans-${i}"></td><td class="px-3 py-3 text-right font-bold text-blue-700 text-xs w-32"><div class="flex items-center justify-end gap-2"><span id="alyc-rev-${i}"></span><span id="alyc-rev-share-${i}" class="text-[9px] text-blue-400 font-normal whitespace-nowrap"></span></div></td></tr>`; });
+            updateAlycValues();
+        }
+        function updateAlycValues() {
+            let totW = portfolios.reduce((s,p)=>s+p.weight,0), blend = portfolios.reduce((s,p)=>s+(p.weight/totW)*p.fee,0); document.getElementById('mix-total-check').innerText = totW+'%';
+            let gAUM=0, tRev=0, tAdmin=0, tSgfci=0, tTrans=0; alycSimData.forEach(m=>gAUM+=m.totalAum);
+            alycSimData.forEach((m, i) => {
+                let trans = Math.max(0, m.totalAum - m.aumAdmin - m.aumSgfci), rev = m.aumAdmin*(blend/100) + trans*(alycTransactionalFee/100);
+                tRev+=rev; tAdmin+=m.aumAdmin; tSgfci+=m.aumSgfci; tTrans+=trans;
+                const setVal = (id, v) => { const el = document.getElementById(id); if(el && document.activeElement!==el) el.value = intFmt.format(v); };
+                setVal(`alyc-total-${i}`, m.totalAum); setVal(`alyc-admin-${i}`, m.aumAdmin); setVal(`alyc-sgfci-${i}`, m.aumSgfci);
+                document.getElementById(`alyc-share-${i}`).innerText = pctFmt.format(gAUM>0?m.totalAum/gAUM:0);
+                document.getElementById(`alyc-trans-${i}`).innerText = usdFmt.format(trans);
+                document.getElementById(`alyc-rev-${i}`).innerText = usdFmt.format(rev);
             });
+            alycSimData.forEach((m,i) => { const r = m.aumAdmin*(blend/100) + Math.max(0, m.totalAum - m.aumAdmin - m.aumSgfci)*(alycTransactionalFee/100); document.getElementById(`alyc-rev-share-${i}`).innerText = pctFmt.format(tRev>0?r/tRev:0); });
+            document.getElementById('alyc-total-revenue').innerText = usdFmt.format(tRev); document.getElementById('alyc-total-aum-footer').innerText = usdFmt.format(gAUM);
+            document.getElementById('alyc-kpi-revenue').innerText = usdFmt.format(tRev); document.getElementById('alyc-kpi-blend-fee').innerText = blend.toFixed(2)+'%';
+            document.getElementById('alyc-kpi-transac-fee').innerText = alycTransactionalFee.toFixed(2)+'%'; document.getElementById('alyc-kpi-total-yield').innerText = (gAUM>0?tRev/gAUM*100:0).toFixed(2)+'%';
+            document.getElementById('alyc-kpi-total-aum').innerText = usdFmt.format(gAUM);
+            const setBrk = (k, v) => { document.getElementById('alyc-kpi-breakdown-'+k).innerText = usdFmt.format(v); document.getElementById('alyc-pct-'+k).innerText = pctFmt.format(gAUM>0?v/gAUM:0); };
+            setBrk('admin', tAdmin); setBrk('sgfci', tSgfci); setBrk('transac', tTrans);
+        }
+        function resetAlycSimulation() { alycPenetration=20; alycTransactionalFee=2.0; alycGlobalGrowth=0; document.getElementById('alyc-penetration-slider').value=20; document.getElementById('alyc-penetration-val').innerText='20%'; document.getElementById('alyc-transact-slider').value=2.0; document.getElementById('alyc-transact-val').innerText='2.00%'; document.getElementById('alyc-growth-slider').value=0; document.getElementById('alyc-growth-val').innerText='+0%'; portfolios=[{id:'dinamica',name:"Cartera Dinámica",weight:60,fee:2.50},{id:'pura',name:"Cartera Pura Sangre",weight:1,fee:3.00},{id:'pesos',name:"Cartera Renta Pesos",weight:1,fee:2.00},{id:'usd',name:"Cartera Renta USD",weight:2,fee:1.75},{id:'asesorada',name:"Cartera Asesorada",weight:36,fee:2.00}]; renderPortfolioConfig(); initAlycSimulation(); }
+
+        // --- GLOBAL SWITCH ---
+        function switchView(viewId) {
+            ['view-structure','view-revenue','view-alyc'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['tab-structure','tab-revenue','tab-alyc'].forEach(id => { const el = document.getElementById(id); el.classList.remove('bg-white','text-blue-700','shadow-sm'); el.classList.add('text-slate-500','hover:bg-white/50'); });
+            
+            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+            const activeTab = document.getElementById(`tab-${viewId}`);
+            activeTab.classList.remove('text-slate-500','hover:bg-white/50'); activeTab.classList.add('bg-white','text-blue-700','shadow-sm');
+            
+            const legend = document.getElementById('legend-bar');
+            if(viewId === 'structure') legend.style.display = 'flex'; else legend.style.display = 'none';
+
+            if (viewId === 'revenue' && !chartInstance) initSimulation();
+            if (viewId === 'alyc') initAlycSimulation();
         }
 
-        function resetSimulation() {
-            simData = JSON.parse(JSON.stringify(initialFundsData));
-            globalGrowth = 0; globalFeeAdj = 0; globalAcdiAdj = 0;
-            document.getElementById('growth-slider').value = 0;
-            document.getElementById('fee-slider').value = 0;
-            document.getElementById('acdi-slider').value = 0;
-            
-            document.getElementById('growth-val').innerText = '+0%';
-            document.getElementById('fee-adj-val').innerText = '0%';
-            document.getElementById('acdi-adj-val').innerText = '0%';
-            
-            renderTable();
-            updateCalculations();
-        }
-
-        // --- Structure View Logic (Preserved) ---
-        const orgData = {
-            'board': { title: "BOARD OF DIRECTORS", tag: "Governance & Strategy", desc: "Órgano máximo de decisión. Define el apetito de riesgo y lidera la agresividad comercial del grupo.", focus: [0, 5, 5, 5, 0], middle: "CEO (Chief Executive Officer)", middleEntity: "ALyC", roles: [], resp: ["Definición de Estrategia Comercial y de Expansión.", "Aprobación de Balances y Presupuestos.", "Designación de Comités (Inversión, Riesgo, PLA/FT).", "Supervisión directa del desempeño del CEO."], color: "slate", headcount: 5 },
-            'risk-com': { title: "RISK COMMITTEE", tag: "Mandatory C-Suite Body", desc: "Órgano colegiado de control liderado por el CCO. Integrado obligatoriamente por toda la C-Suite. NO posee estructura operativa a cargo.", focus: [0, 5, 0, 5, 0], middle: "Chair: CCO (Chief Compliance Officer)", roles: [], resp: ["Participantes Obligatorios: CEO, CFO, COO, CCO, CSO.", "Aprobación de límites de contraparte y solvencia.", "Validación de nuevos productos.", "Puede incorporar participantes Ad-hoc según temática."], color: "amber", headcount: 0 },
-            'inv-com': { title: "INVESTMENT COMMITTEE", tag: "Mandatory C-Suite Body", desc: "Órgano colegiado estratégico liderado por el CSO. Integrado obligatoriamente por toda la C-Suite. Define el 'House View' sin ejecutar.", focus: [0, 5, 5, 2, 0], middle: "Chair: CSO (Chief Strategy Officer)", roles: [], resp: ["Participantes Obligatorios: CEO, CFO, COO, CCO, CSO.", "Definición de Asset Allocation estratégico.", "Revisión de performance de fondos.", "Puede incorporar participantes Ad-hoc según temática."], color: "indigo", headcount: 0 },
-            'ceo': { title: "CEO (Chief Executive Officer)", tag: "Executive", desc: "Nexo entre el Directorio y la operación. Garantiza que las unidades reguladas funcionen eficientemente compartiendo servicios.", focus: [3, 5, 5, 3, 3], middle: "C-Suite (COO, CFO, CCO, CSO)", middleEntity: "ALyC", roles: [{ title: "Direct Report Policy", desc: "El nivel operativo NO tiene acceso directo al CEO. Canalizan vía C-Level.", entity: "ALyC" } ], resp: ["★ ROL CNV (ALyC): Responsable de Cumplimiento Regulatorio (Titular).", "★ ROL UIF (ALyC): Oficial de Cumplimiento (Suplente).", "Supervisión de P&L consolidado.", "Arbitraje de recursos entre ALyC y SGFCI."], color: "slate", headcount: 1, entity: "ALyC" },
-            'ops': { title: "COO (Chief Operating Officer)", tag: "Transversal / Shared Service", desc: "El corazón de la 'fábrica'. Procesa, liquida y custodia los activos de ambas unidades de negocio bajo procesos diferenciados.", focus: [5, 1, 0, 3, 4], middle: "Head of Operations", middleEntity: "ALyC", roles: [{ title: "Settlement Officer", desc: "Liquidación BYMA, MAE, Rofex. Control de garantías.", entity: "ALyC" }, { title: "Fund Administrator", desc: "Cálculo de Valor Cuota diario. Devengamientos.", entity: "SG" }, { title: "Onboarding Analyst", desc: "Legajos digitales, onboarding clientes (KYC).", entity: "ALyC" }, { title: "Custody Analyst", desc: "Conciliación con Caja de Valores.", entity: "ALyC" }], resp: ["Garantizar la liquidación en tiempo y forma (T+0, T+1, T+2).", "Cálculo preciso del patrimonio de los FCI.", "Conciliación diaria de saldos comitentes vs. Caja.", "Reportes operativos a CNV (autopistas de información)."], color: "blue", headcount: 6, entity: "ALyC" },
-            'admin': { title: "CFO (Chief Financial Officer)", tag: "Transversal / Shared Service", desc: "Maneja los flujos monetarios y la contabilidad. CRÍTICO: Debe asegurar la segregación de cuentas bancarias.", focus: [4, 1, 0, 4, 5], middle: "Treasurer / Head of Administration", middleEntity: "ALyC", roles: [{ title: "Treasury Analyst", desc: "Manejo de portales bancarios, transferencias MEP/CCL.", entity: "SG" }, { title: "Senior Accountant", desc: "Contabilidad bimonetaria, ajuste por inflación.", entity: "SG" }, { title: "Tax Analyst", desc: "Retenciones, IIBB, IVA.", entity: "ALyC" }, { title: "Accounts Payable (AP)", desc: "Gestión administrativa del Holding.", entity: "ALyC" }], resp: ["★ ROL UIF (SGFCI): Oficial de Cumplimiento (Titular).", "Conciliación bancaria diaria y segregación de cuentas.", "Ejecución de rescates y suscripciones (movimiento de fondos).", "Presentación de Balances Trimestrales y Anuales."], color: "blue", headcount: 6, entity: "SG" },
-            'compliance': { title: "CCO (Chief Compliance Officer)", tag: "Control / Transversal", desc: "Vela por la integridad normativa. Reporta funcionalmente al Directorio para asegurar independencia. Cubre ALyC y SGFCI.", focus: [2, 1, 0, 5, 1], middle: "Compliance Manager (Titular ante UIF)", middleEntity: "ALyC", roles: [{ title: "AML/CFT Analyst (Ssr)", desc: "Monitoreo transaccional, matrices de riesgo, alertas.", entity: "ALyC" }, { title: "Internal Auditor (Jr)", desc: "Control de legajos, onboarding y auditoría básica.", entity: "SG" }], resp: ["★ ROL UIF (ALyC): Oficial de Cumplimiento (Titular).", "Reporte de Operaciones Sospechosas (ROS).", "Control del Código de Conducta y Conflictos de Interés.", "Aprobación de clientes de alto riesgo."], color: "rose", headcount: 4, entity: "ALyC" },
-            'research': { title: "CSO (Chief Strategy Officer) / RESEARCH", tag: "Transversal / Support", desc: "Genera inteligencia de mercado para uso interno (Mesa/PMs) y externo (Clientes). No ejecuta, solo analiza.", focus: [1, 5, 0, 0, 1], middle: "Head of Research", middleEntity: "SG", roles: [{ title: "Macro Economist", desc: "Política monetaria, fiscal, FX.", entity: "SG" }, { title: "Credit Analyst", desc: "Análisis de balances de emisores de ONs.", entity: "SG" }, { title: "Quantitative Analyst (Quant)", desc: "Modelos de valuación y bases de datos.", entity: "SG" }], resp: ["Daily reports y Weekly reports para clientes.", "Soporte analítico al Comité de Inversiones.", "Valuación de activos ilíquidos (para SGFCI)."], color: "purple", headcount: 5, entity: "ALyC" },
-            'trading': { title: "TRADING AREA / HEAD OF TRADING", tag: "Business Unit / ALyC", desc: "Unidad de negocio interna de la ALyC. Responsable de la ejecución y generación de ingresos. Se vincula estratégicamente con el CSO.", focus: [3, 4, 5, 2, 0], middle: "Senior Trader", middleEntity: "ALyC", roles: [{ title: "Fixed Income Trader", desc: "Bonos soberanos, subsoberanos, ONs. Arbitrajes.", entity: "ALyC" }, { title: "Equity & Cedears Trader", desc: "Acciones, Equity local e internacional.", entity: "ALyC" }, { title: "Institutional Sales Trader", desc: "Atención a grandes clientes y SGFCI (como cliente).", entity: "ALyC" }, { title: "Sales Executive", desc: "Relación directa con clientes activos.", entity: "ALyC" }], resp: ["★ ROL CNV (ALyC): Responsable de Relaciones con el Público.", "Best Execution (Prioridad Precio-Tiempo).", "Ejecución de órdenes propias y de clientes.", "Ejecución de órdenes instruidas por la SGFCI.", "Vinculación directa con Estrategia (CSO)."], color: "purple", headcount: 6, entity: "ALyC" },
-            'sgfci': { title: "ASSET MANAGEMENT / CIO", tag: "Business Unit / SGFCI", desc: "Unidad fiduciaria interna de la Sociedad Gerente. Decide la composición de las carteras de los fondos. Responsable ante CNV.", focus: [2, 5, 4, 3, 1], middle: "Head Portfolio Manager", middleEntity: "SG", roles: [{ title: "Portfolio Manager (MM/T+1)", desc: "Manejo de liquidez, cauciones, cuentas remuneradas.", entity: "SG" }, { title: "Portfolio Manager (Fixed Income)", desc: "Fondos de bonos, estrategia de duration.", entity: "SG" }, { title: "Performance Analyst", desc: "Atribución de retorno, benchmarking.", entity: "SG" }], resp: ["★ ROL UIF (SGFCI): Oficial de Cumplimiento (Suplente).", "★ ROL IDÓNEO: Responsable de Inversiones.", "Minutas de inversión diarias y administración discrecional.", "Vinculación directa con Estrategia (CSO)."], color: "purple", headcount: 5, entity: "SG" }
-        };
-
-        // ... chart and helper functions remain similar ...
-        // Re-injecting helper chart funcs for completeness in memory
-        let radarChart = null;
-        function updateHeadcounts() { let total = 0; Object.keys(orgData).forEach(key => { const data = orgData[key]; if (key !== 'board') { total += data.headcount || 0; } if (key !== 'board') { const node = document.getElementById(`node-${key}`); if (node) { const existingBadge = node.querySelector('.headcount-badge'); if(existingBadge) existingBadge.remove(); const badge = document.createElement('div'); badge.className = 'headcount-badge'; badge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg><span>${data.headcount}</span>`; node.appendChild(badge); } } }); const totalEl = document.getElementById('total-headcount'); if(totalEl) totalEl.innerText = total; }
-        function initStructureChart() { const ctx = document.getElementById('focusChart').getContext('2d'); radarChart = new Chart(ctx, { type: 'radar', data: { labels: ['Operativo', 'Estratégico', 'Ejecución/Comercial', 'Control/Riesgo', 'Administrativo'], datasets: [{ label: 'Nivel de Foco', data: [0, 0, 0, 0, 0], fill: true, backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: 'rgb(59, 130, 246)', pointBackgroundColor: 'rgb(59, 130, 246)', pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: 'rgb(59, 130, 246)' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { display: true }, min: 0, max: 5, ticks: { stepSize: 1, display: false } } }, plugins: { legend: { display: false } } } }); }
-        function loadDetail(nodeId) { const data = orgData[nodeId]; if (!data) return; document.querySelectorAll('.node-card').forEach(el => el.classList.remove('active')); const activeNode = document.getElementById(`node-${nodeId}`); if(activeNode) activeNode.classList.add('active'); document.getElementById('empty-state').classList.add('hidden'); document.getElementById('detail-content').classList.remove('hidden'); document.getElementById('detail-content').classList.add('flex'); document.getElementById('role-title').innerText = data.title; document.getElementById('role-desc').innerText = data.desc; if (radarChart) { radarChart.data.datasets[0].data = data.focus; radarChart.update(); } const middleContainer = document.getElementById('middle-management-container'); const middleTitle = document.getElementById('middle-title'); if(nodeId === 'risk-com' || nodeId === 'inv-com') { middleTitle.innerHTML = `<span class="w-2 h-2 bg-amber-500 rounded-full mr-2"></span> Chair / President`; } else { middleTitle.innerHTML = `<span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span> Middle Management`; } if (data.middle) { let styleClass = 'pos-alyc'; if(data.middleEntity === 'SG') styleClass = 'pos-sg'; middleContainer.innerHTML = `<div class="font-bold text-slate-700 text-sm flex items-center"><span class="pos-badge ${styleClass} text-[11px]">${data.middle}</span></div><div class="text-xs text-slate-500 mt-1">Coordination</div>`; middleContainer.parentElement.classList.remove('hidden'); } else { middleContainer.parentElement.classList.add('hidden'); } const roleContainer = document.getElementById('operational-roles-container'); roleContainer.innerHTML = ''; if (data.roles.length > 0) { data.roles.forEach(role => { const div = document.createElement('div'); div.className = "bg-white border border-slate-200 p-3 rounded shadow-sm hover:border-blue-300 transition-colors flex justify-between items-start"; let styleClass = 'pos-alyc'; if(role.entity === 'SG') styleClass = 'pos-sg'; div.innerHTML = `<div><div class="font-bold text-slate-700 text-xs mb-1"><span class="pos-badge ${styleClass} text-[10px]">${role.title}</span></div><div class="text-[10px] text-slate-500 leading-tight">${role.desc}</div></div>`; roleContainer.appendChild(div); }); roleContainer.parentElement.classList.remove('hidden'); } else { roleContainer.parentElement.classList.add('hidden'); } const respList = document.getElementById('responsibilities-list'); respList.innerHTML = ''; data.resp.forEach(item => { const li = document.createElement('li'); li.innerText = item; respList.appendChild(li); }); }
-        function switchView(viewId) { const structureView = document.getElementById('view-structure'); const revenueView = document.getElementById('view-revenue'); const tabStructure = document.getElementById('tab-structure'); const tabRevenue = document.getElementById('tab-revenue'); const legendBar = document.getElementById('legend-bar'); if (viewId === 'structure') { structureView.classList.remove('hidden'); revenueView.classList.add('hidden'); legendBar.style.display = 'flex'; tabStructure.classList.remove('text-slate-500', 'hover:bg-white/50'); tabStructure.classList.add('bg-white', 'text-blue-700', 'shadow-sm'); tabRevenue.classList.add('text-slate-500', 'hover:bg-white/50'); tabRevenue.classList.remove('bg-white', 'text-blue-700', 'shadow-sm'); } else { structureView.classList.add('hidden'); revenueView.classList.remove('hidden'); legendBar.style.display = 'none'; tabStructure.classList.add('text-slate-500', 'hover:bg-white/50'); tabStructure.classList.remove('bg-white', 'text-blue-700', 'shadow-sm'); tabRevenue.classList.remove('text-slate-500', 'hover:bg-white/50'); tabRevenue.classList.add('bg-white', 'text-blue-700', 'shadow-sm'); if(chartInstance === null) { initSimulation(); } } }
-        window.addEventListener('load', () => { initStructureChart(); updateHeadcounts(); loadDetail('board'); });
+        window.addEventListener('load', () => {
+            initStructureChart(); updateHeadcounts(); loadDetail('board');
+            initSimulation(); initAlycSimulation();
+        });
     </script>
-    <style>
-        .toggle-checkbox:checked { right: 0; border-color: #4f46e5; }
-        .toggle-checkbox:checked + .dot { transform: translateX(100%); background-color: #4f46e5; }
-        .toggle-label { width: 40px; height: 20px; background-color: #e2e8f0; border-radius: 9999px; position: relative; cursor: pointer; transition: background-color 0.3s; }
-        .dot { top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background-color: white; position: absolute; transition: transform 0.3s; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-    </style>
 </body>
 </html>
