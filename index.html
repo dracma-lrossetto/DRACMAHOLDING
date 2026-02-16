@@ -6,6 +6,7 @@
     <title>Estructura Integrada: Holding + ALyC + SGFCI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
     <style>
         /* --- ESTILOS COMPARTIDOS --- */
         .chart-container {
@@ -16,15 +17,18 @@
         
         /* Scrollbar personalizada */
         .custom-scroll::-webkit-scrollbar {
-            width: 6px;
-            height: 6px; /* Added height for horizontal scroll */
+            width: 8px;
+            height: 8px; 
         }
         .custom-scroll::-webkit-scrollbar-track {
             background: #f1f5f9;
         }
         .custom-scroll::-webkit-scrollbar-thumb {
             background: #cbd5e1;
-            border-radius: 3px;
+            border-radius: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
 
         /* --- ESTILOS ESTRUCTURA (ORGANIGRAMA) --- */
@@ -57,19 +61,31 @@
             transform: scale(1.02);
             border-color: #3b82f6;
         }
-        .headcount-badge {
+        /* Minimalist Headcount Badge */
+        .hc-indicator {
             position: absolute;
             top: 6px;
             right: 8px;
-            background-color: transparent;
-            color: #94a3b8;
-            font-size: 0.7rem;
-            font-weight: 600;
+            background-color: rgba(241, 245, 249, 0.9); /* slate-100 with opacity */
+            color: #64748b; /* slate-500 */
+            font-size: 0.65rem;
+            font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 2px;
+            justify-content: center;
+            padding: 2px 6px;
+            border-radius: 9999px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             z-index: 20;
+            transition: all 0.2s;
         }
+        .node-card:hover .hc-indicator {
+            background-color: #fff;
+            color: #3b82f6;
+            border-color: #bfdbfe;
+        }
+
         .pos-badge {
             padding: 2px 6px;
             border-radius: 6px;
@@ -128,6 +144,15 @@
         #offshore-growth-slider::-webkit-slider-thumb { background: #0891b2; } /* Cyan-600 */
         #offshore-fee-slider::-webkit-slider-thumb { background: #7c3aed; } /* Violet-600 */
         #mesa-return-slider::-webkit-slider-thumb { background: #ea580c; } /* Orange-600 */
+        
+        /* Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #68D391;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #68D391;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans h-screen overflow-hidden flex flex-col">
@@ -153,6 +178,9 @@
                 </button>
                 <button onclick="switchView('offshore')" id="tab-offshore" class="px-4 py-1.5 text-xs font-bold rounded-md transition-all text-slate-500 hover:bg-white/50">
                     OTROS ING 2026
+                </button>
+                <button onclick="switchView('costs')" id="tab-costs" class="px-4 py-1.5 text-xs font-bold rounded-md transition-all text-slate-500 hover:bg-white/50">
+                    COSTOS 2026
                 </button>
                 <button onclick="switchView('pl')" id="tab-pl" class="px-4 py-1.5 text-xs font-bold rounded-md transition-all text-slate-500 hover:bg-white/50 border-l border-slate-300 ml-2">
                     P/L 2026
@@ -641,7 +669,7 @@
                 <div class="w-2/3 bg-slate-100 block p-6 overflow-y-auto custom-scroll">
                     
                     <!-- OFFSHORE TABLE -->
-                    <div class="bg-white rounded-xl shadow-md border border-slate-200 flex flex-col mb-6">
+                    <div class="bg-white rounded-xl shadow-md border border-slate-200 flex-1 flex flex-col mb-6">
                         <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                             <div><h3 class="text-sm font-bold text-slate-700">Carteras Offshore</h3></div>
                             <button onclick="resetOffshoreSimulation()" class="text-xs bg-white border border-slate-300 px-3 py-1 rounded hover:bg-slate-50 text-slate-600">Restablecer</button>
@@ -710,6 +738,198 @@
             </div>
         </div>
 
+        <!-- VIEW 6: COSTOS 2026 -->
+        <div id="view-costs" class="hidden absolute inset-0 bg-slate-100 overflow-hidden flex flex-col z-20">
+            <div class="flex-1 flex overflow-hidden">
+                <!-- LEFT COLUMN: Salarios -->
+                <div class="w-2/3 bg-white border-r border-slate-200 flex flex-col overflow-hidden p-8">
+                    <div class="mb-4 flex-shrink-0 flex justify-between items-end">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800">Estructura Salarial Detallada</h2>
+                            <p class="text-xs text-slate-500 mt-1">Costo Total Empresa (Bruto + Cargas + SAC)</p>
+                        </div>
+                        <button onclick="resetCostSimulation()" class="text-xs bg-white border border-slate-300 px-3 py-1 rounded hover:bg-slate-50 text-slate-600 shadow-sm transition-all flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                            Restablecer
+                        </button>
+                    </div>
+
+                    <!-- DRIVERS PANEL -->
+                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4 flex-shrink-0 shadow-sm">
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="text-[10px] font-bold text-blue-800 uppercase tracking-widest">Drivers de Costo Base (Mensual USD)</h4>
+                            <span class="text-[9px] text-blue-600 bg-blue-100 px-2 py-0.5 rounded font-semibold">Anualiza x13 (Aguinaldo)</span>
+                        </div>
+                        <div class="grid grid-cols-6 gap-3">
+                            <div>
+                                <label class="text-[9px] font-bold text-slate-500 block mb-1">CEO</label>
+                                <input type="text" id="driver-ceo" value="8.000" class="w-full bg-white border border-blue-200 rounded px-2 py-1 text-center font-bold text-blue-700 text-xs focus:outline-none focus:border-blue-500" onblur="formatCostInput(this)" oninput="applySalaryDriver('ceo', this.value)">
+                            </div>
+                            <div>
+                                <label class="text-[9px] font-bold text-slate-500 block mb-1">Director / C-Lvl</label>
+                                <input type="text" id="driver-director" value="6.000" class="w-full bg-white border border-blue-200 rounded px-2 py-1 text-center font-bold text-blue-700 text-xs focus:outline-none focus:border-blue-500" onblur="formatCostInput(this)" oninput="applySalaryDriver('director', this.value)">
+                            </div>
+                            <div>
+                                <label class="text-[9px] font-bold text-slate-500 block mb-1">Senior</label>
+                                <input type="text" id="driver-senior" value="4.500" class="w-full bg-white border border-blue-200 rounded px-2 py-1 text-center font-bold text-blue-700 text-xs focus:outline-none focus:border-blue-500" onblur="formatCostInput(this)" oninput="applySalaryDriver('senior', this.value)">
+                            </div>
+                            <div>
+                                <label class="text-[9px] font-bold text-slate-500 block mb-1">Semi-Senior</label>
+                                <input type="text" id="driver-ssr" value="3.000" class="w-full bg-white border border-blue-200 rounded px-2 py-1 text-center font-bold text-blue-700 text-xs focus:outline-none focus:border-blue-500" onblur="formatCostInput(this)" oninput="applySalaryDriver('ssr', this.value)">
+                            </div>
+                            <div>
+                                <label class="text-[9px] font-bold text-slate-500 block mb-1">Junior</label>
+                                <input type="text" id="driver-jr" value="2.000" class="w-full bg-white border border-blue-200 rounded px-2 py-1 text-center font-bold text-blue-700 text-xs focus:outline-none focus:border-blue-500" onblur="formatCostInput(this)" oninput="applySalaryDriver('jr', this.value)">
+                            </div>
+                            <div class="relative group">
+                                <label class="text-[9px] font-bold text-slate-500 block mb-1 text-rose-600">Cargas Soc. %</label>
+                                <div class="relative">
+                                    <input type="number" id="driver-social-charges" value="50" class="w-full bg-white border border-rose-200 rounded px-2 py-1 text-center font-bold text-rose-600 text-xs focus:outline-none focus:border-rose-500" oninput="updateCostCalculations()">
+                                    <span class="absolute right-1 top-0.5 text-[8px] text-rose-300">%</span>
+                                </div>
+                                <div class="opacity-0 group-hover:opacity-100 absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-white text-[9px] rounded pointer-events-none transition-opacity w-24 text-center">
+                                    Aplica a todo excepto Directores
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col flex-1 overflow-hidden mb-6">
+                        <div class="overflow-y-auto custom-scroll flex-1">
+                            <table class="w-full text-xs text-left">
+                                <thead class="bg-slate-50 text-slate-500 font-bold uppercase sticky top-0 z-10 shadow-sm">
+                                    <tr>
+                                        <th class="px-4 py-3 w-1/4">Área / Rol</th>
+                                        <th class="px-2 py-3 w-24">Nombre (Op)</th>
+                                        <th class="px-2 py-3 text-center w-12">Q</th>
+                                        <th class="px-3 py-3 text-right bg-blue-50/50 text-blue-800 w-24">Base Mes</th>
+                                        <th class="px-2 py-3 text-center bg-emerald-50/50 text-emerald-800 w-16" title="% Asignado a ALyC">% ALYC</th>
+                                        <th class="px-3 py-3 text-right text-slate-600" title="Incluye Cargas Sociales">Total Mes</th>
+                                        <th class="px-4 py-3 text-right font-bold text-slate-800" title="Mensual x 13">Anual (x13)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="salary-table-body" class="divide-y divide-slate-100">
+                                    <!-- Generated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 text-right flex justify-end gap-6 flex-shrink-0">
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase mr-1">Headcount:</span>
+                                <span id="total-headcount-calc" class="text-sm font-bold text-slate-700">0</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase mr-1">Mensual Total:</span>
+                                <span id="total-salary-monthly" class="text-sm font-bold text-slate-700">$ 0</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase mr-1">Anual (x13):</span>
+                                <span id="total-salary-annual" class="text-sm font-bold text-blue-700">$ 0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: Overhead & Charts -->
+                <div class="w-1/3 bg-slate-50 p-8 overflow-y-auto custom-scroll flex flex-col gap-6">
+                    
+                    <!-- Pie Chart -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <div class="flex justify-between items-center mb-4 gap-2">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase">Distribución Costos</h4>
+                            <div class="flex flex-col items-end gap-2">
+                                <div class="flex items-center">
+                                    <label for="pie-toggle" class="flex items-center cursor-pointer relative">
+                                        <input type="checkbox" id="pie-toggle" class="sr-only toggle-checkbox" onchange="togglePieChartMode(this)">
+                                        <div class="w-20 h-5 bg-slate-200 rounded-full shadow-inner flex items-center justify-between px-2 text-[8px] font-bold text-slate-500">
+                                            <span>FUNC</span>
+                                            <span>JERAR</span>
+                                        </div>
+                                        <div class="dot absolute left-0 top-0 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200 ease-in-out border border-slate-300"></div>
+                                    </label>
+                                </div>
+                                <div class="flex bg-slate-100 rounded-lg p-0.5">
+                                    <button onclick="setCostEntityFilter('all')" id="btn-ent-all" class="px-2 py-0.5 text-[9px] font-bold rounded bg-white shadow-sm text-slate-700 transition-all">TODO</button>
+                                    <button onclick="setCostEntityFilter('alyc')" id="btn-ent-alyc" class="px-2 py-0.5 text-[9px] font-bold rounded text-slate-400 hover:text-slate-600 transition-all">ALYC</button>
+                                    <button onclick="setCostEntityFilter('sg')" id="btn-ent-sg" class="px-2 py-0.5 text-[9px] font-bold rounded text-slate-400 hover:text-slate-600 transition-all">SG</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-container" style="height: 200px;">
+                            <canvas id="costPieChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <div class="mb-4">
+                            <h2 class="text-lg font-bold text-slate-800">Gastos Generales (Overhead)</h2>
+                            <p class="text-[10px] text-slate-500">Presupuesto Mensual por Centro de Costo</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- Headers -->
+                            <div class="flex text-[10px] text-slate-400 font-bold px-1">
+                                <div class="w-1/3">Concepto</div>
+                                <div class="w-1/3 text-right pr-2 text-emerald-600">ALYC</div>
+                                <div class="w-1/3 text-right pr-2 text-indigo-600">SGFCI</div>
+                            </div>
+
+                            <!-- Office -->
+                            <div class="text-xs border-b border-slate-100 pb-2">
+                                <div class="flex items-center mb-1">
+                                    <label class="w-1/3 font-bold text-slate-600">Oficina</label>
+                                    <input type="text" id="oh-office-alyc-input" value="20.000" class="w-1/3 bg-slate-50 border border-slate-200 rounded px-2 py-1 text-right font-bold text-slate-700 focus:outline-none focus:border-blue-400 mr-1" onblur="formatCostInput(this)" oninput="updateCostCalculations()">
+                                    <input type="text" id="oh-office-sg-input" value="8.000" class="w-1/3 bg-slate-50 border border-slate-200 rounded px-2 py-1 text-right font-bold text-slate-700 focus:outline-none focus:border-blue-400" onblur="formatCostInput(this)" oninput="updateCostCalculations()">
+                                </div>
+                                <div class="text-[9px] text-slate-400 text-right">Total Mes: <span id="oh-office-total">$ 28.000</span></div>
+                            </div>
+
+                            <!-- Marketing -->
+                            <div class="text-xs border-b border-slate-100 pb-2">
+                                <div class="flex items-center mb-1">
+                                    <label class="w-1/3 font-bold text-slate-600">Marketing</label>
+                                    <input type="text" id="oh-marketing-alyc-input" value="5.000" class="w-1/3 bg-slate-50 border border-slate-200 rounded px-2 py-1 text-right font-bold text-slate-700 focus:outline-none focus:border-blue-400 mr-1" onblur="formatCostInput(this)" oninput="updateCostCalculations()">
+                                    <input type="text" id="oh-marketing-sg-input" value="2.000" class="w-1/3 bg-slate-50 border border-slate-200 rounded px-2 py-1 text-right font-bold text-slate-700 focus:outline-none focus:border-blue-400" onblur="formatCostInput(this)" oninput="updateCostCalculations()">
+                                </div>
+                                <div class="text-[9px] text-slate-400 text-right">Total Mes: <span id="oh-marketing-total">$ 7.000</span></div>
+                            </div>
+
+                            <!-- Tech -->
+                            <div class="text-xs">
+                                <div class="flex items-center mb-1">
+                                    <label class="w-1/3 font-bold text-slate-600">Sistemas</label>
+                                    <input type="text" id="oh-tech-alyc-input" value="10.000" class="w-1/3 bg-slate-50 border border-slate-200 rounded px-2 py-1 text-right font-bold text-slate-700 focus:outline-none focus:border-blue-400 mr-1" onblur="formatCostInput(this)" oninput="updateCostCalculations()">
+                                    <input type="text" id="oh-tech-sg-input" value="2.000" class="w-1/3 bg-slate-50 border border-slate-200 rounded px-2 py-1 text-right font-bold text-slate-700 focus:outline-none focus:border-blue-400" onblur="formatCostInput(this)" oninput="updateCostCalculations()">
+                                </div>
+                                <div class="text-[9px] text-slate-400 text-right">Total Mes: <span id="oh-tech-total">$ 12.000</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center">
+                            <span class="text-xs font-bold text-slate-500">Total Overhead Anual</span>
+                            <span id="total-overhead-annual" class="text-sm font-bold text-slate-800">$ 0</span>
+                        </div>
+                    </div>
+
+                    <!-- Cost Allocation Summary -->
+                    <div class="bg-slate-800 text-white p-4 rounded-xl shadow-lg">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 border-b border-slate-700 pb-2">Impacto P/L (Anual)</h4>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-emerald-400 font-bold">ALYC (Total):</span>
+                                <span id="alloc-alyc-total" class="font-mono">$ 0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-indigo-400 font-bold">SGFCI (Total):</span>
+                                <span id="alloc-sgfci-total" class="font-mono">$ 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
         <!-- VIEW 5: P/L 2026 -->
         <div id="view-pl" class="hidden absolute inset-0 bg-slate-100 overflow-hidden flex flex-col z-20">
             <div class="flex-1 flex overflow-hidden">
@@ -732,12 +952,21 @@
                             <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-xs sticky top-0 z-10">
                                 <tr>
                                     <th class="px-4 py-4 w-40 min-w-[150px] sticky left-0 bg-slate-50 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Concepto</th> <!-- Sticky first column narrower -->
-                                    <th class="px-4 py-4 text-right w-32">SGFCI</th>
-                                    <th class="px-4 py-4 text-right w-32">ALYC</th>
-                                    <th class="px-4 py-4 text-right w-32">OFFSHORE</th>
-                                    <th class="px-4 py-4 text-right w-32">MESA</th>
-                                    <th class="px-6 py-4 text-right font-bold text-slate-800 bg-slate-100/50">TOTAL</th>
-                                    <th class="px-4 py-4 text-center w-16 text-slate-400">%</th>
+                                    
+                                    <th class="px-4 py-4 text-right w-28 bg-indigo-50/30">SGFCI</th>
+                                    <th class="px-2 py-4 text-center w-12 text-slate-400 bg-indigo-50/30 text-[10px]">%</th>
+                                    
+                                    <th class="px-4 py-4 text-right w-28 bg-emerald-50/30">ALYC</th>
+                                    <th class="px-2 py-4 text-center w-12 text-slate-400 bg-emerald-50/30 text-[10px]">%</th>
+                                    
+                                    <th class="px-4 py-4 text-right w-28 bg-cyan-50/30">OFFSHORE</th>
+                                    <th class="px-2 py-4 text-center w-12 text-slate-400 bg-cyan-50/30 text-[10px]">%</th>
+                                    
+                                    <th class="px-4 py-4 text-right w-28 bg-orange-50/30">MESA</th>
+                                    <th class="px-2 py-4 text-center w-12 text-slate-400 bg-orange-50/30 text-[10px]">%</th>
+                                    
+                                    <th class="px-3 py-4 text-right font-bold text-slate-800 bg-slate-100/50 w-28">TOTAL</th>
+                                    <th class="px-2 py-4 text-center w-12 text-slate-400 bg-slate-100/50">%</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100" id="pl-table-body">
@@ -781,6 +1010,7 @@
         let mesaGross = 0, mesaCost = 0;
 
         // --- STRUCTURE DATA ---
+        // Synced headcount with Salary Structure
         const orgData = {
             'board': { title: "BOARD OF DIRECTORS", tag: "Governance & Strategy", desc: "Órgano máximo de decisión. Define el apetito de riesgo y lidera la agresividad comercial del grupo.", focus: [0, 5, 5, 5, 0], middle: "CEO (Chief Executive Officer)", middleEntity: "ALyC", roles: [], resp: ["Definición de Estrategia Comercial y de Expansión.", "Aprobación de Balances y Presupuestos.", "Designación de Comités (Inversión, Riesgo, PLA/FT).", "Supervisión directa del desempeño del CEO."], color: "slate", headcount: 5 },
             'risk-com': { title: "RISK COMMITTEE", tag: "Mandatory C-Suite Body", desc: "Órgano colegiado de control liderado por el CCO. Integrado obligatoriamente por toda la C-Suite. NO posee estructura operativa a cargo.", focus: [0, 5, 0, 5, 0], middle: "Chair: CCO (Chief Compliance Officer)", roles: [], resp: ["Participantes Obligatorios: CEO, CFO, COO, CCO, CSO.", "Aprobación de límites de contraparte y solvencia.", "Validación de nuevos productos.", "Puede incorporar participantes Ad-hoc según temática."], color: "amber", headcount: 0 },
@@ -847,12 +1077,102 @@
             comerciales: 0,
             assetManager: 0,
             impuestos: 0,
-            salarios: 0,
-            overhead: 0
+            salariosAlyc: 0, 
+            salariosSgfci: 0,
+            overheadAlyc: 0,
+            overheadSgfci: 0
         };
 
+        // --- COSTS DATA (Detailed Structure) ---
+        // Base values updated: CEO 8k, Dir 6k, Sr 4.5k, Ssr 3k, Jr 2k
+        const defaultSalaryStructure = [
+            {
+                area: "C-Level (Board)",
+                roles: [
+                    { title: "CEO", name: "", count: 1, cost: 8000, allocAlyc: 50, isLeader: true, type: 'ceo' }
+                ]
+            },
+            {
+                area: "Control & Compliance",
+                roles: [
+                    { title: "CCO (Director)", name: "", count: 1, cost: 6000, allocAlyc: 50, isLeader: true, type: 'director' },
+                    { title: "Senior", name: "", count: 1, cost: 4500, allocAlyc: 50, type: 'senior' },
+                    { title: "Semi-Senior", name: "", count: 1, cost: 3000, allocAlyc: 50, type: 'ssr' },
+                    { title: "Junior", name: "", count: 1, cost: 2000, allocAlyc: 50, type: 'jr' }
+                ]
+            },
+            {
+                area: "Operations (Back Office)",
+                roles: [
+                    { title: "COO (Director)", name: "", count: 1, cost: 6000, allocAlyc: 50, isLeader: true, type: 'director' },
+                    { title: "Senior", name: "", count: 1, cost: 4500, allocAlyc: 50, type: 'senior' },
+                    { title: "Semi-Senior", name: "", count: 2, cost: 3000, allocAlyc: 50, type: 'ssr' },
+                    { title: "Junior", name: "", count: 2, cost: 2000, allocAlyc: 50, type: 'jr' }
+                ]
+            },
+            {
+                area: "Finance & Admin",
+                roles: [
+                    { title: "CFO (Director)", name: "", count: 1, cost: 6000, allocAlyc: 50, isLeader: true, type: 'director' },
+                    { title: "Senior", name: "", count: 1, cost: 4500, allocAlyc: 50, type: 'senior' },
+                    { title: "Semi-Senior", name: "", count: 2, cost: 3000, allocAlyc: 50, type: 'ssr' },
+                    { title: "Junior", name: "", count: 2, cost: 2000, allocAlyc: 50, type: 'jr' }
+                ]
+            },
+            {
+                area: "Strategy & Research",
+                roles: [
+                    { title: "CSO (Director)", name: "", count: 1, cost: 6000, allocAlyc: 50, isLeader: true, type: 'director' },
+                    { title: "Senior", name: "", count: 1, cost: 4500, allocAlyc: 50, type: 'senior' },
+                    { title: "Semi-Senior", name: "", count: 1, cost: 3000, allocAlyc: 50, type: 'ssr' },
+                    { title: "Junior", name: "", count: 2, cost: 2000, allocAlyc: 50, type: 'jr' }
+                ]
+            },
+            {
+                area: "Asset Management (SGFCI)",
+                roles: [
+                    { title: "CIO (Head)", name: "", count: 1, cost: 6000, allocAlyc: 0, isLeader: true, type: 'director' },
+                    { title: "Senior PM", name: "", count: 1, cost: 4500, allocAlyc: 0, type: 'senior' },
+                    { title: "Semi-Senior", name: "", count: 1, cost: 3000, allocAlyc: 0, type: 'ssr' },
+                    { title: "Junior", name: "", count: 2, cost: 2000, allocAlyc: 0, type: 'jr' }
+                ]
+            },
+            {
+                area: "Trading Desk (ALYC)",
+                roles: [
+                    { title: "Head of Trading", name: "", count: 1, cost: 6000, allocAlyc: 100, isLeader: true, type: 'director' },
+                    { title: "Senior Trader", name: "", count: 2, cost: 4500, allocAlyc: 100, type: 'senior' },
+                    { title: "Semi-Senior", name: "", count: 1, cost: 3000, allocAlyc: 100, type: 'ssr' },
+                    { title: "Junior", name: "", count: 2, cost: 2000, allocAlyc: 100, type: 'jr' }
+                ]
+            }
+        ];
+        
+        let salaryStructure = JSON.parse(JSON.stringify(defaultSalaryStructure));
+        
+        const defaultSalaryDrivers = {
+            ceo: 8000,
+            director: 6000,
+            senior: 4500,
+            ssr: 3000,
+            jr: 2000
+        };
+        
+        let salaryDrivers = {...defaultSalaryDrivers};
+        
+        const defaultOverheadData = {
+            officeAlyc: 20000, officeSg: 8000,
+            marketingAlyc: 5000, marketingSg: 2000,
+            techAlyc: 10000, techSg: 2000
+        };
+        
+        let overheadData = {...defaultOverheadData};
+        
+        let pieChartMode = 'functional'; // 'functional' (default) or 'hierarchical' (segregated)
+        let costEntityFilter = 'all';
+
         // State & Formatters
-        let radarChart = null, chartInstance = null;
+        let radarChart = null, chartInstance = null, costPieChart = null;
         let plRevenueChart = null, plWaterfallChart = null;
         let simData = JSON.parse(JSON.stringify(initialFundsData));
         let globalGrowth = 0, globalFeeAdj = 0, globalAcdiAdj = 0, groupedMode = false;
@@ -865,26 +1185,36 @@
 
         // --- STRUCTURE LOGIC ---
         function updateHeadcounts() {
-            let total = 0, countAlyc = 0, countSg = 0;
+            let visualTotal = 0, visualAlyc = 0, visualSg = 0;
+            
+            // Calculate totals from OrgData
             Object.keys(orgData).forEach(key => {
                 const data = orgData[key];
                 if (key !== 'board') {
-                    const hc = data.headcount || 0; total += hc;
-                    if (data.entity === 'SG') countSg += hc; else countAlyc += hc;
-                }
-                const node = document.getElementById(`node-${key}`);
-                if (node) {
-                    const existingBadge = node.querySelector('.headcount-badge'); if(existingBadge) existingBadge.remove();
-                    if (key !== 'board') {
-                        const badge = document.createElement('div'); badge.className = 'headcount-badge';
-                        badge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg><span>${data.headcount}</span>`;
-                        node.appendChild(badge);
+                    const hc = data.headcount || 0; 
+                    visualTotal += hc;
+                    if (data.entity === 'SG') visualSg += hc; else visualAlyc += hc;
+
+                    // Add Badge to Node
+                    const node = document.getElementById(`node-${key}`);
+                    if (node && key !== 'risk-com' && key !== 'inv-com') { 
+                        // Remove existing
+                        const existing = node.querySelector('.hc-indicator');
+                        if(existing) existing.remove();
+
+                        if(hc > 0) {
+                            const badge = document.createElement('div');
+                            badge.className = 'hc-indicator';
+                            badge.title = `Headcount: ${hc}`;
+                            badge.innerHTML = `<span class="mr-0.5 text-[8px]">👤</span>${hc}`;
+                            node.appendChild(badge);
+                        }
                     }
                 }
             });
-            document.getElementById('total-headcount').innerText = total;
-            document.getElementById('count-alyc').innerText = countAlyc;
-            document.getElementById('count-sg').innerText = countSg;
+            document.getElementById('total-headcount').innerText = visualTotal;
+            document.getElementById('count-alyc').innerText = visualAlyc;
+            document.getElementById('count-sg').innerText = visualSg;
         }
 
         function initStructureChart() {
@@ -1245,6 +1575,348 @@
             document.getElementById('total-om-revenue').innerText = usdFmt.format(off + mesa);
         }
 
+        // --- COSTOS 2026 LOGIC ---
+        function initCostSimulation() {
+            renderSalaryTable();
+            updateCostCalculations();
+        }
+        
+        function resetCostSimulation() {
+            // Restore Salary Structure Deep Copy
+            salaryStructure = JSON.parse(JSON.stringify(defaultSalaryStructure));
+            
+            // Restore Drivers
+            salaryDrivers = {...defaultSalaryDrivers};
+            document.getElementById('driver-ceo').value = "8.000";
+            document.getElementById('driver-director').value = "6.000";
+            document.getElementById('driver-senior').value = "4.500";
+            document.getElementById('driver-ssr').value = "3.000";
+            document.getElementById('driver-jr').value = "2.000";
+            
+            // Restore Social Charges
+            document.getElementById('driver-social-charges').value = 50;
+            
+            // Restore Overhead
+            overheadData = {...defaultOverheadData};
+            document.getElementById('oh-office-alyc-input').value = "20.000";
+            document.getElementById('oh-office-sg-input').value = "8.000";
+            
+            document.getElementById('oh-marketing-alyc-input').value = "5.000";
+            document.getElementById('oh-marketing-sg-input').value = "2.000";
+            
+            document.getElementById('oh-tech-alyc-input').value = "10.000";
+            document.getElementById('oh-tech-sg-input').value = "2.000";
+
+            // Re-render
+            renderSalaryTable();
+            updateCostCalculations();
+        }
+        
+        function applySalaryDriver(type, value) {
+            const val = parseInt(value.replace(/\./g, '')) || 0;
+            if(val > 0) {
+                salaryDrivers[type] = val;
+                // Update all roles matching this type
+                salaryStructure.forEach((area, aIdx) => {
+                    area.roles.forEach((role, rIdx) => {
+                        // Infer type if not strictly set (backward compat) or check explicit property
+                        let roleType = role.type; 
+                        if (!roleType) {
+                            if(role.title === 'CEO') roleType = 'ceo';
+                            else if(role.isLeader) roleType = 'director';
+                            else if(role.title.includes('Senior') && !role.title.includes('Semi')) roleType = 'senior';
+                            else if(role.title.includes('Semi')) roleType = 'ssr';
+                            else roleType = 'jr';
+                        }
+                        
+                        if (roleType === type) {
+                            // Update data
+                            role.cost = val;
+                            // Update Input UI if rendered
+                            const input = document.getElementById(`sal-input-cost-${aIdx}-${rIdx}`);
+                            if(input) input.value = intFmt.format(val);
+                        }
+                    });
+                });
+                updateCostCalculations();
+            }
+        }
+
+        function renderSalaryTable() {
+            const tbody = document.getElementById('salary-table-body');
+            tbody.innerHTML = '';
+            
+            // Re-render grouped by Area for clarity
+            salaryStructure.forEach((area, aIdx) => {
+                // Area Header Row
+                const headerRow = document.createElement('tr');
+                headerRow.className = "bg-slate-100 border-b border-slate-200";
+                headerRow.innerHTML = `<td colspan="7" class="px-4 py-2 font-bold text-xs text-slate-500 uppercase tracking-wider">${area.area}</td>`;
+                tbody.appendChild(headerRow);
+
+                area.roles.forEach((role, rIdx) => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 border-b border-slate-50 last:border-0";
+                    
+                    const monthlyTotal = role.count * role.cost;
+                    const annualTotal = monthlyTotal * 12; // Wait, we changed this to x13 in Turn 9 logic but need to be consistent in var naming.
+                    // The actual calculation logic happens in updateCostCalculations() which handles the x13
+
+                    tr.innerHTML = `
+                        <td class="px-4 py-2 text-slate-700 pl-6">${role.title}</td>
+                        <td class="px-2 py-2">
+                            <input type="text" placeholder="Vacante" value="${role.name}" class="w-full bg-white border border-slate-200 rounded px-1 py-1 text-left text-slate-600 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400 placeholder:text-slate-300" oninput="updateDetailedSalary(${aIdx}, ${rIdx}, 'name', this.value)">
+                        </td>
+                        <td class="px-2 py-2">
+                            <input type="number" value="${role.count}" class="w-full bg-white border border-slate-200 rounded px-1 py-1 text-center font-bold text-slate-600 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400" oninput="updateDetailedSalary(${aIdx}, ${rIdx}, 'count', this.value)">
+                        </td>
+                        <td class="px-2 py-2 bg-blue-50/50">
+                            <input type="text" id="sal-input-cost-${aIdx}-${rIdx}" value="${intFmt.format(role.cost)}" class="w-full bg-transparent text-right font-bold text-blue-700 text-xs focus:outline-none border-b border-transparent focus:border-blue-300" onblur="formatCostInput(this)" oninput="updateDetailedSalary(${aIdx}, ${rIdx}, 'cost', this.value)">
+                        </td>
+                        <td class="px-2 py-2 bg-emerald-50/50">
+                            <div class="relative">
+                                <input type="number" min="0" max="100" value="${role.allocAlyc}" class="w-full bg-transparent text-center font-bold text-emerald-700 text-xs focus:outline-none" oninput="updateDetailedSalary(${aIdx}, ${rIdx}, 'alloc', this.value)">
+                                <span class="absolute right-1 top-0.5 text-[8px] text-emerald-400">%</span>
+                            </div>
+                        </td>
+                        <td class="px-3 py-2 text-right text-slate-600" id="sal-row-mo-${aIdx}-${rIdx}">-</td>
+                        <td class="px-4 py-2 text-right font-bold text-slate-800" id="sal-row-yr-${aIdx}-${rIdx}">-</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        function updateDetailedSalary(aIdx, rIdx, field, value) {
+            const role = salaryStructure[aIdx].roles[rIdx];
+            if (field === 'count') role.count = parseInt(value) || 0;
+            if (field === 'cost') role.cost = parseInt(value.replace(/\./g, '')) || 0;
+            if (field === 'alloc') role.allocAlyc = Math.min(100, Math.max(0, parseInt(value) || 0));
+            if (field === 'name') role.name = value;
+            updateCostCalculations();
+        }
+
+        function togglePieChartMode(el) {
+            pieChartMode = el.checked ? 'hierarchical' : 'functional';
+            updateCostCalculations(); // Will trigger chart update
+        }
+        
+        function setCostEntityFilter(val) {
+            costEntityFilter = val;
+            // Update button styles
+            ['all', 'alyc', 'sg'].forEach(k => {
+                const btn = document.getElementById(`btn-ent-${k}`);
+                if(k === val) {
+                    btn.className = "px-2 py-0.5 text-[9px] font-bold rounded bg-white shadow-sm text-slate-700 transition-all";
+                } else {
+                    btn.className = "px-2 py-0.5 text-[9px] font-bold rounded text-slate-400 hover:text-slate-600 transition-all";
+                }
+            });
+            updateCostCalculations();
+        }
+
+        function formatCostInput(el) {
+            let val = parseInt(el.value.replace(/\./g, ''));
+            if (!isNaN(val)) el.value = intFmt.format(val);
+        }
+
+        function updateCostCalculations() {
+            let totalSalMonthly = 0;
+            let totalAlycAnnual = 0;
+            let totalSgfciAnnual = 0;
+            let totalHeadcount = 0;
+            
+            // Get Social Charges Driver
+            const chargesInput = document.getElementById('driver-social-charges');
+            const socialChargesPct = chargesInput ? (parseFloat(chargesInput.value) || 0) : 0;
+
+            // Data aggregators for Chart
+            let functionalData = []; 
+            let hierarchicalData = { cLevel: 0, areas: {} };
+
+            salaryStructure.forEach((area, aIdx) => {
+                let areaTotalMonthly = 0;
+                let areaChartMonthly = 0; // Sum based on filter
+
+                area.roles.forEach((role, rIdx) => {
+                    const baseUnitCost = role.cost;
+                    const count = role.count;
+                    
+                    // Determine if charges apply (Not CEO/Director)
+                    // We check role.type set by applySalaryDriver or implicit logic
+                    let isDirector = role.isLeader || role.type === 'ceo' || role.type === 'director';
+                    // Re-verify type if explicit type is present
+                    if(role.type && (role.type === 'ceo' || role.type === 'director')) isDirector = true;
+
+                    // Calculate Monthly Cost per person including charges
+                    let unitTotalCost = baseUnitCost;
+                    if (!isDirector) {
+                        unitTotalCost = baseUnitCost * (1 + socialChargesPct / 100);
+                    }
+
+                    const mo = unitTotalCost * count;
+                    const yr = mo * 13; // Annualize x13 for Aguinaldo
+                    
+                    totalSalMonthly += mo;
+                    totalHeadcount += count;
+                    areaTotalMonthly += mo;
+
+                    // Allocation Logic (Annualized)
+                    const alycPart = yr * (role.allocAlyc / 100);
+                    const sgfciPart = yr - alycPart;
+                    totalAlycAnnual += alycPart;
+                    totalSgfciAnnual += sgfciPart;
+
+                    // Filter Logic for Chart Aggregation (Monthly)
+                    let chartVal = 0;
+                    if (costEntityFilter === 'all') chartVal = mo;
+                    else if (costEntityFilter === 'alyc') chartVal = mo * (role.allocAlyc / 100);
+                    else if (costEntityFilter === 'sg') chartVal = mo * (1 - role.allocAlyc / 100);
+
+                    // Hierarchical Chart Logic
+                    if (role.isLeader) {
+                        hierarchicalData.cLevel += chartVal;
+                    } else {
+                        if (!hierarchicalData.areas[area.area]) hierarchicalData.areas[area.area] = 0;
+                        hierarchicalData.areas[area.area] += chartVal;
+                    }
+                    
+                    // Functional Chart Logic
+                    areaChartMonthly += chartVal;
+
+                    // Update UI Row
+                    const rowMo = document.getElementById(`sal-row-mo-${aIdx}-${rIdx}`);
+                    const rowYr = document.getElementById(`sal-row-yr-${aIdx}-${rIdx}`);
+                    if(rowMo) rowMo.innerText = usdFmt.format(mo);
+                    if(rowYr) rowYr.innerText = usdFmt.format(yr);
+                });
+                
+                // Functional Mode: Filtered Area Cost
+                if(areaChartMonthly > 0) functionalData.push({ label: area.area, value: areaChartMonthly });
+            });
+            
+            // Prepare Chart Data based on Mode
+            let chartData = [];
+            if (pieChartMode === 'functional') {
+                chartData = functionalData;
+            } else {
+                // Hierarchical Mode
+                if(hierarchicalData.cLevel > 0) chartData.push({ label: "C-Level / Dirección", value: hierarchicalData.cLevel });
+                for (const [key, value] of Object.entries(hierarchicalData.areas)) {
+                    if (value > 0) chartData.push({ label: key, value: value });
+                }
+            }
+
+            // Total Annual is Monthly * 13
+            const totalSalAnnual = totalSalMonthly * 13;
+            
+            document.getElementById('total-headcount-calc').innerText = totalHeadcount;
+            document.getElementById('total-salary-monthly').innerText = usdFmt.format(totalSalMonthly);
+            document.getElementById('total-salary-annual').innerText = usdFmt.format(totalSalAnnual);
+
+            // Overhead Calculation (Split logic - NEW Direct Inputs)
+            const getVal = (id) => parseInt(document.getElementById(id).value.replace(/\./g, '')) || 0;
+            
+            const offAlyc = getVal('oh-office-alyc-input');
+            const offSg = getVal('oh-office-sg-input');
+            document.getElementById('oh-office-total').innerText = usdFmt.format(offAlyc + offSg);
+
+            const mktAlyc = getVal('oh-marketing-alyc-input');
+            const mktSg = getVal('oh-marketing-sg-input');
+            document.getElementById('oh-marketing-total').innerText = usdFmt.format(mktAlyc + mktSg);
+
+            const techAlyc = getVal('oh-tech-alyc-input');
+            const techSg = getVal('oh-tech-sg-input');
+            document.getElementById('oh-tech-total').innerText = usdFmt.format(techAlyc + techSg);
+
+            // Sums for P/L (Annualized x12 for Overhead)
+            const ohAlycMonthly = offAlyc + mktAlyc + techAlyc;
+            const ohSgMonthly = offSg + mktSg + techSg;
+            const totalOhAnnual = (ohAlycMonthly + ohSgMonthly) * 12;
+
+            document.getElementById('total-overhead-annual').innerText = usdFmt.format(totalOhAnnual);
+
+            // Update Global P/L Vars
+            plCosts.salariosAlyc = totalAlycAnnual;
+            plCosts.salariosSgfci = totalSgfciAnnual;
+            plCosts.overheadAlyc = ohAlycMonthly * 12;
+            plCosts.overheadSgfci = ohSgMonthly * 12;
+
+            // Update Allocation Summary
+            document.getElementById('alloc-alyc-total').innerText = usdFmt.format(plCosts.salariosAlyc + plCosts.overheadAlyc);
+            document.getElementById('alloc-sgfci-total').innerText = usdFmt.format(plCosts.salariosSgfci + plCosts.overheadSgfci);
+
+            // Update Chart
+            updateCostChart(chartData);
+            
+            // Refresh P/L
+            updatePL();
+        }
+
+        function updateCostChart(data) {
+            const ctx = document.getElementById('costPieChart')?.getContext('2d');
+            if(!ctx) return;
+            if(costPieChart) costPieChart.destroy();
+
+            // Dynamic colors based on labels (simplified mapping)
+            const getCol = (l) => {
+                if(l.includes('C-Level') || l.includes('Dirección')) return '#1e293b'; // Slate
+                if(l.includes('Control')) return '#f43f5e'; // Rose
+                if(l.includes('Operations')) return '#3b82f6'; // Blue
+                if(l.includes('Finance')) return '#6366f1'; // Indigo
+                if(l.includes('Strategy')) return '#8b5cf6'; // Purple
+                if(l.includes('Asset')) return '#a855f7'; // Purple-600
+                if(l.includes('Trading')) return '#10b981'; // Emerald
+                return '#94a3b8'; // Default
+            };
+            
+            // Calculate total for percentages
+            const totalVal = data.reduce((a, b) => a + b.value, 0);
+
+            costPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.map(d => d.label),
+                    datasets: [{
+                        data: data.map(d => d.value),
+                        backgroundColor: data.map(d => getCol(d.label)),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { boxWidth: 10, font: { size: 9 } } },
+                        datalabels: { 
+                            display: true,
+                            color: '#fff',
+                            font: { weight: 'bold', size: 10 },
+                            formatter: (value, ctx) => {
+                                const percentage = (value / totalVal * 100).toFixed(1) + "%";
+                                return percentage;
+                            },
+                            anchor: 'center',
+                            align: 'center',
+                            offset: 0
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) label += ': ';
+                                    label += usdFmt.format(context.raw);
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+
         // --- P/L LOGIC ---
         function initPL() { updatePL(); }
         function handlePlInput(key, val) {
@@ -1257,125 +1929,265 @@
             const tbody = document.getElementById('pl-table-body');
             tbody.innerHTML = '';
 
-            // Rows config
-            // Key: label, isInput, modelKey, values: [sgfci, alyc, off, mesa]
-            const totalGross = sgfciGross + alycGross + offshoreGross + mesaGross;
+            // 1. Data Prep
+            const grossValues = [sgfciGross, alycGross, offshoreGross, mesaGross];
+            const totalGross = grossValues.reduce((a, b) => a + b, 0);
             
-            // 1. Gross Revenue
-            addRow(tbody, "INGRESOS BRUTOS", false, null, [sgfciGross, alycGross, offshoreGross, mesaGross], true);
+            // 2. Gross Revenue Row
+            addRow(tbody, "INGRESOS BRUTOS", false, null, grossValues, true, false, grossValues);
             
-            // 2. Commissions (Direct Variable)
-            const comms = [sgfciAcdi, 0, 0, mesaCost]; // ACDI for SGFCI, Success for Mesa
-            addRow(tbody, "COSTO DIRECTO", false, null, comms, false, true);
+            // 3. Direct Costs
+            const comms = [sgfciAcdi, 0, 0, mesaCost]; 
+            addRow(tbody, "COSTO DIRECTO", false, null, comms, false, true, grossValues);
 
-            // 3. Manual Variable Costs
-            const manualVars = ['comerciales', 'assetManager', 'impuestos'];
-            const manualLabels = ['Comerciales', 'Asset Manager', 'Impuestos'];
+            // 4. Taxes
+            const taxesArray = grossValues.map(g => g * 0.055);
+            plCosts.impuestos = taxesArray.reduce((a,b)=>a+b,0);
+            addRow(tbody, "IMPUESTOS (5.5%)", false, null, taxesArray, false, true, grossValues);
+
+            // 5. Manual Vars (Unallocated)
+            const manualVars = ['comerciales', 'assetManager'];
+            const manualLabels = ['Comerciales', 'Asset Manager'];
             let totalManualVar = 0;
             
             manualVars.forEach((k, i) => {
                 const val = plCosts[k];
                 totalManualVar += val;
-                addRowManualTotal(tbody, manualLabels[i], k, val);
+                const isReadOnly = (k === 'impuestos');
+                addRowManualTotal(tbody, manualLabels[i], k, val, isReadOnly);
             });
 
-            // 4. Net Revenue (Contribution Margin)
+            // 6. CM (Contribution Margin)
+            // CM Column = Gross - Direct - Taxes
+            const cmValues = grossValues.map((g, i) => g - comms[i] - taxesArray[i]);
+            
+            // Total CM = Total Gross - Total Direct - Total Taxes - Total Manual Vars
             const totalComms = comms.reduce((a,b)=>a+b,0);
-            const netRev = totalGross - totalComms - totalManualVar;
-            addSummaryRow(tbody, "CM", netRev, totalGross);
-
-            // 5. Fixed Costs
-            const fixedVars = ['salarios', 'overhead'];
-            const fixedLabels = ['Costo Salarial', 'Overhead'];
-            let totalFixed = 0;
+            const totalTaxes = taxesArray.reduce((a,b)=>a+b,0);
+            const netRev = totalGross - totalComms - totalTaxes - totalManualVar;
             
-            fixedVars.forEach((k, i) => {
-                const val = plCosts[k];
-                totalFixed += val;
-                addRowManualTotal(tbody, fixedLabels[i], k, val);
-            });
+            addSummaryRowWithColumns(tbody, "CM", cmValues, grossValues, netRev);
 
-            // 6. EBIT
-            const ebit = netRev - totalFixed;
-            const ebitMargin = totalGross > 0 ? (ebit / totalGross) : 0;
-            addSummaryRow(tbody, "EBIT", ebit, totalGross, true);
+            // 7. Fixed Costs
+            const rowSalaries = [plCosts.salariosSgfci, plCosts.salariosAlyc, 0, 0]; 
+            addRow(tbody, "Costo Salarial", false, null, rowSalaries, false, true, grossValues);
+
+            const rowOverhead = [plCosts.overheadSgfci, plCosts.overheadAlyc, 0, 0];
+            addRow(tbody, "Overhead", false, null, rowOverhead, false, true, grossValues);
+
+            // 8. EBIT
+            // EBIT Column = CM Column - Salaries - Overhead
+            const ebitValues = cmValues.map((cm, i) => cm - rowSalaries[i] - rowOverhead[i]);
             
+            const totalFixed = (plCosts.salariosSgfci + plCosts.salariosAlyc) + (plCosts.overheadSgfci + plCosts.overheadAlyc);
+            const totalEbit = netRev - totalFixed;
+            
+            addSummaryRowWithColumns(tbody, "EBIT", ebitValues, grossValues, totalEbit);
+            
+            // Margin Display
+            const ebitMargin = totalGross > 0 ? (totalEbit / totalGross) : 0;
             document.getElementById('pl-ebit-margin').innerText = (ebitMargin*100).toFixed(1) + '%';
 
             // Charts
-            updatePlCharts(totalGross, totalComms, totalManualVar, totalFixed, ebit);
+            updatePlCharts(totalGross, totalComms + totalTaxes, totalManualVar, totalFixed, totalEbit);
         }
 
-        function addRow(tbody, label, isInput, key, values, isHeader=false, isNegative=false) {
+        function addRow(tbody, label, isInput, key, values, isHeader=false, isNegative=false, refGross=[]) {
             const tr = document.createElement('tr');
             tr.className = isHeader ? "bg-slate-50 font-bold border-b border-slate-200" : "border-b border-slate-50 hover:bg-slate-50";
             
-            // Added sticky styles to the first cell (Concepto) - Modified padding for narrower look
             let html = `<td class="px-4 py-3 text-slate-700 ${isHeader?'':'pl-4'} sticky left-0 ${isHeader ? 'bg-slate-50' : 'bg-white group-hover:bg-slate-50'} z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] text-xs font-semibold uppercase tracking-tight">${label}</td>`;
             let rowTotal = 0;
             
-            values.forEach(v => {
+            values.forEach((v, i) => {
                 rowTotal += v;
                 let displayVal = usdFmt.format(v);
+                let valColor = v === 0 ? 'text-slate-300' : (isNegative ? 'text-rose-600' : 'text-slate-600');
                 if(isNegative && v > 0) displayVal = `(${displayVal})`;
-                html += `<td class="px-4 py-3 text-right ${v===0 ? 'text-slate-300' : 'text-slate-600'}">${displayVal}</td>`;
+
+                // Value Cell
+                html += `<td class="px-4 py-3 text-right ${valColor}">${displayVal}</td>`;
+                
+                // % Cell
+                let pct = "0.0%";
+                if(refGross[i] > 0) pct = (v / refGross[i] * 100).toFixed(1) + '%';
+                html += `<td class="px-2 py-3 text-center text-[10px] text-slate-400 border-r border-slate-100">${pct}</td>`;
             });
 
             let totalDisplay = usdFmt.format(rowTotal);
-            if(isNegative && rowTotal > 0) totalDisplay = `(${totalDisplay})`;
+            let totalColor = isHeader ? 'text-blue-700' : 'text-slate-700';
+            
+            if(isNegative && rowTotal > 0) {
+                totalDisplay = `(${totalDisplay})`;
+                totalColor = 'text-rose-600';
+            }
             
             // Total Column
-            html += `<td class="px-6 py-3 text-right font-bold ${isHeader ? 'text-blue-700' : (isNegative ? 'text-rose-600' : 'text-slate-700')} bg-slate-50/50">${totalDisplay}</td>`;
+            html += `<td class="px-3 py-3 text-right font-bold ${totalColor} bg-slate-50/50">${totalDisplay}</td>`;
             
-            // % Column (vs Gross)
-            let pct = "100%";
-            if (!isHeader) {
-                const gross = sgfciGross + alycGross + offshoreGross + mesaGross;
-                let pctVal = gross > 0 ? (rowTotal / gross) : 0;
-                pct = (pctVal * 100).toFixed(1) + '%';
-            }
-            html += `<td class="px-4 py-3 text-center text-xs text-slate-400">${pct}</td>`;
+            // Total % Column
+            let totalRef = refGross.reduce((a,b)=>a+b,0);
+            let totalPct = totalRef > 0 ? (rowTotal / totalRef * 100).toFixed(1) + '%' : '0.0%';
+            
+            html += `<td class="px-2 py-3 text-center text-xs text-slate-400 bg-slate-50/50">${totalPct}</td>`;
             
             tr.innerHTML = html;
             tbody.appendChild(tr);
         }
 
-        function addRowManualTotal(tbody, label, key, val) {
+        function addRowManualTotal(tbody, label, key, val, isReadOnly=false) {
+            // Simplified for manual vars which are total-only in this UI version
             const gross = sgfciGross + alycGross + offshoreGross + mesaGross;
-            const pct = gross > 0 ? (val / gross * 100).toFixed(1) + '%' : '0.0%';
+            const totalGross = gross; // Alias for clarity
+            const pct = totalGross > 0 ? (val / totalGross * 100).toFixed(1) + '%' : '0.0%';
             
             const tr = document.createElement('tr');
-            tr.className = "border-b border-slate-50 hover:bg-slate-50 group"; // Added group class for hover effect
+            tr.className = "border-b border-slate-50 hover:bg-slate-50 group"; 
+            
+            let inputHtml = '';
+            if (isReadOnly) {
+                let displayVal = val > 0 ? `(${usdFmt.format(val)})` : usdFmt.format(val);
+                inputHtml = `<div class="w-full text-right px-2 py-1 text-rose-600 text-sm font-bold bg-slate-100/50 rounded border border-transparent cursor-not-allowed">${displayVal}</div>`;
+            } else {
+                inputHtml = `<input type="text" value="${intFmt.format(val)}" 
+                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-right text-rose-600 font-medium focus:outline-none focus:ring-1 focus:ring-rose-400 text-sm"
+                        onblur="formatPlInput(this)" oninput="handlePlInput('${key}', this.value)">`;
+            }
+
             tr.innerHTML = `
                 <td class="px-4 py-3 text-slate-700 pl-4 sticky left-0 bg-white group-hover:bg-slate-50 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] text-xs font-medium uppercase tracking-tight">${label}</td>
-                <td class="px-4 py-3 text-right text-slate-300">-</td>
-                <td class="px-4 py-3 text-right text-slate-300">-</td>
-                <td class="px-4 py-3 text-right text-slate-300">-</td>
-                <td class="px-4 py-3 text-right text-slate-300">-</td>
-                <td class="px-6 py-3 text-right bg-slate-50/50">
-                    <input type="text" value="${intFmt.format(val)}" 
-                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-right text-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-400 text-sm"
-                        onblur="formatPlInput(this)" oninput="handlePlInput('${key}', this.value)">
+                <td class="px-4 py-3 text-right text-slate-300">-</td><td class="px-2 py-3 text-center text-slate-300 border-r border-slate-100">-</td>
+                <td class="px-4 py-3 text-right text-slate-300">-</td><td class="px-2 py-3 text-center text-slate-300 border-r border-slate-100">-</td>
+                <td class="px-4 py-3 text-right text-slate-300">-</td><td class="px-2 py-3 text-center text-slate-300 border-r border-slate-100">-</td>
+                <td class="px-4 py-3 text-right text-slate-300">-</td><td class="px-2 py-3 text-center text-slate-300 border-r border-slate-100">-</td>
+                
+                <td class="px-3 py-3 text-right bg-slate-50/50">
+                    ${inputHtml}
                 </td>
-                <td class="px-4 py-3 text-center text-xs text-slate-400">${pct}</td>
+                <td class="px-2 py-3 text-center text-xs text-slate-400 bg-slate-50/50">${pct}</td>
             `;
             tbody.appendChild(tr);
         }
 
-        function addSummaryRow(tbody, label, val, gross, isFinal=false) {
-            const pct = gross > 0 ? (val / gross * 100).toFixed(1) + '%' : '0.0%';
+        function addSummaryRowWithColumns(tbody, label, values, refGross, overrideTotal=null) {
             const tr = document.createElement('tr');
-            tr.className = isFinal ? "bg-emerald-50 border-t-2 border-emerald-100 group" : "bg-slate-50 border-t border-slate-200 font-bold group";
+            tr.className = label === 'EBIT' ? "bg-emerald-50 border-t-2 border-emerald-100 group" : "bg-slate-50 border-t border-slate-200 font-bold group";
+            const stickyBg = label === 'EBIT' ? 'bg-emerald-50' : 'bg-slate-50';
             
-            // Adjusted background color logic for sticky column on summary rows
-            const stickyBg = isFinal ? 'bg-emerald-50' : 'bg-slate-50';
+            let html = `<td class="px-4 py-3 ${label==='EBIT'?'text-emerald-800 text-lg':'text-slate-700'} font-bold uppercase sticky left-0 ${stickyBg} z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] tracking-tight">${label}</td>`;
+            
+            let rowSum = 0;
+            values.forEach((v, i) => {
+                rowSum += v;
+                let displayVal = usdFmt.format(v);
+                let colorClass = label==='EBIT' ? 'text-emerald-700' : 'text-slate-800';
+                if (v < 0) {
+                    displayVal = `(${usdFmt.format(Math.abs(v))})`;
+                    colorClass = 'text-rose-600';
+                }
+                
+                // %
+                let pct = "0.0%";
+                if(refGross[i] > 0) pct = (v / refGross[i] * 100).toFixed(1) + '%';
+
+                html += `<td class="px-4 py-3 text-right ${colorClass}">${displayVal}</td>`;
+                html += `<td class="px-2 py-3 text-center text-[10px] ${label==='EBIT'?'text-emerald-600':'text-slate-500'} border-r border-slate-200/50">${pct}</td>`;
+            });
+
+            // Total
+            let finalTotal = overrideTotal !== null ? overrideTotal : rowSum;
+            let totalDisplay = usdFmt.format(finalTotal);
+            let totalColor = label==='EBIT' ? 'text-emerald-700 text-lg' : 'text-slate-800';
+            if (finalTotal < 0) {
+                totalDisplay = `(${usdFmt.format(Math.abs(finalTotal))})`;
+                totalColor = 'text-rose-600 text-lg';
+            }
+
+            let totalRef = refGross.reduce((a,b)=>a+b,0);
+            let totalPct = totalRef > 0 ? (finalTotal / totalRef * 100).toFixed(1) + '%' : '0.0%';
+
+            html += `<td class="px-3 py-3 text-right font-bold ${totalColor}">${totalDisplay}</td>`;
+            html += `<td class="px-2 py-3 text-center text-xs ${label==='EBIT'?'text-emerald-600':'text-slate-500'} font-bold">${totalPct}</td>`;
+
+            tr.innerHTML = html;
+            tbody.appendChild(tr);
+        }
+
+        function addRowManualTotal(tbody, label, key, val, isReadOnly=false) {
+            // Simplified for manual vars which are total-only in this UI version
+            const gross = sgfciGross + alycGross + offshoreGross + mesaGross;
+            const totalGross = gross; // Alias for clarity
+            const pct = totalGross > 0 ? (val / totalGross * 100).toFixed(1) + '%' : '0.0%';
+            
+            const tr = document.createElement('tr');
+            tr.className = "border-b border-slate-50 hover:bg-slate-50 group"; 
+            
+            let inputHtml = '';
+            if (isReadOnly) {
+                let displayVal = val > 0 ? `(${usdFmt.format(val)})` : usdFmt.format(val);
+                inputHtml = `<div class="w-full text-right px-2 py-1 text-rose-600 text-sm font-bold bg-slate-100/50 rounded border border-transparent cursor-not-allowed">${displayVal}</div>`;
+            } else {
+                inputHtml = `<input type="text" value="${intFmt.format(val)}" 
+                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-right text-rose-600 font-medium focus:outline-none focus:ring-1 focus:ring-rose-400 text-sm"
+                        onblur="formatPlInput(this)" oninput="handlePlInput('${key}', this.value)">`;
+            }
 
             tr.innerHTML = `
-                <td class="px-4 py-3 ${isFinal ? 'text-emerald-800 text-lg' : 'text-slate-700'} font-bold uppercase sticky left-0 ${stickyBg} z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] tracking-tight">${label}</td>
-                <td colspan="4"></td>
-                <td class="px-6 py-3 text-right font-bold ${isFinal ? 'text-emerald-700 text-lg' : 'text-slate-800'}">${usdFmt.format(val)}</td>
-                <td class="px-4 py-3 text-center text-xs ${isFinal ? 'text-emerald-600' : 'text-slate-500'} font-bold">${pct}</td>
+                <td class="px-4 py-3 text-slate-700 pl-4 sticky left-0 bg-white group-hover:bg-slate-50 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] text-xs font-medium uppercase tracking-tight">${label}</td>
+                <td class="px-4 py-3 text-right text-slate-300">-</td><td class="px-2 py-3 text-center text-slate-300 border-r border-slate-100">-</td>
+                <td class="px-4 py-3 text-right text-slate-300">-</td><td class="px-2 py-3 text-center text-slate-300 border-r border-slate-100">-</td>
+                <td class="px-4 py-3 text-right text-slate-300">-</td><td class="px-2 py-3 text-center text-slate-300 border-r border-slate-100">-</td>
+                <td class="px-4 py-3 text-right text-slate-300">-</td><td class="px-2 py-3 text-center text-slate-300 border-r border-slate-100">-</td>
+                
+                <td class="px-6 py-3 text-right bg-slate-50/50">
+                    ${inputHtml}
+                </td>
+                <td class="px-4 py-3 text-center text-xs text-slate-400 bg-slate-50/50">${pct}</td>
             `;
+            tbody.appendChild(tr);
+        }
+
+        function addSummaryRowWithColumns(tbody, label, values, refGross, overrideTotal=null) {
+            const tr = document.createElement('tr');
+            tr.className = label === 'EBIT' ? "bg-emerald-50 border-t-2 border-emerald-100 group" : "bg-slate-50 border-t border-slate-200 font-bold group";
+            const stickyBg = label === 'EBIT' ? 'bg-emerald-50' : 'bg-slate-50';
+            
+            let html = `<td class="px-4 py-3 ${label==='EBIT'?'text-emerald-800 text-lg':'text-slate-700'} font-bold uppercase sticky left-0 ${stickyBg} z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] tracking-tight">${label}</td>`;
+            
+            let rowSum = 0;
+            values.forEach((v, i) => {
+                rowSum += v;
+                let displayVal = usdFmt.format(v);
+                let colorClass = label==='EBIT' ? 'text-emerald-700' : 'text-slate-800';
+                if (v < 0) {
+                    displayVal = `(${usdFmt.format(Math.abs(v))})`;
+                    colorClass = 'text-rose-600';
+                }
+                
+                // %
+                let pct = "0.0%";
+                if(refGross[i] > 0) pct = (v / refGross[i] * 100).toFixed(1) + '%';
+
+                html += `<td class="px-4 py-3 text-right ${colorClass}">${displayVal}</td>`;
+                html += `<td class="px-2 py-3 text-center text-[10px] ${label==='EBIT'?'text-emerald-600':'text-slate-500'} border-r border-slate-200/50">${pct}</td>`;
+            });
+
+            // Total
+            let finalTotal = overrideTotal !== null ? overrideTotal : rowSum;
+            let totalDisplay = usdFmt.format(finalTotal);
+            let totalColor = label==='EBIT' ? 'text-emerald-700 text-lg' : 'text-slate-800';
+            if (finalTotal < 0) {
+                totalDisplay = `(${usdFmt.format(Math.abs(finalTotal))})`;
+                totalColor = 'text-rose-600 text-lg';
+            }
+
+            let totalRef = refGross.reduce((a,b)=>a+b,0);
+            let totalPct = totalRef > 0 ? (finalTotal / totalRef * 100).toFixed(1) + '%' : '0.0%';
+
+            html += `<td class="px-6 py-3 text-right font-bold ${totalColor}">${totalDisplay}</td>`;
+            html += `<td class="px-4 py-3 text-center text-xs ${label==='EBIT'?'text-emerald-600':'text-slate-500'} font-bold">${totalPct}</td>`;
+
+            tr.innerHTML = html;
             tbody.appendChild(tr);
         }
 
@@ -1402,7 +2214,6 @@
             const ctx2 = document.getElementById('plWaterfallChart')?.getContext('2d');
             if (ctx2) {
                 if (plWaterfallChart) plWaterfallChart.destroy();
-                // Simple bar char simulating waterfall
                 plWaterfallChart = new Chart(ctx2, {
                     type: 'bar',
                     data: {
@@ -1428,8 +2239,8 @@
 
         // --- GLOBAL SWITCH ---
         function switchView(viewId) {
-            ['view-structure','view-revenue','view-alyc','view-offshore','view-pl'].forEach(id => document.getElementById(id).classList.add('hidden'));
-            ['tab-structure','tab-revenue','tab-alyc','tab-offshore','tab-pl'].forEach(id => { const el = document.getElementById(id); el.classList.remove('bg-white','text-blue-700','shadow-sm'); el.classList.add('text-slate-500','hover:bg-white/50'); });
+            ['view-structure','view-revenue','view-alyc','view-offshore','view-costs','view-pl'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['tab-structure','tab-revenue','tab-alyc','tab-offshore','tab-costs','tab-pl'].forEach(id => { const el = document.getElementById(id); el.classList.remove('bg-white','text-blue-700','shadow-sm'); el.classList.add('text-slate-500','hover:bg-white/50'); });
             
             document.getElementById(`view-${viewId}`).classList.remove('hidden');
             const activeTab = document.getElementById(`tab-${viewId}`);
@@ -1441,12 +2252,13 @@
             if (viewId === 'revenue' && !chartInstance) initSimulation();
             if (viewId === 'alyc') initAlycSimulation();
             if (viewId === 'offshore') initOffshoreSimulation();
+            if (viewId === 'costs') initCostSimulation();
             if (viewId === 'pl') initPL();
         }
 
         window.addEventListener('load', () => {
             initStructureChart(); updateHeadcounts(); loadDetail('board');
-            initSimulation(); initAlycSimulation(); initOffshoreSimulation(); initPL();
+            initSimulation(); initAlycSimulation(); initOffshoreSimulation(); initCostSimulation(); initPL();
         });
     </script>
 </body>
