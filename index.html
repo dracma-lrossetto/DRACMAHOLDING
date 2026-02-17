@@ -144,6 +144,12 @@
         #offshore-growth-slider::-webkit-slider-thumb { background: #0891b2; } /* Cyan-600 */
         #offshore-fee-slider::-webkit-slider-thumb { background: #7c3aed; } /* Violet-600 */
         #mesa-return-slider::-webkit-slider-thumb { background: #ea580c; } /* Orange-600 */
+        #com-share-slider::-webkit-slider-thumb { background: #f59e0b; } /* Amber-500 */
+        #am-share-slider::-webkit-slider-thumb { background: #db2777; } /* Pink-600 */
+        /* ALYC NEW SLIDERS */
+        #alyc-com-trad-slider::-webkit-slider-thumb { background: #f59e0b; } /* Amber-500 */
+        #alyc-com-trans-slider::-webkit-slider-thumb { background: #d97706; } /* Amber-600 */
+        #alyc-am-slider::-webkit-slider-thumb { background: #db2777; } /* Pink-600 */
         
         /* Toggle Switch */
         .toggle-checkbox:checked {
@@ -489,6 +495,34 @@
                         <div class="mb-5"><div class="flex justify-between text-xs mb-2"><span class="text-slate-600 font-semibold">Ajuste de Fee (Presión)</span><span id="fee-adj-val" class="font-bold text-purple-600">0%</span></div><input type="range" id="fee-slider" min="-50" max="50" value="0" step="5" class="w-full"><div class="flex justify-between text-[10px] text-slate-400 mt-1"><span>-50%</span><span>+50%</span></div></div>
                         <div><div class="flex justify-between text-xs mb-2"><span class="text-slate-600 font-semibold">Impacto Costo ACDI</span><span id="acdi-adj-val" class="font-bold text-rose-600">0%</span></div><input type="range" id="acdi-slider" min="-50" max="50" value="0" step="5" class="w-full"><div class="flex justify-between text-[10px] text-slate-400 mt-1"><span>-50%</span><span>+50%</span></div></div>
                     </div>
+                    
+                    <!-- NEW DRIVERS PANEL: Variable Costs -->
+                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 mb-6 shadow-sm">
+                        <h3 class="text-xs font-bold text-amber-800 uppercase tracking-widest mb-3">Costos Variables (s/ Ing. Bruto)</h3>
+                        <div class="mb-4">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-600 font-semibold">Comerciales (Solo Dracma)</span>
+                                <span id="com-share-val" class="font-bold text-amber-600">50%</span>
+                            </div>
+                            <input type="range" id="com-share-slider" min="0" max="100" value="50" step="1" class="w-full accent-amber-500">
+                            <div class="flex justify-between text-[9px] mt-1 text-slate-400">
+                                <span>Costo Proy:</span>
+                                <span id="com-cost-total" class="font-bold text-amber-700">$ 0</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-600 font-semibold">Asset Manager (Global)</span>
+                                <span id="am-share-val" class="font-bold text-pink-600">25%</span>
+                            </div>
+                            <input type="range" id="am-share-slider" min="0" max="100" value="25" step="1" class="w-full accent-pink-500">
+                            <div class="flex justify-between text-[9px] mt-1 text-slate-400">
+                                <span>Ingreso AM:</span>
+                                <span id="am-cost-total" class="font-bold text-pink-700">$ 0</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 gap-4 mb-6">
                         <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100 relative overflow-hidden">
                             <div class="text-[10px] font-bold text-slate-400 uppercase mb-2">INGRESOS NETOS PROYECTADOS</div>
@@ -507,8 +541,35 @@
                                 <div class="flex justify-between"><span class="text-slate-500">Cust. OTROS:</span><span class="font-bold text-slate-700"><span id="kpi-aum-cust-otros">$ 0</span> <span id="kpi-pct-cust-otros" class="text-blue-400 text-[8px] font-normal ml-1"></span></span></div>
                             </div>
                         </div>
+                        
+                        <!-- Costo ACDI Summary -->
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100 relative overflow-hidden">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase">Costo Distribución (ACDI)</div>
+                            <div class="flex justify-between items-end mt-1">
+                                <div id="kpi-acdi-annual" class="text-xl font-bold text-rose-600">$ 0</div>
+                                <div id="kpi-acdi-share" class="text-xs font-bold bg-rose-100 text-rose-700 px-2 py-1 rounded">0% del Bruto</div>
+                            </div>
+                        </div>
+
+                        <!-- NEW: Costo Comercial Summary -->
+                        <div id="kpi-com-card" class="bg-white p-4 rounded-lg shadow-sm border border-slate-100 relative overflow-hidden">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase">Costo Comercial Total</div>
+                            <div class="flex justify-between items-end mt-1">
+                                <div id="kpi-com-annual" class="text-xl font-bold text-amber-600">$ 0</div>
+                                <div id="kpi-com-share" class="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-1 rounded">0% del Bruto</div>
+                            </div>
+                        </div>
+
+                        <!-- NEW: Costo AM Summary -->
+                        <div id="kpi-am-card" class="bg-white p-4 rounded-lg shadow-sm border border-slate-100 relative overflow-hidden">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase">Ingreso Asset Mgr</div>
+                            <div class="flex justify-between items-end mt-1">
+                                <div id="kpi-am-annual" class="text-xl font-bold text-pink-600">$ 0</div>
+                                <div id="kpi-am-share" class="text-xs font-bold bg-pink-100 text-pink-700 px-2 py-1 rounded">0% del Bruto</div>
+                            </div>
+                        </div>
+
                         <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100"><div class="text-[10px] font-bold text-slate-400 uppercase mb-2">Promedios Ponderados (Fees)</div><div class="flex gap-4"><div class="flex-1 border-r border-slate-100 pr-2"><div class="text-[9px] text-slate-500">Neto (Revenue)</div><div id="kpi-fee" class="text-lg font-bold text-indigo-600 mt-1">0.00%</div></div><div class="flex-1"><div class="text-[9px] text-slate-500">Total (Client)</div><div id="kpi-fee-total" class="text-lg font-bold text-slate-600 mt-1">0.00%</div></div></div></div>
-                        <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100 relative overflow-hidden"><div class="text-[10px] font-bold text-slate-400 uppercase">Costo Distribución (ACDI)</div><div class="flex justify-between items-end mt-1"><div id="kpi-acdi-annual" class="text-xl font-bold text-rose-600">$ 0</div><div id="kpi-acdi-share" class="text-xs font-bold bg-rose-100 text-rose-700 px-2 py-1 rounded">0% del Bruto</div></div></div>
                     </div>
                     <div class="flex-1 min-h-[200px]"><h3 class="text-xs font-bold text-slate-700 mb-2">Proyección vs Base</h3><div class="h-full w-full"><canvas id="projectionChart"></canvas></div></div>
                 </div>
@@ -522,12 +583,28 @@
                         <div class="overflow-auto custom-scroll flex-1">
                             <table class="w-full text-xs text-left">
                                 <thead class="bg-slate-50 text-slate-500 font-bold uppercase sticky top-0 z-10 shadow-sm">
-                                    <tr><th class="px-2 py-3 w-32">Fondo</th><th class="px-2 py-3 bg-blue-50 text-blue-700 border-x border-blue-100 w-28 text-right">AUM Proy</th><th class="px-1 py-3 bg-blue-50 text-blue-700 border-x border-blue-100 w-16 text-center" title="Fee Total (Editable)">Fee T</th><th class="px-1 py-3 bg-purple-50 text-purple-700 border-x border-purple-100 w-14 text-center" title="Fee Distribución">%ACDI</th><th class="px-1 py-3 text-center w-12 font-bold text-slate-700">Fee N</th><th class="px-2 py-3 text-right text-slate-500 w-24 border-l border-slate-100 bg-slate-50/50">Ing. Bruto</th><th class="px-2 py-3 text-right font-bold text-emerald-700 w-28">Ing. Neto</th></tr>
+                                    <tr>
+                                        <th class="px-2 py-3 w-32">Fondo</th>
+                                        <th class="px-2 py-3 bg-blue-50 text-blue-700 border-x border-blue-100 w-24 text-right">AUM Proy</th>
+                                        <th class="px-1 py-3 bg-blue-50 text-blue-700 border-x border-blue-100 w-14 text-center" title="Fee Total (Editable)">Fee T</th>
+                                        <th class="px-1 py-3 bg-purple-50 text-purple-700 border-x border-purple-100 w-12 text-center" title="Fee Distribución">%ACDI</th>
+                                        
+                                        <!-- NEW COLUMNS -->
+                                        <th class="px-1 py-3 bg-amber-50 text-amber-700 border-x border-amber-100 w-16 text-center" title="Comerciales (s/ Bruto)">Costo Com</th>
+                                        <th class="px-1 py-3 bg-pink-50 text-pink-700 border-x border-pink-100 w-16 text-center" title="Asset Manager (s/ Bruto)">Ingreso AM</th>
+                                        
+                                        <th class="px-1 py-3 text-center w-12 font-bold text-slate-700">Fee N</th>
+                                        <th class="px-2 py-3 text-right text-slate-500 w-24 border-l border-slate-100 bg-slate-50/50">Ing. Bruto</th>
+                                        <th class="px-2 py-3 text-right font-bold text-emerald-700 w-28">Ing. Neto</th>
+                                    </tr>
                                 </thead>
                                 <tbody id="simulation-table-body" class="divide-y divide-slate-100"></tbody>
                             </table>
                         </div>
-                        <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 text-right flex justify-end gap-8">
+                        <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 text-right flex justify-end gap-4 items-center">
+                            <div><span class="text-[10px] font-bold text-amber-500 mr-1">Total Com:</span><span id="footer-total-com" class="text-xs font-bold text-amber-700">$ 0</span></div>
+                            <div><span class="text-[10px] font-bold text-pink-500 mr-1">Total AM:</span><span id="footer-total-am" class="text-xs font-bold text-pink-700">$ 0</span></div>
+                            <div class="h-4 w-px bg-slate-300 mx-2"></div>
                             <div><span class="text-xs font-bold text-slate-400 mr-2">Total Bruto Anual:</span><span id="total-gross-annual" class="text-sm font-bold text-slate-600">$ 0</span></div>
                             <div><span class="text-xs font-bold text-slate-500 mr-2">Total Neto Anual:</span><span id="total-annual" class="text-sm font-bold text-emerald-600">$ 0</span></div>
                         </div>
@@ -538,6 +615,7 @@
 
         <!-- VIEW 3: ALYC 2026 -->
         <div id="view-alyc" class="hidden absolute inset-0 bg-slate-100 overflow-hidden flex flex-col z-20">
+            <!-- (Content same as previous, preserving structure) -->
             <div class="flex-1 flex overflow-hidden">
                 <!-- LEFT COLUMN: Drivers -->
                 <div class="w-1/3 bg-white border-r border-slate-200 flex flex-col overflow-y-auto custom-scroll p-6">
@@ -555,6 +633,38 @@
                         <h3 class="text-xs font-bold text-amber-800 uppercase tracking-widest mb-3">Fee Transaccional</h3>
                         <div class="mb-2"><div class="flex justify-between text-xs mb-1"><span class="text-slate-600 font-semibold">Fee sobre AUM Restante</span><span id="alyc-transact-val" class="font-bold text-amber-600">2.00%</span></div><input type="range" id="alyc-transact-slider" min="0" max="5.0" value="2.0" step="0.1" class="w-full accent-amber-500"><p class="text-[9px] text-slate-400 mt-1">Aplica sobre el saldo NO administrado ni en SGFCI.</p></div>
                     </div>
+
+                    <!-- NEW ALYC COST DRIVERS -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6 shadow-sm relative">
+                        <div class="absolute -top-3 right-4 bg-orange-100 text-orange-800 text-[10px] font-bold px-2 py-1 rounded border border-orange-200 uppercase">Costos Variables</div>
+                        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-widest mb-3">Esquema de Comisiones</h3>
+                        
+                        <div class="mb-4">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-amber-700 font-semibold">Comercial Tradicional (Admin)</span>
+                                <span id="alyc-com-trad-val" class="font-bold text-amber-600">55%</span>
+                            </div>
+                            <input type="range" id="alyc-com-trad-slider" min="0" max="100" value="55" step="5" class="w-full accent-amber-500">
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-amber-800 font-semibold">Comercial Transaccional</span>
+                                <span id="alyc-com-trans-val" class="font-bold text-amber-700">75%</span>
+                            </div>
+                            <input type="range" id="alyc-com-trans-slider" min="0" max="100" value="75" step="5" class="w-full accent-amber-600">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-pink-700 font-semibold">Asset Manager (Global)</span>
+                                <span id="alyc-am-val" class="font-bold text-pink-600">0%</span>
+                            </div>
+                            <input type="range" id="alyc-am-slider" min="0" max="100" value="0" step="1" class="w-full accent-pink-500">
+                            <p class="text-[9px] text-slate-400 mt-1">Sobre Ingreso Bruto Total.</p>
+                        </div>
+                    </div>
+
                     <div class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm">
                         <h3 class="text-xs font-bold text-slate-700 uppercase tracking-widest mb-3">Mix de Carteras (100%)</h3>
                         <div class="space-y-3" id="portfolio-mix-container"></div>
@@ -597,11 +707,15 @@
                                 <thead class="bg-slate-50 text-slate-500 font-bold uppercase sticky top-0 z-10 shadow-sm">
                                     <tr>
                                         <th class="px-3 py-3 w-32">Manager</th>
-                                        <th class="px-2 py-3 text-right text-[10px] text-slate-400 w-32">Total AUM</th>
-                                        <th class="px-2 py-3 text-center bg-emerald-50 text-emerald-700 border-x border-emerald-100 w-24" title="Editable">AUM Admin</th>
-                                        <th class="px-2 py-3 text-center bg-slate-50 text-slate-600 border-r border-slate-100 w-24" title="Editable">AUM SGFCI</th>
-                                        <th class="px-2 py-3 text-right bg-amber-50 text-amber-700 border-r border-amber-100 w-24">AUM Transac.</th>
-                                        <th class="px-3 py-3 text-right font-bold text-blue-700 w-32">Revenue Total</th>
+                                        <th class="px-2 py-3 text-right text-[10px] text-slate-400 w-24">Total AUM</th>
+                                        <th class="px-2 py-3 text-center bg-emerald-50 text-emerald-700 border-x border-emerald-100 w-20" title="Editable">AUM Admin</th>
+                                        <th class="px-2 py-3 text-center bg-slate-50 text-slate-600 border-r border-slate-100 w-20" title="Editable">AUM SGFCI</th>
+                                        <th class="px-2 py-3 text-right bg-amber-50 text-amber-700 border-r border-amber-100 w-20">AUM Transac.</th>
+                                        <th class="px-3 py-3 text-right font-bold text-blue-700 w-24 border-r border-blue-100">Revenue Total</th>
+                                        <!-- NEW COLUMNS -->
+                                        <th class="px-2 py-3 text-right text-amber-600 bg-amber-50/50 w-20">Costo Com</th>
+                                        <th class="px-2 py-3 text-right text-pink-600 bg-pink-50/50 w-20">Costo AM</th>
+                                        <th class="px-2 py-3 text-right font-bold text-emerald-700 w-24">Ing. Neto</th>
                                     </tr>
                                 </thead>
                                 <tbody id="alyc-table-body" class="divide-y divide-slate-100"></tbody>
@@ -616,8 +730,12 @@
             </div>
         </div>
 
+<!-- ... existing code for OFFSHORE, COSTOS, P/L ... -->
+<!-- (Structure remains the same, JS logic changes below) -->
+
         <!-- VIEW 4: OFFSHORE + MESA 2026 -->
         <div id="view-offshore" class="hidden absolute inset-0 bg-slate-100 overflow-hidden flex flex-col z-20">
+            <!-- ... existing content ... -->
             <div class="flex-1 flex overflow-hidden">
                 <!-- LEFT COLUMN: Drivers -->
                 <div class="w-1/3 bg-white border-r border-slate-200 flex flex-col overflow-y-auto custom-scroll p-6">
@@ -739,7 +857,9 @@
         </div>
 
         <!-- VIEW 6: COSTOS 2026 -->
+        <!-- ... existing content ... -->
         <div id="view-costs" class="hidden absolute inset-0 bg-slate-100 overflow-hidden flex flex-col z-20">
+            <!-- (Costs content preserved) -->
             <div class="flex-1 flex overflow-hidden">
                 <!-- LEFT COLUMN: Salarios -->
                 <div class="w-2/3 bg-white border-r border-slate-200 flex flex-col overflow-hidden p-8">
@@ -832,6 +952,7 @@
 
                 <!-- RIGHT COLUMN: Overhead & Charts -->
                 <div class="w-1/3 bg-slate-50 p-8 overflow-y-auto custom-scroll flex flex-col gap-6">
+                    <!-- ... existing pie chart & overhead panel ... -->
                     
                     <!-- Pie Chart -->
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
@@ -932,10 +1053,13 @@
 
         <!-- VIEW 5: P/L 2026 -->
         <div id="view-pl" class="hidden absolute inset-0 bg-slate-100 overflow-hidden flex flex-col z-20">
-            <div class="flex-1 flex overflow-hidden">
-                <!-- MAIN P/L TABLE -->
-                <div class="w-2/3 bg-white border-r border-slate-200 flex flex-col overflow-y-auto custom-scroll p-8">
-                    <div class="mb-6 flex justify-between items-end">
+            <!-- Layout Change: Single vertical scrollable container -->
+            <div class="flex-1 overflow-y-auto custom-scroll p-6 md:p-8">
+                
+                <!-- SECTION 1: P/L Table (Full Width) -->
+                <div class="bg-white border border-slate-200 rounded-xl shadow-sm mb-8 overflow-hidden">
+                    <!-- Header -->
+                    <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-end bg-white">
                         <div>
                             <h2 class="text-2xl font-bold text-slate-800">Estado de Resultados 2026</h2>
                             <p class="text-sm text-slate-500 mt-1">Consolidado Anual Proyectado (USD)</p>
@@ -946,12 +1070,12 @@
                         </div>
                     </div>
 
-                    <!-- Change: Changed overflow-hidden to overflow-x-auto to allow horizontal scrolling -->
-                    <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-x-auto custom-scroll">
-                        <table class="w-full text-sm text-left min-w-max"> <!-- Added min-w-max to ensure table keeps width -->
+                    <!-- Table Container with Horizontal Scroll -->
+                    <div class="overflow-x-auto custom-scroll">
+                        <table class="w-full text-sm text-left min-w-max"> 
                             <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-xs sticky top-0 z-10">
                                 <tr>
-                                    <th class="px-4 py-4 w-40 min-w-[150px] sticky left-0 bg-slate-50 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Concepto</th> <!-- Sticky first column narrower -->
+                                    <th class="px-4 py-4 w-40 min-w-[150px] sticky left-0 bg-slate-50 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Concepto</th> 
                                     
                                     <th class="px-4 py-4 text-right w-28 bg-indigo-50/30">SGFCI</th>
                                     <th class="px-2 py-4 text-center w-12 text-slate-400 bg-indigo-50/30 text-[10px]">%</th>
@@ -964,6 +1088,9 @@
                                     
                                     <th class="px-4 py-4 text-right w-28 bg-orange-50/30">MESA</th>
                                     <th class="px-2 py-4 text-center w-12 text-slate-400 bg-orange-50/30 text-[10px]">%</th>
+
+                                    <th class="px-4 py-4 text-right w-28 bg-pink-50/30">ASSET MGR</th>
+                                    <th class="px-2 py-4 text-center w-12 text-slate-400 bg-pink-50/30 text-[10px]">%</th>
                                     
                                     <th class="px-3 py-4 text-right font-bold text-slate-800 bg-slate-100/50 w-28">TOTAL</th>
                                     <th class="px-2 py-4 text-center w-12 text-slate-400 bg-slate-100/50">%</th>
@@ -976,21 +1103,21 @@
                     </div>
                 </div>
 
-                <!-- RIGHT COLUMN: CHARTS -->
-                <div class="w-1/3 bg-slate-50 p-6 flex flex-col space-y-6 overflow-y-auto custom-scroll">
+                <!-- SECTION 2: CHARTS (Grid Layout below table) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-8">
                     
                     <!-- Revenue Mix Chart -->
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                         <h4 class="text-xs font-bold text-slate-400 uppercase mb-4">Composición de Ingresos Brutos</h4>
-                        <div class="chart-container" style="height: 200px;">
+                        <div class="chart-container" style="height: 300px;">
                             <canvas id="plRevenueChart"></canvas>
                         </div>
                     </div>
 
                     <!-- EBIT Bridge -->
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex-1">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                         <h4 class="text-xs font-bold text-slate-400 uppercase mb-4">Puente de Utilidad (Waterfall)</h4>
-                        <div class="chart-container" style="height: 250px;">
+                        <div class="chart-container" style="height: 300px;">
                             <canvas id="plWaterfallChart"></canvas>
                         </div>
                     </div>
@@ -1005,12 +1132,19 @@
     <script>
         // --- SHARED GLOBALS (FOR P/L) ---
         let sgfciGross = 0, sgfciAcdi = 0;
-        let alycGross = 0; // Assuming no variable costs defined yet
+        let alycGross = 0; 
         let offshoreGross = 0;
         let mesaGross = 0, mesaCost = 0;
+        let amGross = 0; 
+        
+        // Detailed Cost Globals to feed P/L correctly
+        let sgfciComCost = 0;
+        let sgfciAmRevenue = 0;
+        let alycComCost = 0;
+        let alycAmRevenue = 0;
 
         // --- STRUCTURE DATA ---
-        // Synced headcount with Salary Structure
+        // (No changes to OrgData)
         const orgData = {
             'board': { title: "BOARD OF DIRECTORS", tag: "Governance & Strategy", desc: "Órgano máximo de decisión. Define el apetito de riesgo y lidera la agresividad comercial del grupo.", focus: [0, 5, 5, 5, 0], middle: "CEO (Chief Executive Officer)", middleEntity: "ALyC", roles: [], resp: ["Definición de Estrategia Comercial y de Expansión.", "Aprobación de Balances y Presupuestos.", "Designación de Comités (Inversión, Riesgo, PLA/FT).", "Supervisión directa del desempeño del CEO."], color: "slate", headcount: 5 },
             'risk-com': { title: "RISK COMMITTEE", tag: "Mandatory C-Suite Body", desc: "Órgano colegiado de control liderado por el CCO. Integrado obligatoriamente por toda la C-Suite. NO posee estructura operativa a cargo.", focus: [0, 5, 0, 5, 0], middle: "Chair: CCO (Chief Compliance Officer)", roles: [], resp: ["Participantes Obligatorios: CEO, CFO, COO, CCO, CSO.", "Aprobación de límites de contraparte y solvencia.", "Validación de nuevos productos.", "Puede incorporar participantes Ad-hoc según temática."], color: "amber", headcount: 0 },
@@ -1175,8 +1309,21 @@
         let radarChart = null, chartInstance = null, costPieChart = null;
         let plRevenueChart = null, plWaterfallChart = null;
         let simData = JSON.parse(JSON.stringify(initialFundsData));
+        // Initialize dynamic fields for simData
+        simData.forEach(r => {
+            r.comShare = (r.cust === 'DRACMA' || (r.name === 'INMOBILIARIO' && r.cust === 'OTRO ACDI')) ? 50 : 0;
+            r.amShare = 25;
+        });
+
         let globalGrowth = 0, globalFeeAdj = 0, globalAcdiAdj = 0, groupedMode = false;
+        let globalComShare = 50, globalAmShare = 25; // NEW: Variable Costs
+        
+        // ALYC STATE VARS (UPDATED)
         let alycSimData = [], alycPenetration = 20, alycTransactionalFee = 2.0, alycGlobalGrowth = 0;
+        let alycComShareTrad = 55; // 55% sobre tradicional
+        let alycComShareTrans = 75; // 75% sobre transaccional
+        let alycAmShare = 0; // 0% default AM cost for ALyC
+
         let offshoreGrowth = 0, offshoreFeeAdj = 0, mesaPn = 5000000, mesaReturn = 15, mesaSuccessFee = 25;
 
         const usdFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -1267,6 +1414,9 @@
             document.getElementById('growth-slider').addEventListener('input', (e) => { globalGrowth = parseInt(e.target.value); updateDriverDisplay('growth-val', globalGrowth); applyGlobalGrowth(); });
             document.getElementById('fee-slider').addEventListener('input', (e) => { globalFeeAdj = parseInt(e.target.value); updateDriverDisplay('fee-adj-val', globalFeeAdj, true); updateCalculations(); if(!groupedMode) renderTableValuesOnly(); else renderTable(); });
             document.getElementById('acdi-slider').addEventListener('input', (e) => { globalAcdiAdj = parseInt(e.target.value); updateDriverDisplay('acdi-adj-val', globalAcdiAdj, false, true); applyGlobalAcdiAdj(); });
+            // New listeners for Variable Costs
+            document.getElementById('com-share-slider').addEventListener('input', (e) => { globalComShare = parseInt(e.target.value); document.getElementById('com-share-val').innerText = globalComShare + '%'; applyGlobalComShare(); });
+            document.getElementById('am-share-slider').addEventListener('input', (e) => { globalAmShare = parseInt(e.target.value); document.getElementById('am-share-val').innerText = globalAmShare + '%'; applyGlobalAmShare(); });
         }
         function updateDriverDisplay(id, val, isPurple=false, isRose=false) {
             const el = document.getElementById(id); el.innerText = `${val >= 0 ? '+' : ''}${val}%`;
@@ -1275,55 +1425,234 @@
         function toggleGroupMode(checkbox) { groupedMode = checkbox.checked; renderTable(); }
         function applyGlobalGrowth() { simData.forEach(row => { const base = initialFundsData.find(r => r.id === row.id).aum; row.aum = Math.round(base * (1 + globalGrowth / 100)); }); if(!groupedMode) simData.forEach(row => { const inp = document.getElementById(`input-aum-${row.id}`); if(inp) inp.value = intFmt.format(row.aum); }); else renderTable(); updateCalculations(); }
         function applyGlobalAcdiAdj() { simData.forEach(row => { const base = initialFundsData.find(r => r.id === row.id).feeAcdi; row.feeAcdi = base * (1 + globalAcdiAdj / 100); }); if(!groupedMode) { simData.forEach(row => { const inp = document.getElementById(`input-acdi-${row.id}`); if(inp) inp.value = row.feeAcdi.toFixed(2); }); renderTableValuesOnly(); } else renderTable(); updateCalculations(); }
+        function applyGlobalComShare() { 
+            simData.forEach(row => { 
+                // Fix logic to include Inmobiliario logic
+                if(row.cust === 'DRACMA' || (row.name === 'INMOBILIARIO' && row.cust === 'OTRO ACDI')) row.comShare = globalComShare; 
+            });
+            if(!groupedMode) { simData.forEach(row => { 
+                const inp = document.getElementById(`input-com-share-${row.id}`); 
+                if(inp) inp.value = row.comShare; 
+            }); } else renderTable();
+            updateCalculations();
+        }
+        function applyGlobalAmShare() { 
+            simData.forEach(row => { row.amShare = globalAmShare; });
+            if(!groupedMode) { simData.forEach(row => { 
+                const inp = document.getElementById(`input-am-share-${row.id}`); 
+                if(inp) inp.value = row.amShare; 
+            }); } else renderTable();
+            updateCalculations();
+        }
+
         function handleAumInput(el, id) { let val = parseInt(el.value.replace(/\./g, '')) || 0; const row = simData.find(r => r.id === id); if (row) { row.aum = val; updateCalculations(); updateRowDisplay(row, calculateCurrentTotals()); } }
         function formatAumInput(el) { let val = parseInt(el.value.replace(/\./g, '')); if(!isNaN(val)) el.value = intFmt.format(val); }
         function handleManualInput(id, field, value) { const row = simData.find(r => r.id === id); if (row) { row[field] = parseFloat(value) || 0; updateCalculations(); updateRowDisplay(row, calculateCurrentTotals()); } }
-        function calculateCurrentTotals() { let tAUM = 0, tNetRev = 0; simData.forEach(r => { tAUM += r.aum; tNetRev += r.aum * ((r.feeTotal*(1+globalFeeAdj/100) - r.feeAcdi)/100); }); return { totalAUM: tAUM, totalNetRevenue: tNetRev }; }
+        function calculateCurrentTotals() { 
+            let tAUM = 0, tNetRev = 0; 
+            simData.forEach(r => { 
+                const adjFee = r.feeTotal * (1+globalFeeAdj/100);
+                const gross = r.aum * (adjFee / 100);
+                const acdi = r.aum * (r.feeAcdi / 100);
+                const comCost = gross * (r.comShare/100);
+                const amCost = gross * (r.amShare/100);
+                const net = gross - acdi - comCost - amCost;
+                tAUM += r.aum; 
+                tNetRev += net; 
+            }); 
+            return { totalAUM: tAUM, totalNetRevenue: tNetRev }; 
+        }
         function renderTable() { const tbody = document.getElementById('simulation-table-body'); tbody.innerHTML = ''; const totals = calculateCurrentTotals(); if (groupedMode) renderGroupedTable(tbody, totals); else renderDetailTable(tbody, totals); }
         function renderDetailTable(tbody, totals) {
             simData.forEach(row => {
                 const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 border-b border-slate-50 last:border-0";
-                const adjFee = row.feeTotal * (1 + globalFeeAdj / 100), netFee = adjFee - row.feeAcdi, revNet = row.aum * (netFee / 100);
+                
+                // Calculate Row Values
+                const adjFee = row.feeTotal * (1 + globalFeeAdj / 100);
+                const gross = row.aum * (adjFee / 100);
+                const acdi = row.aum * (row.feeAcdi / 100);
+                // Variable Costs
+                const comCost = gross * (row.comShare / 100);
+                const amCost = gross * (row.amShare / 100);
+                // Net
+                const revNet = gross - acdi - comCost - amCost;
+                
+                // Effective Net Fee % for display
+                const netFeePct = row.aum > 0 ? (revNet / row.aum) * 100 : 0;
+
+                // Visual cue for adjusted Gross Income
+                const grossClass = globalFeeAdj !== 0 ? "text-blue-600 font-semibold" : "text-slate-500";
+
                 tr.innerHTML = `<td class="px-2 py-2"><div class="flex items-center gap-2 h-full"><span class="font-bold text-slate-700 text-[11px]">${row.name}</span><span class="text-[8px] px-1 py-0.5 rounded border ${row.cust === 'DRACMA' ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : 'bg-slate-100 text-slate-600 border-slate-200'} font-semibold">${row.cust}</span></div></td>
                     <td class="px-2 py-2 bg-blue-50 border-x border-blue-100"><div class="flex items-center justify-end gap-1"><input type="text" id="input-aum-${row.id}" value="${intFmt.format(row.aum)}" class="w-full bg-transparent text-right text-blue-800 font-bold focus:outline-none text-[11px]" oninput="handleAumInput(this, ${row.id})" onblur="formatAumInput(this)"><span class="text-[9px] text-blue-400 font-medium w-8 text-right">${pctFmt.format(totals.totalAUM > 0 ? row.aum/totals.totalAUM : 0)}</span></div></td>
                     <td class="px-1 py-2 bg-blue-50 border-x border-blue-100"><input type="number" id="input-feetot-${row.id}" step="0.01" value="${row.feeTotal.toFixed(2)}" class="w-full bg-white border border-blue-200 rounded px-1 py-1 text-center text-blue-800 font-bold text-[11px]" oninput="handleManualInput(${row.id}, 'feeTotal', this.value)"></td>
                     <td class="px-1 py-2 bg-purple-50 border-x border-purple-100"><input type="number" id="input-acdi-${row.id}" step="0.01" value="${row.feeAcdi.toFixed(2)}" class="w-full bg-white border border-purple-200 rounded px-1 py-1 text-center text-purple-800 font-bold text-[11px]" oninput="handleManualInput(${row.id}, 'feeAcdi', this.value)"></td>
-                    <td class="px-1 py-2 text-center font-bold text-slate-700 text-[10px]" id="cell-feenet-${row.id}">${netFee.toFixed(2)}%</td>
-                    <td class="px-2 py-2 text-right text-slate-500 text-[10px] border-l border-slate-100 bg-slate-50/50" id="cell-gross-${row.id}">${usdFmt.format(row.aum * (adjFee / 100))}</td>
+                    
+                    <td class="px-1 py-2 bg-amber-50 border-x border-amber-100">
+                        <div class="flex flex-col items-center">
+                            <div class="relative w-full">
+                                <input type="number" id="input-com-share-${row.id}" value="${row.comShare}" class="w-full bg-transparent text-center font-bold text-amber-700 text-[10px] focus:outline-none" oninput="handleManualInput(${row.id}, 'comShare', this.value)">
+                                <span class="absolute right-0 top-0 text-[8px] text-amber-400">%</span>
+                            </div>
+                            <span class="text-[9px] text-amber-600/70" id="cell-com-cost-${row.id}">${usdFmt.format(comCost)}</span>
+                        </div>
+                    </td>
+                    <td class="px-1 py-2 bg-pink-50 border-x border-pink-100">
+                        <div class="flex flex-col items-center">
+                            <div class="relative w-full">
+                                <input type="number" id="input-am-share-${row.id}" value="${row.amShare}" class="w-full bg-transparent text-center font-bold text-pink-700 text-[10px] focus:outline-none" oninput="handleManualInput(${row.id}, 'amShare', this.value)">
+                                <span class="absolute right-0 top-0 text-[8px] text-pink-400">%</span>
+                            </div>
+                            <span class="text-[9px] text-pink-600/70" id="cell-am-cost-${row.id}">${usdFmt.format(amCost)}</span>
+                        </div>
+                    </td>
+
+                    <td class="px-1 py-2 text-center font-bold text-slate-700 text-[10px]" id="cell-feenet-${row.id}">${netFeePct.toFixed(2)}%</td>
+                    <td class="px-2 py-2 text-right ${grossClass} text-[10px] border-l border-slate-100 bg-slate-50/50" id="cell-gross-${row.id}">${usdFmt.format(gross)}</td>
                     <td class="px-2 py-2 text-right font-bold text-emerald-700 text-[10px] w-28"><div class="flex items-center justify-end gap-1"><span id="cell-rev-${row.id}">${usdFmt.format(revNet)}</span><span id="cell-rev-pct-${row.id}" class="text-[9px] text-emerald-400 font-normal whitespace-nowrap">${pctFmt.format(totals.totalNetRevenue > 0 ? revNet/totals.totalNetRevenue : 0)}</span></div></td>`;
                 tbody.appendChild(tr);
             });
         }
         function renderGroupedTable(tbody, totals) {
-            const groups = {}; simData.forEach(r => { if(!groups[r.name]) groups[r.name] = { name: r.name, aum: 0, wFeeT: 0, wFeeA: 0 }; groups[r.name].aum += r.aum; });
-            Object.values(groups).forEach(g => { let wt=0, wa=0; simData.filter(r => r.name === g.name).forEach(r => { const w = g.aum > 0 ? r.aum/g.aum : 0; wt += r.feeTotal*(1+globalFeeAdj/100)*w; wa += r.feeAcdi*w; }); g.wFeeT=wt; g.wFeeA=wa; });
+            const groups = {}; 
+            // Fix: Initialize accumulators correctly for grouping
+            simData.forEach(r => { 
+                if(!groups[r.name]) groups[r.name] = { 
+                    name: r.name, 
+                    aum: 0, 
+                    gross: 0, 
+                    net: 0, 
+                    feeTotalW: 0,
+                    acdiCostTotal: 0, // NEW accumulator
+                    comCostTotal: 0, // NEW accumulator
+                    amCostTotal: 0    // NEW accumulator
+                }; 
+                groups[r.name].aum += r.aum; 
+            });
+            
+            // Calculate weighted values for groups
+            Object.keys(groups).forEach(key => {
+                const g = groups[key];
+                simData.filter(r => r.name === key).forEach(r => {
+                    const adjFee = r.feeTotal * (1 + globalFeeAdj / 100);
+                    const gross = r.aum * (adjFee / 100);
+                    const acdi = r.aum * (r.feeAcdi / 100);
+                    const comCost = gross * (r.comShare / 100);
+                    const amCost = gross * (r.amShare / 100);
+                    const net = gross - acdi - comCost - amCost;
+                    
+                    g.gross += gross;
+                    g.net += net;
+                    g.feeTotalW += r.feeTotal * r.aum; 
+                    
+                    // Accumulate Totals
+                    g.acdiCostTotal += acdi;
+                    g.comCostTotal += comCost;
+                    g.amCostTotal += amCost;
+                });
+            });
+
             Object.values(groups).forEach(g => {
-                const net = g.wFeeT - g.wFeeA, rev = g.aum * (net/100), tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 border-b border-slate-50 last:border-0";
+                const avgFee = g.aum > 0 ? (g.feeTotalW / g.aum) * (1+globalFeeAdj/100) : 0;
+                const avgNetFee = g.aum > 0 ? (g.net / g.aum) * 100 : 0;
+                // Calculate implicit weighted avg for ACDI just for display if needed, but standardizing
+                const avgAcdiFee = g.aum > 0 ? (g.acdiCostTotal / g.aum) * 100 : 0;
+                
+                const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 border-b border-slate-50 last:border-0";
                 tr.innerHTML = `<td class="px-2 py-3"><div class="font-bold text-slate-800 text-xs">${g.name}</div><div class="text-[9px] text-slate-400">Agrupado</div></td>
                     <td class="px-2 py-3 text-right font-bold text-blue-700 text-xs bg-slate-50/50">${intFmt.format(g.aum)} <span class="text-[9px] text-blue-400 ml-1 font-normal">${pctFmt.format(totals.totalAUM > 0 ? g.aum/totals.totalAUM : 0)}</span></td>
-                    <td class="px-1 py-3 text-center text-slate-500 text-xs">${g.wFeeT.toFixed(2)}%</td><td class="px-1 py-3 text-center text-purple-600 text-xs">${g.wFeeA.toFixed(2)}%</td><td class="px-1 py-3 text-center font-bold text-slate-700 text-xs">${net.toFixed(2)}%</td><td class="px-2 py-3 text-right text-slate-500 text-xs border-l border-slate-100">${usdFmt.format(g.aum*(g.wFeeT/100))}</td>
-                    <td class="px-2 py-3 text-right font-bold text-emerald-700 text-xs w-28"><div class="flex items-center justify-end gap-1">${usdFmt.format(rev)} <span class="text-[9px] text-emerald-400 font-normal whitespace-nowrap">${pctFmt.format(totals.totalNetRevenue > 0 ? rev/totals.totalNetRevenue : 0)}</span></div></td>`;
+                    <td class="px-1 py-3 text-center text-slate-500 text-xs">${avgFee.toFixed(2)}%</td>
+                    <td class="px-1 py-3 text-center text-purple-600 text-xs">${avgAcdiFee.toFixed(2)}%</td>
+                    
+                    <!-- NEW Group Columns showing Amounts -->
+                    <td class="px-1 py-3 text-center text-amber-700 text-xs bg-amber-50">${usdFmt.format(g.comCostTotal)}</td>
+                    <td class="px-1 py-3 text-center text-pink-700 text-xs bg-pink-50">${usdFmt.format(g.amCostTotal)}</td>
+                    
+                    <td class="px-1 py-3 text-center font-bold text-slate-700 text-xs">${avgNetFee.toFixed(2)}%</td><td class="px-2 py-3 text-right text-slate-500 text-xs border-l border-slate-100">${usdFmt.format(g.gross)}</td>
+                    <td class="px-2 py-3 text-right font-bold text-emerald-700 text-xs w-28"><div class="flex items-center justify-end gap-1">${usdFmt.format(g.net)} <span class="text-[9px] text-emerald-400 font-normal whitespace-nowrap">${pctFmt.format(totals.totalNetRevenue > 0 ? g.net/totals.totalNetRevenue : 0)}</span></div></td>`;
                 tbody.appendChild(tr);
             });
         }
         function renderTableValuesOnly() { if(groupedMode) return; const totals = calculateCurrentTotals(); simData.forEach(row => updateRowDisplay(row, totals)); }
         function updateRowDisplay(row, totals) {
-            const adj = row.feeTotal * (1 + globalFeeAdj / 100), net = adj - row.feeAcdi, rev = row.aum * (net / 100);
-            document.getElementById(`cell-feenet-${row.id}`).innerText = `${net.toFixed(2)}%`; document.getElementById(`cell-rev-${row.id}`).innerText = usdFmt.format(rev);
-            document.getElementById(`cell-gross-${row.id}`).innerText = usdFmt.format(row.aum * (adj / 100)); document.getElementById(`cell-rev-pct-${row.id}`).innerText = pctFmt.format(totals.totalNetRevenue > 0 ? rev/totals.totalNetRevenue : 0);
+            const adjFee = row.feeTotal * (1 + globalFeeAdj / 100);
+            const gross = row.aum * (adjFee / 100);
+            const acdi = row.aum * (row.feeAcdi / 100);
+            const comCost = gross * (row.comShare / 100);
+            const amCost = gross * (row.amShare / 100);
+            const net = gross - acdi - comCost - amCost;
+            const netFeePct = row.aum > 0 ? (net / row.aum) * 100 : 0;
+
+            const elCom = document.getElementById(`cell-com-cost-${row.id}`);
+            const elAm = document.getElementById(`cell-am-cost-${row.id}`);
+            const elFeeNet = document.getElementById(`cell-feenet-${row.id}`);
+            const elRev = document.getElementById(`cell-rev-${row.id}`);
+            const elGross = document.getElementById(`cell-gross-${row.id}`);
+            const elRevPct = document.getElementById(`cell-rev-pct-${row.id}`);
+
+            if(elCom) elCom.innerText = usdFmt.format(comCost);
+            if(elAm) elAm.innerText = usdFmt.format(amCost);
+            if(elFeeNet) elFeeNet.innerText = `${netFeePct.toFixed(2)}%`; 
+            if(elRev) elRev.innerText = usdFmt.format(net);
+            if(elGross) {
+                elGross.innerText = usdFmt.format(gross); 
+                elGross.className = globalFeeAdj !== 0 ? "px-2 py-2 text-right text-[10px] border-l border-slate-100 bg-slate-50/50 text-blue-600 font-semibold" : "px-2 py-2 text-right text-[10px] border-l border-slate-100 bg-slate-50/50 text-slate-500";
+            }
+            if(elRevPct) elRevPct.innerText = pctFmt.format(totals.totalNetRevenue > 0 ? net/totals.totalNetRevenue : 0);
         }
         function updateCalculations() {
             let tBase=0, tProj=0, tAUM=0, tAcdi=0, tGross=0, aOpen=0, aDed=0, aClos=0, aDracma=0, aOtros=0;
+            let totalComCost = 0;
+            let totalAmCost = 0;
+
             simData.forEach(r => {
-                const init = initialFundsData.find(x => x.id === r.id) || r; tBase += init.aum * ((init.feeTotal - init.feeAcdi)/100);
-                const adj = r.feeTotal * (1+globalFeeAdj/100), net = adj - r.feeAcdi; tProj += r.aum*(net/100); tAUM += r.aum; tAcdi += r.aum*(r.feeAcdi/100); tGross += r.aum*(adj/100);
+                const init = initialFundsData.find(x => x.id === r.id) || r; 
+                tBase += init.aum * ((init.feeTotal - init.feeAcdi)/100);
+
+                const adj = r.feeTotal * (1+globalFeeAdj/100);
+                const gross = r.aum*(adj/100);
+                const acdi = r.aum*(r.feeAcdi/100);
+                
+                // Variable Costs Calculation based on Row Properties
+                const comCost = gross * (r.comShare / 100);
+                const amCost = gross * (r.amShare / 100);
+                
+                const net = gross - acdi - comCost - amCost;
+
+                tProj += net; 
+                tAUM += r.aum; 
+                tAcdi += acdi; 
+                tGross += gross;
+                totalComCost += comCost;
+                totalAmCost += amCost;
+
                 if(r.type.includes("Abierto") && !r.type.includes("Dedicado")) aOpen += r.aum; if(r.type.includes("Dedicado")) aDed += r.aum; if(r.type.includes("Cerrado")) aClos += r.aum;
                 if(r.cust === 'DRACMA') aDracma += r.aum; else aOtros += r.aum;
             });
             
-            // Global Updates for P/L
-            sgfciGross = tGross;
+            // Update Sidebar Cost Displays
+            document.getElementById('com-cost-total').innerText = usdFmt.format(totalComCost);
+            document.getElementById('am-cost-total').innerText = usdFmt.format(totalAmCost);
+
+            // Update New KPIs
+            document.getElementById('kpi-com-annual').innerText = usdFmt.format(totalComCost);
+            document.getElementById('kpi-com-share').innerText = `${(tGross>0?totalComCost/tGross*100:0).toFixed(1)}% del Bruto`;
+            
+            document.getElementById('kpi-am-annual').innerText = usdFmt.format(totalAmCost);
+            document.getElementById('kpi-am-share').innerText = `${(tGross>0?totalAmCost/tGross*100:0).toFixed(1)}% del Bruto`;
+
+            // Update Footer
+            document.getElementById('footer-total-com').innerText = usdFmt.format(totalComCost);
+            document.getElementById('footer-total-am').innerText = usdFmt.format(totalAmCost);
+
+            // Link to P/L Variables
+            // IMPORTANT: SGFCI Gross is now NET of AM share, as AM share moves to its own unit
+            sgfciGross = tGross - totalAmCost; 
+            sgfciAmRevenue = totalAmCost; // Specific AM revenue from SGFCI
+            
             sgfciAcdi = tAcdi;
+            sgfciComCost = totalComCost; // Specific Commercial cost from SGFCI
+            
             updatePL();
 
             const updateKpi = (id, val, total) => { document.getElementById(id).innerText = usdFmt.format(val); document.getElementById(id.replace('aum','pct')).innerText = pctFmt.format(total > 0 ? val/total : 0); };
@@ -1333,7 +1662,11 @@
             const delta = tBase > 0 ? ((tProj-tBase)/tBase)*100 : 0; document.getElementById('kpi-revenue-delta').innerHTML = `vs Base: <span class="${delta >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${delta >= 0 ? '+' : ''}${delta.toFixed(1)}%</span>`;
             document.getElementById('kpi-acdi-annual').innerText = usdFmt.format(tAcdi); document.getElementById('kpi-acdi-share').innerText = `${(tGross>0?tAcdi/tGross*100:0).toFixed(1)}% del Bruto`;
             document.getElementById('kpi-aum').innerText = usdFmt.format(tAUM); document.getElementById('kpi-count').innerText = new Set(simData.filter(r=>r.aum>0).map(r=>r.name)).size;
-            document.getElementById('kpi-fee').innerText = (tAUM>0?tProj/tAUM*100:0).toFixed(2)+'%'; document.getElementById('kpi-fee-total').innerText = (tAUM>0?tGross/tAUM*100:0).toFixed(2)+'%';
+            
+            // Net Yield Display should reflect deductions
+            document.getElementById('kpi-fee').innerText = (tAUM>0?tProj/tAUM*100:0).toFixed(2)+'%'; 
+            document.getElementById('kpi-fee-total').innerText = (tAUM>0?tGross/tAUM*100:0).toFixed(2)+'%';
+            
             document.getElementById('total-annual').innerText = usdFmt.format(tProj); document.getElementById('total-gross-annual').innerText = usdFmt.format(tGross);
             updateChart(tBase, tProj);
             if (alycSimData.length > 0) { const m = alycSimData.find(m => m.name === 'DRACMA'); if(m) { m.aumSgfci = aDracma; updateAlycValues(); } }
@@ -1345,9 +1678,17 @@
         }
         function resetSimulation() { 
             simData = JSON.parse(JSON.stringify(initialFundsData)); 
+            // Re-init dynamic props
+            simData.forEach(r => {
+                r.comShare = (r.cust === 'DRACMA' || (r.name === 'INMOBILIARIO' && r.cust === 'OTRO ACDI')) ? 50 : 0;
+                r.amShare = 25;
+            });
+
             globalGrowth=0; 
             globalFeeAdj=0; 
             globalAcdiAdj=0; 
+            globalComShare=50; // Reset
+            globalAmShare=25; // Reset
             
             // Reset Sliders manually to ensure correct IDs
             document.getElementById('growth-slider').value = 0;
@@ -1358,6 +1699,12 @@
 
             document.getElementById('acdi-slider').value = 0;
             updateDriverDisplay('acdi-adj-val', 0, false, true);
+
+            document.getElementById('com-share-slider').value = 50;
+            document.getElementById('com-share-val').innerText = '50%';
+
+            document.getElementById('am-share-slider').value = 25;
+            document.getElementById('am-share-val').innerText = '25%';
 
             renderTable(); 
             updateCalculations(); 
@@ -1370,6 +1717,11 @@
             document.getElementById('alyc-penetration-slider').addEventListener('input', (e) => { alycPenetration = parseInt(e.target.value); document.getElementById('alyc-penetration-val').innerText = `${alycPenetration}%`; applyAlycGlobalPenetration(); });
             document.getElementById('alyc-transact-slider').addEventListener('input', (e) => { alycTransactionalFee = parseFloat(e.target.value); document.getElementById('alyc-transact-val').innerText = `${alycTransactionalFee}%`; updateAlycValues(); });
             document.getElementById('alyc-growth-slider').addEventListener('input', (e) => { alycGlobalGrowth = parseInt(e.target.value); const el=document.getElementById('alyc-growth-val'); el.innerText=`${alycGlobalGrowth>=0?'+':''}${alycGlobalGrowth}%`; if(alycGlobalGrowth<0){el.classList.remove('text-blue-600');el.classList.add('text-rose-600')}else{el.classList.remove('text-rose-600');el.classList.add('text-blue-600')} applyAlycGlobalGrowth(); });
+            
+            // New Listeners
+            document.getElementById('alyc-com-trad-slider').addEventListener('input', (e) => { alycComShareTrad = parseInt(e.target.value); document.getElementById('alyc-com-trad-val').innerText = `${alycComShareTrad}%`; updateAlycValues(); });
+            document.getElementById('alyc-com-trans-slider').addEventListener('input', (e) => { alycComShareTrans = parseInt(e.target.value); document.getElementById('alyc-com-trans-val').innerText = `${alycComShareTrans}%`; updateAlycValues(); });
+            document.getElementById('alyc-am-slider').addEventListener('input', (e) => { alycAmShare = parseInt(e.target.value); document.getElementById('alyc-am-val').innerText = `${alycAmShare}%`; updateAlycValues(); });
         }
         function getSgfciDracmaAum() { return simData.reduce((s, r) => r.cust === 'DRACMA' ? s + r.aum : s, 0); }
         function applyAlycGlobalGrowth() { alycSimData.forEach((m, i) => { m.totalAum = alycManagersStatic[i].aum * (1 + alycGlobalGrowth / 100); m.aumAdmin = m.totalAum * (alycPenetration / 100); if(m.name==='DRACMA') m.aumSgfci = getSgfciDracmaAum() * (1 + alycGlobalGrowth / 100); }); updateAlycValues(); }
@@ -1380,22 +1732,51 @@
         function renderPortfolioConfig() { const c = document.getElementById('portfolio-mix-container'); c.innerHTML=''; portfolios.forEach(p => { c.innerHTML += `<div class="flex items-center justify-between text-xs"><span class="text-slate-600 w-1/3 truncate">${p.name}</span><div class="flex gap-2 w-2/3"><div class="relative w-1/2"><input type="number" value="${p.weight}" oninput="updatePortfolioConfig('${p.id}', 'weight', this.value)" class="w-full border border-slate-300 rounded px-1 text-center font-bold text-slate-700 outline-none"><span class="absolute right-4 top-0.5 text-[9px] text-slate-400">%</span></div><div class="relative w-1/2"><input type="number" value="${p.fee}" step="0.01" oninput="updatePortfolioConfig('${p.id}', 'fee', this.value)" class="w-full border border-slate-300 rounded px-1 text-center font-bold text-blue-600 outline-none"><span class="absolute right-4 top-0.5 text-[9px] text-slate-400">Fee</span></div></div></div>`; }); }
         function renderAlycTable() {
             const tbody = document.getElementById('alyc-table-body'); tbody.innerHTML = '';
-            alycSimData.forEach((m, i) => { tbody.innerHTML += `<tr class="hover:bg-slate-50 border-b border-slate-50 last:border-0"><td class="px-3 py-3 font-bold text-slate-700 text-xs">${m.name}</td><td class="px-2 py-3 text-right w-32"><div class="flex items-center justify-end gap-2"><input type="text" id="alyc-total-${i}" value="${intFmt.format(m.totalAum)}" class="w-full bg-white border border-slate-200 rounded px-1 py-1 text-right text-slate-600 font-bold focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs" oninput="handleAlycManualInput(${i}, 'totalAum', this.value)" onblur="formatAlycInput(this)"><span id="alyc-share-${i}" class="text-[9px] text-slate-400 font-medium whitespace-nowrap"></span></div></td><td class="px-2 py-3 bg-emerald-50/30 border-x border-emerald-50 w-24"><input type="text" id="alyc-admin-${i}" value="${intFmt.format(m.aumAdmin)}" class="w-full bg-white border border-emerald-200 rounded px-1 py-1 text-right text-emerald-700 font-bold focus:outline-none focus:ring-1 focus:ring-emerald-400 text-xs" oninput="handleAlycManualInput(${i}, 'aumAdmin', this.value)" onblur="formatAlycInput(this)"></td><td class="px-2 py-3 bg-slate-50 border-r border-slate-100 w-24"><input type="text" id="alyc-sgfci-${i}" value="${intFmt.format(m.aumSgfci)}" class="w-full bg-white border border-slate-200 rounded px-1 py-1 text-right text-slate-600 focus:outline-none focus:ring-1 focus:ring-slate-400 text-xs" oninput="handleAlycManualInput(${i}, 'aumSgfci', this.value)" onblur="formatAlycInput(this)"></td><td class="px-2 py-3 text-right text-amber-700 bg-amber-50/30 border-r border-amber-100 text-xs w-24" id="alyc-trans-${i}"></td><td class="px-3 py-3 text-right font-bold text-blue-700 text-xs w-32"><div class="flex items-center justify-end gap-2"><span id="alyc-rev-${i}"></span><span id="alyc-rev-share-${i}" class="text-[9px] text-blue-400 font-normal whitespace-nowrap"></span></div></td></tr>`; });
+            alycSimData.forEach((m, i) => { tbody.innerHTML += `<tr class="hover:bg-slate-50 border-b border-slate-50 last:border-0"><td class="px-3 py-3 font-bold text-slate-700 text-xs">${m.name}</td><td class="px-2 py-3 text-right w-24"><div class="flex items-center justify-end gap-2"><input type="text" id="alyc-total-${i}" value="${intFmt.format(m.totalAum)}" class="w-full bg-white border border-slate-200 rounded px-1 py-1 text-right text-slate-600 font-bold focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs" oninput="handleAlycManualInput(${i}, 'totalAum', this.value)" onblur="formatAlycInput(this)"></div></td><td class="px-2 py-3 bg-emerald-50/30 border-x border-emerald-50 w-20"><input type="text" id="alyc-admin-${i}" value="${intFmt.format(m.aumAdmin)}" class="w-full bg-white border border-emerald-200 rounded px-1 py-1 text-right text-emerald-700 font-bold focus:outline-none focus:ring-1 focus:ring-emerald-400 text-xs" oninput="handleAlycManualInput(${i}, 'aumAdmin', this.value)" onblur="formatAlycInput(this)"></td><td class="px-2 py-3 bg-slate-50 border-r border-slate-100 w-20"><input type="text" id="alyc-sgfci-${i}" value="${intFmt.format(m.aumSgfci)}" class="w-full bg-white border border-slate-200 rounded px-1 py-1 text-right text-slate-600 focus:outline-none focus:ring-1 focus:ring-slate-400 text-xs" oninput="handleAlycManualInput(${i}, 'aumSgfci', this.value)" onblur="formatAlycInput(this)"></td><td class="px-2 py-3 text-right text-amber-700 bg-amber-50/30 border-r border-amber-100 text-xs w-20" id="alyc-trans-${i}"></td><td class="px-3 py-3 text-right font-bold text-blue-700 text-xs w-24 border-r border-blue-100"><span id="alyc-rev-${i}"></span></td>
+            
+            <td class="px-2 py-3 text-right text-amber-600 bg-amber-50/50 w-20 text-[10px]" id="alyc-cost-com-${i}">-</td>
+            <td class="px-2 py-3 text-right text-pink-600 bg-pink-50/50 w-20 text-[10px]" id="alyc-cost-am-${i}">-</td>
+            <td class="px-2 py-3 text-right font-bold text-emerald-700 w-24 text-xs" id="alyc-net-${i}">-</td>
+            </tr>`; });
             updateAlycValues();
         }
         function updateAlycValues() {
             let totW = portfolios.reduce((s,p)=>s+p.weight,0), blend = portfolios.reduce((s,p)=>s+(p.weight/totW)*p.fee,0); document.getElementById('mix-total-check').innerText = totW+'%';
-            let gAUM=0, tRev=0, tAdmin=0, tSgfci=0, tTrans=0; alycSimData.forEach(m=>gAUM+=m.totalAum);
+            let gAUM=0, tRev=0, tAdmin=0, tSgfci=0, tTrans=0; 
+            let tComCost = 0, tAmCost = 0, tNet = 0;
+
+            alycSimData.forEach(m=>gAUM+=m.totalAum);
             alycSimData.forEach((m, i) => {
-                let trans = Math.max(0, m.totalAum - m.aumAdmin - m.aumSgfci), rev = m.aumAdmin*(blend/100) + trans*(alycTransactionalFee/100);
-                tRev+=rev; tAdmin+=m.aumAdmin; tSgfci+=m.aumSgfci; tTrans+=trans;
+                let transAum = Math.max(0, m.totalAum - m.aumAdmin - m.aumSgfci);
+                
+                let revTrad = m.aumAdmin*(blend/100);
+                let revTrans = transAum*(alycTransactionalFee/100);
+                let revTotal = revTrad + revTrans;
+
+                // Costs Logic
+                let costComTrad = revTrad * (alycComShareTrad / 100);
+                let costComTrans = revTrans * (alycComShareTrans / 100);
+                let totalCostCom = costComTrad + costComTrans;
+
+                let totalCostAm = revTotal * (alycAmShare / 100); // AM Share on Total Gross
+
+                let netRevenue = revTotal - totalCostCom - totalCostAm;
+
+                tRev+=revTotal; tAdmin+=m.aumAdmin; tSgfci+=m.aumSgfci; tTrans+=transAum;
+                tComCost += totalCostCom; tAmCost += totalCostAm; tNet += netRevenue;
+
                 const setVal = (id, v) => { const el = document.getElementById(id); if(el && document.activeElement!==el) el.value = intFmt.format(v); };
                 setVal(`alyc-total-${i}`, m.totalAum); setVal(`alyc-admin-${i}`, m.aumAdmin); setVal(`alyc-sgfci-${i}`, m.aumSgfci);
-                document.getElementById(`alyc-share-${i}`).innerText = pctFmt.format(gAUM>0?m.totalAum/gAUM:0);
-                document.getElementById(`alyc-trans-${i}`).innerText = usdFmt.format(trans);
-                document.getElementById(`alyc-rev-${i}`).innerText = usdFmt.format(rev);
+                
+                document.getElementById(`alyc-trans-${i}`).innerText = usdFmt.format(transAum);
+                document.getElementById(`alyc-rev-${i}`).innerText = usdFmt.format(revTotal);
+                
+                // Update New Cols
+                document.getElementById(`alyc-cost-com-${i}`).innerText = usdFmt.format(totalCostCom);
+                document.getElementById(`alyc-cost-am-${i}`).innerText = usdFmt.format(totalCostAm);
+                document.getElementById(`alyc-net-${i}`).innerText = usdFmt.format(netRevenue);
             });
-            alycSimData.forEach((m,i) => { const r = m.aumAdmin*(blend/100) + Math.max(0, m.totalAum - m.aumAdmin - m.aumSgfci)*(alycTransactionalFee/100); document.getElementById(`alyc-rev-share-${i}`).innerText = pctFmt.format(tRev>0?r/tRev:0); });
+            
             document.getElementById('alyc-total-revenue').innerText = usdFmt.format(tRev); document.getElementById('alyc-total-aum-footer').innerText = usdFmt.format(gAUM);
             document.getElementById('alyc-kpi-revenue').innerText = usdFmt.format(tRev); document.getElementById('alyc-kpi-blend-fee').innerText = blend.toFixed(2)+'%';
             document.getElementById('alyc-kpi-transac-fee').innerText = alycTransactionalFee.toFixed(2)+'%'; document.getElementById('alyc-kpi-total-yield').innerText = (gAUM>0?tRev/gAUM*100:0).toFixed(2)+'%';
@@ -1403,8 +1784,11 @@
             const setBrk = (k, v) => { document.getElementById('alyc-kpi-breakdown-'+k).innerText = usdFmt.format(v); document.getElementById('alyc-pct-'+k).innerText = pctFmt.format(gAUM>0?v/gAUM:0); };
             setBrk('admin', tAdmin); setBrk('sgfci', tSgfci); setBrk('transac', tTrans);
             
-            // P/L update
+            // P/L update (Revenue and Costs)
             alycGross = tRev;
+            alycComCost = tComCost;
+            alycAmRevenue = tAmCost;
+
             updatePL();
         }
         function resetAlycSimulation() { 
@@ -1412,6 +1796,9 @@
             alycPenetration=20; 
             alycTransactionalFee=2.0; 
             alycGlobalGrowth=0; 
+            alycComShareTrad = 55;
+            alycComShareTrans = 75;
+            alycAmShare = 0;
             
             // Reset UI Controls
             document.getElementById('alyc-penetration-slider').value=20; 
@@ -1423,7 +1810,16 @@
             document.getElementById('alyc-growth-slider').value=0; 
             const growthEl = document.getElementById('alyc-growth-val');
             growthEl.innerText='+0%'; 
-            growthEl.className = 'font-bold text-blue-600'; // Reset color
+            growthEl.className = 'font-bold text-blue-600'; 
+
+            document.getElementById('alyc-com-trad-slider').value = 55;
+            document.getElementById('alyc-com-trad-val').innerText = '55%';
+
+            document.getElementById('alyc-com-trans-slider').value = 75;
+            document.getElementById('alyc-com-trans-val').innerText = '75%';
+
+            document.getElementById('alyc-am-slider').value = 0;
+            document.getElementById('alyc-am-val').innerText = '0%';
 
             // Reset Portfolios Config
             portfolios=[
@@ -1930,53 +2326,52 @@
             tbody.innerHTML = '';
 
             // 1. Data Prep
-            const grossValues = [sgfciGross, alycGross, offshoreGross, mesaGross];
+            // Added amGross as a revenue stream
+            // Sum AM Revenues from units (SGFCI + ALYC)
+            amGross = sgfciAmRevenue + alycAmRevenue;
+
+            const grossValues = [sgfciGross, alycGross, offshoreGross, mesaGross, amGross];
             const totalGross = grossValues.reduce((a, b) => a + b, 0);
             
             // 2. Gross Revenue Row
             addRow(tbody, "INGRESOS BRUTOS", false, null, grossValues, true, false, grossValues);
             
             // 3. Direct Costs
-            const comms = [sgfciAcdi, 0, 0, mesaCost]; 
+            // Comms here only includes ACDI and Mesa Cost. Commercial cost moved to new row.
+            const comms = [sgfciAcdi, 0, 0, mesaCost, 0]; 
             addRow(tbody, "COSTO DIRECTO", false, null, comms, false, true, grossValues);
 
+            // New Row: Commercial Commissions (allocated to SGFCI column as requested)
+            // Now includes ALyC Commercial Cost
+            const commsComerciales = [sgfciComCost, alycComCost, 0, 0, 0];
+            addRow(tbody, "Comisiones Comerciales", false, null, commsComerciales, false, true, grossValues);
+
             // 4. Taxes
-            const taxesArray = grossValues.map(g => g * 0.055);
+            // Updated: Offshore (index 2) is exempt from 5.5% tax
+            const taxesArray = grossValues.map((g, i) => i === 2 ? 0 : g * 0.055);
             plCosts.impuestos = taxesArray.reduce((a,b)=>a+b,0);
             addRow(tbody, "IMPUESTOS (5.5%)", false, null, taxesArray, false, true, grossValues);
 
-            // 5. Manual Vars (Unallocated)
-            const manualVars = ['comerciales', 'assetManager'];
-            const manualLabels = ['Comerciales', 'Asset Manager'];
-            let totalManualVar = 0;
+            // 5. CM (Contribution Margin)
+            // CM Column = Gross - Direct - Commercials - Taxes
+            const cmValues = grossValues.map((g, i) => g - comms[i] - commsComerciales[i] - taxesArray[i]);
             
-            manualVars.forEach((k, i) => {
-                const val = plCosts[k];
-                totalManualVar += val;
-                const isReadOnly = (k === 'impuestos');
-                addRowManualTotal(tbody, manualLabels[i], k, val, isReadOnly);
-            });
-
-            // 6. CM (Contribution Margin)
-            // CM Column = Gross - Direct - Taxes
-            const cmValues = grossValues.map((g, i) => g - comms[i] - taxesArray[i]);
-            
-            // Total CM = Total Gross - Total Direct - Total Taxes - Total Manual Vars
+            // Total CM
             const totalComms = comms.reduce((a,b)=>a+b,0);
+            const totalCommercials = commsComerciales.reduce((a,b)=>a+b,0);
             const totalTaxes = taxesArray.reduce((a,b)=>a+b,0);
-            const netRev = totalGross - totalComms - totalTaxes - totalManualVar;
+            const netRev = totalGross - totalComms - totalCommercials - totalTaxes;
             
             addSummaryRowWithColumns(tbody, "CM", cmValues, grossValues, netRev);
 
-            // 7. Fixed Costs
-            const rowSalaries = [plCosts.salariosSgfci, plCosts.salariosAlyc, 0, 0]; 
+            // 6. Fixed Costs
+            const rowSalaries = [plCosts.salariosSgfci, plCosts.salariosAlyc, 0, 0, 0]; 
             addRow(tbody, "Costo Salarial", false, null, rowSalaries, false, true, grossValues);
 
-            const rowOverhead = [plCosts.overheadSgfci, plCosts.overheadAlyc, 0, 0];
+            const rowOverhead = [plCosts.overheadSgfci, plCosts.overheadAlyc, 0, 0, 0];
             addRow(tbody, "Overhead", false, null, rowOverhead, false, true, grossValues);
 
-            // 8. EBIT
-            // EBIT Column = CM Column - Salaries - Overhead
+            // 7. EBIT
             const ebitValues = cmValues.map((cm, i) => cm - rowSalaries[i] - rowOverhead[i]);
             
             const totalFixed = (plCosts.salariosSgfci + plCosts.salariosAlyc) + (plCosts.overheadSgfci + plCosts.overheadAlyc);
@@ -1989,7 +2384,8 @@
             document.getElementById('pl-ebit-margin').innerText = (ebitMargin*100).toFixed(1) + '%';
 
             // Charts
-            updatePlCharts(totalGross, totalComms + totalTaxes, totalManualVar, totalFixed, totalEbit);
+            // Note: totalComms now excludes commercials, so we add totalCommercials to variable costs for the chart
+            updatePlCharts(totalGross, totalComms + totalCommercials + totalTaxes, 0, totalFixed, totalEbit); 
         }
 
         function addRow(tbody, label, isInput, key, values, isHeader=false, isNegative=false, refGross=[]) {
@@ -2037,9 +2433,8 @@
 
         function addRowManualTotal(tbody, label, key, val, isReadOnly=false) {
             // Simplified for manual vars which are total-only in this UI version
-            const gross = sgfciGross + alycGross + offshoreGross + mesaGross;
-            const totalGross = gross; // Alias for clarity
-            const pct = totalGross > 0 ? (val / totalGross * 100).toFixed(1) + '%' : '0.0%';
+            // Note: Since we are dynamically building P/L, this function might be redundant if we don't have purely manual rows anymore.
+            // Keeping it for safety but not using in main flow if not needed.
             
             const tr = document.createElement('tr');
             tr.className = "border-b border-slate-50 hover:bg-slate-50 group"; 
@@ -2054,95 +2449,19 @@
                         onblur="formatPlInput(this)" oninput="handlePlInput('${key}', this.value)">`;
             }
 
-            tr.innerHTML = `
-                <td class="px-4 py-3 text-slate-700 pl-4 sticky left-0 bg-white group-hover:bg-slate-50 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] text-xs font-medium uppercase tracking-tight">${label}</td>
-                <td class="px-4 py-3 text-right text-slate-300">-</td><td class="px-2 py-3 text-center text-slate-300 border-r border-slate-100">-</td>
-                <td class="px-4 py-3 text-right text-slate-300">-</td><td class="px-2 py-3 text-center text-slate-300 border-r border-slate-100">-</td>
-                <td class="px-4 py-3 text-right text-slate-300">-</td><td class="px-2 py-3 text-center text-slate-300 border-r border-slate-100">-</td>
-                <td class="px-4 py-3 text-right text-slate-300">-</td><td class="px-2 py-3 text-center text-slate-300 border-r border-slate-100">-</td>
-                
-                <td class="px-3 py-3 text-right bg-slate-50/50">
-                    ${inputHtml}
-                </td>
-                <td class="px-2 py-3 text-center text-xs text-slate-400 bg-slate-50/50">${pct}</td>
-            `;
-            tbody.appendChild(tr);
-        }
-
-        function addSummaryRowWithColumns(tbody, label, values, refGross, overrideTotal=null) {
-            const tr = document.createElement('tr');
-            tr.className = label === 'EBIT' ? "bg-emerald-50 border-t-2 border-emerald-100 group" : "bg-slate-50 border-t border-slate-200 font-bold group";
-            const stickyBg = label === 'EBIT' ? 'bg-emerald-50' : 'bg-slate-50';
-            
-            let html = `<td class="px-4 py-3 ${label==='EBIT'?'text-emerald-800 text-lg':'text-slate-700'} font-bold uppercase sticky left-0 ${stickyBg} z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] tracking-tight">${label}</td>`;
-            
-            let rowSum = 0;
-            values.forEach((v, i) => {
-                rowSum += v;
-                let displayVal = usdFmt.format(v);
-                let colorClass = label==='EBIT' ? 'text-emerald-700' : 'text-slate-800';
-                if (v < 0) {
-                    displayVal = `(${usdFmt.format(Math.abs(v))})`;
-                    colorClass = 'text-rose-600';
-                }
-                
-                // %
-                let pct = "0.0%";
-                if(refGross[i] > 0) pct = (v / refGross[i] * 100).toFixed(1) + '%';
-
-                html += `<td class="px-4 py-3 text-right ${colorClass}">${displayVal}</td>`;
-                html += `<td class="px-2 py-3 text-center text-[10px] ${label==='EBIT'?'text-emerald-600':'text-slate-500'} border-r border-slate-200/50">${pct}</td>`;
-            });
-
-            // Total
-            let finalTotal = overrideTotal !== null ? overrideTotal : rowSum;
-            let totalDisplay = usdFmt.format(finalTotal);
-            let totalColor = label==='EBIT' ? 'text-emerald-700 text-lg' : 'text-slate-800';
-            if (finalTotal < 0) {
-                totalDisplay = `(${usdFmt.format(Math.abs(finalTotal))})`;
-                totalColor = 'text-rose-600 text-lg';
-            }
-
-            let totalRef = refGross.reduce((a,b)=>a+b,0);
-            let totalPct = totalRef > 0 ? (finalTotal / totalRef * 100).toFixed(1) + '%' : '0.0%';
-
-            html += `<td class="px-3 py-3 text-right font-bold ${totalColor}">${totalDisplay}</td>`;
-            html += `<td class="px-2 py-3 text-center text-xs ${label==='EBIT'?'text-emerald-600':'text-slate-500'} font-bold">${totalPct}</td>`;
-
-            tr.innerHTML = html;
-            tbody.appendChild(tr);
-        }
-
-        function addRowManualTotal(tbody, label, key, val, isReadOnly=false) {
-            // Simplified for manual vars which are total-only in this UI version
-            const gross = sgfciGross + alycGross + offshoreGross + mesaGross;
-            const totalGross = gross; // Alias for clarity
-            const pct = totalGross > 0 ? (val / totalGross * 100).toFixed(1) + '%' : '0.0%';
-            
-            const tr = document.createElement('tr');
-            tr.className = "border-b border-slate-50 hover:bg-slate-50 group"; 
-            
-            let inputHtml = '';
-            if (isReadOnly) {
-                let displayVal = val > 0 ? `(${usdFmt.format(val)})` : usdFmt.format(val);
-                inputHtml = `<div class="w-full text-right px-2 py-1 text-rose-600 text-sm font-bold bg-slate-100/50 rounded border border-transparent cursor-not-allowed">${displayVal}</div>`;
-            } else {
-                inputHtml = `<input type="text" value="${intFmt.format(val)}" 
-                        class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-right text-rose-600 font-medium focus:outline-none focus:ring-1 focus:ring-rose-400 text-sm"
-                        onblur="formatPlInput(this)" oninput="handlePlInput('${key}', this.value)">`;
+            // Fill empty cells for 5 columns
+            let emptyCells = '';
+            for(let i=0; i<5; i++) {
+                 emptyCells += `<td class="px-4 py-3 text-right text-slate-300">-</td><td class="px-2 py-3 text-center text-slate-300 border-r border-slate-100">-</td>`;
             }
 
             tr.innerHTML = `
                 <td class="px-4 py-3 text-slate-700 pl-4 sticky left-0 bg-white group-hover:bg-slate-50 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] text-xs font-medium uppercase tracking-tight">${label}</td>
-                <td class="px-4 py-3 text-right text-slate-300">-</td><td class="px-2 py-3 text-center text-slate-300 border-r border-slate-100">-</td>
-                <td class="px-4 py-3 text-right text-slate-300">-</td><td class="px-2 py-3 text-center text-slate-300 border-r border-slate-100">-</td>
-                <td class="px-4 py-3 text-right text-slate-300">-</td><td class="px-2 py-3 text-center text-slate-300 border-r border-slate-100">-</td>
-                <td class="px-4 py-3 text-right text-slate-300">-</td><td class="px-2 py-3 text-center text-slate-300 border-r border-slate-100">-</td>
-                
+                ${emptyCells}
                 <td class="px-6 py-3 text-right bg-slate-50/50">
                     ${inputHtml}
                 </td>
-                <td class="px-4 py-3 text-center text-xs text-slate-400 bg-slate-50/50">${pct}</td>
+                <td class="px-4 py-3 text-center text-xs text-slate-400 bg-slate-50/50">-</td>
             `;
             tbody.appendChild(tr);
         }
@@ -2199,10 +2518,10 @@
                 plRevenueChart = new Chart(ctx1, {
                     type: 'doughnut',
                     data: {
-                        labels: ['SGFCI', 'ALyC', 'Offshore', 'Mesa'],
+                        labels: ['SGFCI', 'ALyC', 'Offshore', 'Mesa', 'Asset Mgr'],
                         datasets: [{
-                            data: [sgfciGross, alycGross, offshoreGross, mesaGross],
-                            backgroundColor: ['#8b5cf6', '#10b981', '#06b6d4', '#f97316'],
+                            data: [sgfciGross, alycGross, offshoreGross, mesaGross, amGross],
+                            backgroundColor: ['#8b5cf6', '#10b981', '#06b6d4', '#f97316', '#db2777'],
                             borderWidth: 0
                         }]
                     },
