@@ -7,133 +7,112 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
     <style>
+        body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
+
         /* --- ESTILOS COMPARTIDOS --- */
-        .chart-container {
-            position: relative;
-            width: 100%;
-            height: 250px;
-        }
+        .chart-container { position: relative; width: 100%; height: 250px; }
         
         /* Scrollbar personalizada */
-        .custom-scroll::-webkit-scrollbar {
-            width: 8px;
-            height: 8px; 
-        }
-        .custom-scroll::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+        .custom-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* --- ESTILOS ESTRUCTURA (ORGANIGRAMA) --- */
-        .tree-line-vertical {
-            width: 2px;
-            background-color: #cbd5e1;
-            margin: 0 auto;
-        }
-        .tree-connector-horizontal {
-            height: 2px;
-            background-color: #cbd5e1;
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        .node-card {
-            transition: all 0.2s ease-in-out;
+        /* --- ESTILOS ORGANIGRAMA (NUEVO) --- */
+        .org-v-line { width: 2px; background: #cbd5e1; margin: 0 auto; }
+        
+        .org-node {
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             position: relative;
-            z-index: 10;
         }
-        .node-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            z-index: 20;
+        .org-node:hover { transform: translateY(-2px); z-index: 10; }
+        .org-node.selected {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.15);
         }
-        .node-card.active {
-            ring-width: 3px;
-            transform: scale(1.02);
-            border-color: #3b82f6;
-        }
-        /* Minimalist Headcount Badge */
-        .hc-indicator {
-            position: absolute;
-            top: 6px;
-            right: 8px;
-            background-color: rgba(241, 245, 249, 0.9); /* slate-100 with opacity */
-            color: #64748b; /* slate-500 */
-            font-size: 0.65rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2px 6px;
-            border-radius: 9999px;
+
+        .org-hc-badge {
+            position: absolute; top: 6px; right: 8px;
+            background: rgba(241,245,249,0.9); color: #64748b;
+            font-size: 9px; font-weight: 700;
+            display: flex; align-items: center; gap: 3px;
+            padding: 1px 7px; border-radius: 10px;
             border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            z-index: 20;
             transition: all 0.2s;
         }
-        .node-card:hover .hc-indicator {
-            background-color: #fff;
-            color: #3b82f6;
-            border-color: #bfdbfe;
-        }
+        .org-node:hover .org-hc-badge { background: white; color: #3b82f6; border-color: #bfdbfe; }
 
-        .pos-badge {
-            padding: 2px 6px;
-            border-radius: 6px;
-            font-weight: 700;
-            display: inline-block;
-            line-height: 1.2;
+        .ent-badge {
+            display: inline-flex; align-items: center;
+            padding: 2px 8px; border-radius: 4px;
+            font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
         }
-        .pos-alyc { background-color: #d1fae5; color: #065f46; }
-        .pos-sg { background-color: #e0e7ff; color: #3730a3; }
+        .ent-badge.alyc { background: #d1fae5; color: #065f46; }
+        .ent-badge.sg { background: #e0e7ff; color: #3730a3; }
         
-        .reg-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            font-size: 0.75rem;
-            margin-left: 4px;
-            cursor: help;
-            vertical-align: middle;
-            border: 1px solid rgba(0,0,0,0.05);
+        .reg-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 18px; height: 18px; border-radius: 50%;
+            font-size: 9px; cursor: help;
         }
-        .reg-badge-alyc { background-color: #d1fae5; color: #065f46; }
-        .reg-badge-sgfci { background-color: #e0e7ff; color: #3730a3; }
+        .reg-icon.alyc { background: rgba(16,185,129,0.12); }
+        .reg-icon.sg { background: rgba(99,102,241,0.12); }
+
+        .org-subnode { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 5px; font-size: 10px; color: #475569; }
+        .org-subnode .dot-ind { width: 5px; height: 5px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+
+        /* Focus Bars (Detail Panel) */
+        .focus-bar-track { flex: 1; height: 6px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
+        .focus-bar-fill { height: 100%; border-radius: 3px; transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* --- ESTILOS RRHH / STAFFING --- */
+        .staff-input {
+            width: 100%; border: 1px solid transparent; border-radius: 4px;
+            padding: 5px 8px; font-size: 13px; font-family: inherit;
+            background: transparent; color: #334155;
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .staff-input:hover { border-color: #cbd5e1; background: white; }
+        .staff-input:focus { outline: none; border-color: #3b82f6; background: white; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        .staff-input::placeholder { color: #cbd5e1; }
+        .staff-input.cost-input { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .staff-input.cost-input:focus { border-color: #d4a853; box-shadow: 0 0 0 3px rgba(196,154,60,0.1); }
+
+        /* Role Modal */
+        .role-modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(10,22,40,0.5); z-index: 1000;
+            align-items: center; justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .role-modal-overlay.visible { display: flex; }
+        .role-modal {
+            background: white; border-radius: 16px;
+            box-shadow: 0 24px 80px rgba(10,22,40,0.25);
+            width: 90%; max-width: 640px; max-height: 85vh;
+            overflow: hidden; display: flex; flex-direction: column;
+            animation: modalIn 200ms ease-out;
+        }
+        @keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+        .rm-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .rm-meta-item { background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 6px; padding: 10px 12px; }
+        .rm-task-list { list-style: none; padding: 0; }
+        .rm-task-list li { font-size: 13px; color: #475569; padding: 5px 0; display: flex; align-items: flex-start; gap: 8px; line-height: 1.45; }
+        .rm-task-list li::before { content: '▸'; color: #cbd5e1; flex-shrink: 0; margin-top: 1px; }
 
         /* --- ESTILOS SIMULADORES (INPUTS) --- */
-        input[type=range] {
-            -webkit-appearance: none; 
-            background: transparent; 
-        }
+        input[type=range] { -webkit-appearance: none; background: transparent; }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 16px;
-            width: 16px;
-            border-radius: 50%;
-            background: #4f46e5;
-            cursor: pointer;
-            margin-top: -6px; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+            background: #4f46e5; cursor: pointer; margin-top: -6px; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 4px;
-            cursor: pointer;
-            background: #e2e8f0;
-            border-radius: 2px;
-        }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #e2e8f0; border-radius: 2px; }
+        
         /* Custom Colors for Sliders */
         #acdi-slider::-webkit-slider-thumb { background: #e11d48; }
         #growth-slider::-webkit-slider-thumb { background: #2563eb; }
@@ -141,361 +120,447 @@
         #alyc-penetration-slider::-webkit-slider-thumb { background: #059669; }
         #alyc-transact-slider::-webkit-slider-thumb { background: #d97706; }
         #alyc-growth-slider::-webkit-slider-thumb { background: #2563eb; }
-        #offshore-growth-slider::-webkit-slider-thumb { background: #0891b2; } /* Cyan-600 */
-        #offshore-fee-slider::-webkit-slider-thumb { background: #7c3aed; } /* Violet-600 */
-        #mesa-return-slider::-webkit-slider-thumb { background: #ea580c; } /* Orange-600 */
-        #com-share-slider::-webkit-slider-thumb { background: #f59e0b; } /* Amber-500 */
-        #am-share-slider::-webkit-slider-thumb { background: #db2777; } /* Pink-600 */
-        
-        /* ALYC NEW SLIDERS */
-        #alyc-com-trad-slider::-webkit-slider-thumb { background: #f59e0b; } /* Amber-500 */
-        #alyc-com-trans-slider::-webkit-slider-thumb { background: #d97706; } /* Amber-600 */
-        #alyc-am-slider::-webkit-slider-thumb { background: #db2777; } /* Pink-600 */
-
-        /* OFFSHORE NEW SLIDERS */
-        #offshore-com-slider::-webkit-slider-thumb { background: #f59e0b; } /* Amber-500 */
-        #offshore-am-slider::-webkit-slider-thumb { background: #db2777; } /* Pink-600 */
-        #offshore-front-slider::-webkit-slider-thumb { background: #e11d48; } /* Rose-600 */
-        
-        /* GLOBAL COST ALLOCATION SLIDERS */
-        #alloc-sg-slider::-webkit-slider-thumb { background: #6366f1; } /* Indigo */
-        #alloc-alyc-slider::-webkit-slider-thumb { background: #10b981; } /* Emerald */
-        #alloc-off-slider::-webkit-slider-thumb { background: #06b6d4; } /* Cyan */
-        #alloc-trad-slider::-webkit-slider-thumb { background: #f97316; } /* Orange */
-        #alloc-am-slider::-webkit-slider-thumb { background: #db2777; } /* Pink */
+        #offshore-growth-slider::-webkit-slider-thumb { background: #0891b2; }
+        #offshore-fee-slider::-webkit-slider-thumb { background: #7c3aed; }
+        #mesa-return-slider::-webkit-slider-thumb { background: #ea580c; }
+        #com-share-slider::-webkit-slider-thumb { background: #f59e0b; }
+        #am-share-slider::-webkit-slider-thumb { background: #db2777; }
+        #alyc-com-trad-slider::-webkit-slider-thumb { background: #f59e0b; }
+        #alyc-com-trans-slider::-webkit-slider-thumb { background: #d97706; }
+        #alyc-am-slider::-webkit-slider-thumb { background: #db2777; }
+        #offshore-com-slider::-webkit-slider-thumb { background: #f59e0b; }
+        #offshore-am-slider::-webkit-slider-thumb { background: #db2777; }
+        #offshore-front-slider::-webkit-slider-thumb { background: #e11d48; }
+        #alloc-sg-slider::-webkit-slider-thumb { background: #6366f1; }
+        #alloc-alyc-slider::-webkit-slider-thumb { background: #10b981; }
+        #alloc-off-slider::-webkit-slider-thumb { background: #06b6d4; }
+        #alloc-trad-slider::-webkit-slider-thumb { background: #f97316; }
+        #alloc-am-slider::-webkit-slider-thumb { background: #db2777; }
 
         /* Toggle Switch */
-        .toggle-checkbox:checked {
-            right: 0;
-            border-color: #68D391;
+        .toggle-checkbox:checked { right: 0; border-color: #68D391; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #68D391; }
+
+        /* --- NAVBAR DARK THEME (avoids Tailwind opacity slash classes) --- */
+        .nav-bar { background: #0a1628; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .nav-tabs { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); }
+        .nav-tab {
+            padding: 6px 16px; font-size: 11px; font-weight: 700;
+            border: none; background: transparent; color: #94a3b8;
+            cursor: pointer; border-radius: 7px;
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: #68D391;
-        }
+        .nav-tab:hover { color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.05); }
+        .nav-tab.active { background: rgba(255,255,255,0.12); color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        .nav-tab.tab-sep { border-left: 1px solid rgba(255,255,255,0.1); margin-left: 4px; }
+        .nav-hc-box { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); }
+        .nav-hc-sep { width: 1px; height: 16px; background: rgba(255,255,255,0.12); }
+        .legend-dark { background: #111d35; border-bottom: 1px solid rgba(255,255,255,0.06); }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans h-screen overflow-hidden flex flex-col">
 
     <!-- Navbar -->
-    <nav class="bg-white border-b border-slate-200 shadow-sm z-30">
+    <nav class="nav-bar z-30 flex-shrink-0">
         <div class="px-6 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="bg-blue-900 text-white font-bold p-2 rounded-lg text-sm">FINANCIAL HOLDING</div>
-                <h1 class="text-xl font-semibold text-slate-700 hidden md:block">Modelo Operativo</h1>
+                <div class="bg-gradient-to-br from-amber-400 to-amber-600 text-slate-900 font-bold p-2 rounded-lg text-sm" style="font-family:'DM Serif Display',serif;">FH</div>
+                <div>
+                    <h1 class="text-sm font-semibold text-white/90 tracking-wide">FINANCIAL HOLDING</h1>
+                    <div class="text-[9px] text-slate-400 uppercase tracking-widest font-medium">Modelo Operativo Integrado</div>
+                </div>
             </div>
             
             <!-- View Switcher Tabs -->
-            <div class="flex space-x-1 bg-slate-100 p-1 rounded-lg">
-                <button onclick="switchView('structure')" id="tab-structure" class="px-4 py-1.5 text-xs font-bold rounded-md transition-all shadow-sm bg-white text-blue-700">
-                    Estructura
-                </button>
-                <button onclick="switchView('revenue')" id="tab-revenue" class="px-4 py-1.5 text-xs font-bold rounded-md transition-all text-slate-500 hover:bg-white/50">
-                    SGFCI 2026
-                </button>
-                <button onclick="switchView('alyc')" id="tab-alyc" class="px-4 py-1.5 text-xs font-bold rounded-md transition-all text-slate-500 hover:bg-white/50">
-                    ALYC 2026
-                </button>
-                <button onclick="switchView('offshore')" id="tab-offshore" class="px-4 py-1.5 text-xs font-bold rounded-md transition-all text-slate-500 hover:bg-white/50">
-                    OTROS ING 2026
-                </button>
-                <button onclick="switchView('costs')" id="tab-costs" class="px-4 py-1.5 text-xs font-bold rounded-md transition-all text-slate-500 hover:bg-white/50">
-                    COSTOS 2026
-                </button>
-                <button onclick="switchView('pl')" id="tab-pl" class="px-4 py-1.5 text-xs font-bold rounded-md transition-all text-slate-500 hover:bg-white/50 border-l border-slate-300 ml-2">
-                    P/L 2026
-                </button>
+            <div class="nav-tabs flex gap-0.5 p-1 rounded-lg">
+                <button onclick="switchView('structure')" id="tab-structure" class="nav-tab active">Estructura</button>
+                <button onclick="switchView('rrhh')" id="tab-rrhh" class="nav-tab">RRHH</button>
+                <button onclick="switchView('revenue')" id="tab-revenue" class="nav-tab">SGFCI 2026</button>
+                <button onclick="switchView('alyc')" id="tab-alyc" class="nav-tab">ALYC 2026</button>
+                <button onclick="switchView('offshore')" id="tab-offshore" class="nav-tab">OTROS ING 2026</button>
+                <button onclick="switchView('costs')" id="tab-costs" class="nav-tab">COSTOS 2026</button>
+                <button onclick="switchView('pl')" id="tab-pl" class="nav-tab tab-sep">P/L 2026</button>
             </div>
 
             <div class="flex items-center gap-4">
-                <!-- Headcount Counter Split -->
-                <div class="bg-slate-50 border border-slate-300 rounded-lg px-2 py-1 flex items-center gap-3 shadow-sm">
+                <!-- Headcount Counter -->
+                <div class="nav-hc-box rounded-lg px-3 py-1.5 flex items-center gap-3">
                     <div class="flex flex-col items-end gap-0.5">
-                        <div class="flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 rounded border border-emerald-200 w-full justify-between">
-                            <span class="mr-1">ALYC:</span>
+                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400">
+                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                            <span>ALYC:</span>
                             <span id="count-alyc">0</span>
                         </div>
-                        <div class="flex items-center gap-1 text-[10px] font-bold text-indigo-700 bg-indigo-100 px-1.5 rounded border border-indigo-200 w-full justify-between">
-                            <span class="mr-1">SG:</span>
+                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-indigo-400">
+                            <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
+                            <span>SG:</span>
                             <span id="count-sg">0</span>
                         </div>
                     </div>
-                    <div class="h-6 w-px bg-slate-300"></div>
+                    <div class="nav-hc-sep"></div>
                     <div class="flex flex-col leading-none items-center pr-1">
-                        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Total</span>
-                        <span id="total-headcount" class="text-sm font-bold text-slate-700">0</span>
+                        <span class="text-[8px] text-slate-400 font-bold uppercase tracking-widest">Total HC</span>
+                        <span id="total-headcount" class="text-sm font-bold text-white">0</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- REFERENCE LEGEND BAR (Solo visible en Estructura) -->
-        <div id="legend-bar" class="bg-slate-50 border-t border-slate-200 px-6 py-2 flex flex-wrap justify-center gap-8 text-xs text-slate-600 shadow-inner">
-            <div class="flex items-center gap-3 border-r border-slate-300 pr-6">
-                <span class="font-bold text-slate-400 uppercase tracking-widest">Nómina (Cargo):</span>
-                <span class="pos-badge pos-alyc text-[10px]">ALYC</span>
-                <span class="pos-badge pos-sg text-[10px]">SGFCI</span>
+        <!-- REFERENCE LEGEND BAR -->
+        <div id="legend-bar" class="legend-dark px-6 py-2 flex flex-wrap justify-center gap-8 text-xs text-slate-400">
+            <div class="flex items-center gap-3 pr-6" style="border-right:1px solid rgba(255,255,255,0.1);">
+                <span class="font-bold text-slate-500 uppercase tracking-widest text-[9px]">Nómina:</span>
+                <span class="ent-badge alyc text-[10px]">ALYC</span>
+                <span class="ent-badge sg text-[10px]">SGFCI</span>
             </div>
-            <!-- ALYC LEGEND -->
-            <div class="flex items-center gap-4 border-r border-slate-300 pr-6">
-                <div class="font-bold text-emerald-600 uppercase tracking-widest flex items-center">Resp. ALyC:</div>
-                <div class="flex items-center gap-1" title="Responsable de Cumplimiento Regulatorio"><span class="reg-badge reg-badge-alyc">⚖️</span> Resp. CNV</div>
-                <div class="flex items-center gap-1" title="Oficial de Cumplimiento UIF (Titular)"><span class="reg-badge reg-badge-alyc">🛡️</span> UIF Titular</div>
-                <div class="flex items-center gap-1" title="Responsable de Relaciones con el Público"><span class="reg-badge reg-badge-alyc">🤝</span> Rel. Público</div>
+            <div class="flex items-center gap-4 pr-6" style="border-right:1px solid rgba(255,255,255,0.1);">
+                <span class="font-bold text-slate-500 uppercase tracking-widest text-[9px]">Resp. ALyC:</span>
+                <span class="flex items-center gap-1"><span class="reg-icon alyc">⚖️</span> CNV</span>
+                <span class="flex items-center gap-1"><span class="reg-icon alyc">🛡️</span> UIF</span>
+                <span class="flex items-center gap-1"><span class="reg-icon alyc">🤝</span> Rel. Público</span>
             </div>
-            <!-- SGFCI LEGEND -->
             <div class="flex items-center gap-4">
-                <div class="font-bold text-indigo-600 uppercase tracking-widest flex items-center">Resp. SGFCI:</div>
-                <div class="flex items-center gap-1" title="Oficial de Cumplimiento UIF (Titular)"><span class="reg-badge reg-badge-sgfci">🛡️</span> UIF Titular</div>
-                <div class="flex items-center gap-1" title="Responsable de Inversiones (Idóneo)"><span class="reg-badge reg-badge-sgfci">✒️</span> Resp. Inversiones</div>
+                <span class="font-bold text-slate-500 uppercase tracking-widest text-[9px]">Resp. SGFCI:</span>
+                <span class="flex items-center gap-1"><span class="reg-icon sg">🛡️</span> UIF</span>
+                <span class="flex items-center gap-1"><span class="reg-icon sg">✒️</span> Inversiones</span>
             </div>
         </div>
     </nav>
 
     <!-- Main Content Container -->
     <div class="flex-1 relative overflow-hidden">
-
-        <!-- VIEW 1: STRUCTURE -->
+        <!-- VIEW 1: STRUCTURE (NEW ORG CHART) -->
         <div id="view-structure" class="absolute inset-0 flex flex-col md:flex-row bg-slate-50 transition-opacity duration-300 z-10">
-            <!-- LEFT PANEL: Visual Org Chart (Interactive) -->
-            <div class="flex-1 overflow-y-auto custom-scroll p-8 bg-slate-50 relative">
-                <!-- Hierarchy Container -->
-                <div class="max-w-5xl mx-auto flex flex-col items-center relative scale-90 origin-top">
-                    <!-- LEVEL 1: Governance -->
-                    <div class="flex flex-col items-center mb-8 relative w-full">
-                        <!-- Board -->
-                        <div id="node-board" class="node-card w-64 bg-slate-900 text-white p-4 rounded-xl shadow-lg text-center z-10 border-b-4 border-indigo-500" onclick="loadDetail('board')">
-                            <h2 class="font-bold text-lg">BOARD OF DIRECTORS</h2>
-                            <p class="text-xs text-slate-400">Corporate Governance</p>
-                        </div>
-                        <div class="h-8 tree-line-vertical"></div>
-                        <!-- Committees -->
-                        <div class="flex gap-4 justify-center w-full relative">
-                            <div class="absolute top-0 w-1/2 border-t-2 border-slate-300"></div>
-                            <div class="h-4 tree-line-vertical absolute top-0 left-1/2 -translate-x-1/2"></div>
-                            <!-- Committee: Risk -->
-                            <div id="node-risk-com" class="node-card bg-amber-50 border-2 border-amber-200 text-amber-900 p-3 rounded-lg shadow-sm w-48 text-center mt-4" onclick="loadDetail('risk-com')">
-                                <h3 class="font-bold text-sm">RISK COMMITTEE</h3>
-                                <p class="text-[10px] text-amber-700 mt-1">Chair: CCO</p>
+            <!-- LEFT PANEL: Org Chart -->
+            <div class="flex-1 overflow-y-auto overflow-x-auto custom-scroll p-10 relative" style="background: linear-gradient(to bottom right, #f8fafc, #f8fafc, rgba(238,242,255,0.2))">
+                <div class="max-w-5xl mx-auto flex flex-col items-center relative">
+
+                    <!-- LEVEL 0: HOLDING -->
+                    <div id="node-board" class="org-node bg-slate-900 text-white px-10 py-5 rounded-2xl text-center border-b-[3px] border-amber-500 shadow-lg shadow-slate-900/20 min-w-[280px]" onclick="selectNode('board')">
+                        <h2 class="text-xl font-normal" style="font-family:'DM Serif Display',serif; letter-spacing:0.5px;">BOARD OF DIRECTORS</h2>
+                        <div class="text-[9px] uppercase tracking-[2px] text-amber-400 mt-1 font-medium">Corporate Governance · Holding Financiero</div>
+                    </div>
+
+                    <div class="org-v-line" style="height:28px;"></div>
+
+                    <!-- LEVEL 1: CEO + COMMITTEES -->
+                    <div class="flex justify-center items-start gap-6 w-full max-w-[700px] relative">
+                        <!-- H-connector -->
+                        <div class="absolute top-0 left-1/4 right-1/4 h-0.5 bg-slate-300"></div>
+                        
+                        <!-- Risk Committee -->
+                        <div class="pt-4 flex flex-col items-center">
+                            <div class="org-v-line" style="height:16px;"></div>
+                            <div id="node-risk-com" class="org-node bg-white border border-slate-200 rounded-lg px-5 py-3 text-center shadow-sm border-l-[3px] border-l-amber-500 min-w-[160px]" onclick="selectNode('risk-com')">
+                                <div class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Comité de Riesgo</div>
+                                <div class="text-[9px] text-slate-400 mt-1">Chair: CCO</div>
                             </div>
-                            <!-- CEO -->
-                            <div id="node-ceo" class="node-card bg-white border-2 border-slate-300 p-3 rounded-lg shadow-md w-48 text-center mt-4 z-10" onclick="loadDetail('ceo')">
+                        </div>
+
+                        <!-- CEO -->
+                        <div class="pt-4 flex flex-col items-center z-10">
+                            <div class="org-v-line" style="height:16px;"></div>
+                            <div id="node-ceo" class="org-node bg-white border-2 border-slate-300 rounded-lg px-6 py-3.5 text-center shadow-sm min-w-[200px]" onclick="selectNode('ceo')">
                                 <div class="flex items-center justify-center gap-1 mb-1">
-                                    <h3 class="pos-badge pos-alyc text-sm">CEO</h3>
-                                    <span class="reg-badge reg-badge-alyc" title="Titular CNV (ALyC)">⚖️</span>
-                                    <span class="reg-badge reg-badge-alyc" title="Suplente UIF (ALyC)">🛟</span>
+                                    <span class="ent-badge alyc text-[11px]">CEO</span>
+                                    <span class="reg-icon alyc" title="Titular CNV (ALyC)">⚖️</span>
                                 </div>
-                                <p class="text-[10px] text-slate-500">Chief Executive Officer</p>
+                                <div class="text-[9px] text-slate-500">Chief Executive Officer</div>
                             </div>
-                            <!-- Committee: Investment -->
-                            <div id="node-inv-com" class="node-card bg-indigo-50 border-2 border-indigo-200 text-indigo-900 p-3 rounded-lg shadow-sm w-48 text-center mt-4" onclick="loadDetail('inv-com')">
-                                <h3 class="font-bold text-sm">INVESTMENT COMMITTEE</h3>
-                                <p class="text-[10px] text-indigo-700 mt-1">Chair: CSO</p>
+                        </div>
+
+                        <!-- Investment Committee -->
+                        <div class="pt-4 flex flex-col items-center">
+                            <div class="org-v-line" style="height:16px;"></div>
+                            <div id="node-inv-com" class="org-node bg-white border border-slate-200 rounded-lg px-5 py-3 text-center shadow-sm border-l-[3px] border-l-indigo-500 min-w-[160px]" onclick="selectNode('inv-com')">
+                                <div class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Comité de Inversiones</div>
+                                <div class="text-[9px] text-slate-400 mt-1">Chair: CIO</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- LEVEL 2: Transversal Functional Areas -->
-                    <div class="w-full mb-12 relative">
-                        <div class="flex items-center justify-center mb-10 relative">
-                            <div class="absolute -top-8 left-1/2 -translate-x-1/2 h-8 tree-line-vertical"></div>
-                            <span class="bg-slate-200 text-slate-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider relative z-10">Shared Services (C-Level Transversal)</span>
+                    <div class="org-v-line" style="height:32px;"></div>
+
+                    <!-- LEVEL 2: SHARED SERVICES -->
+                    <div class="inline-flex items-center bg-slate-200 text-slate-600 text-[9px] font-bold uppercase tracking-[1.5px] px-4 py-1.5 rounded-full relative z-10">
+                        Shared Services · C-Level Transversal
+                    </div>
+
+                    <div class="org-v-line" style="height:20px;"></div>
+
+                    <!-- Grid: Core Shared Services -->
+                    <div class="grid grid-cols-3 gap-4 w-full max-w-[860px] relative">
+                        <!-- H-connector line above grid -->
+                        <div class="absolute -top-5 left-10 right-10 h-0.5 bg-slate-300"></div>
+                        <div class="absolute -top-5 left-1/2 -translate-x-1/2 w-0.5 h-5 bg-slate-300"></div>
+
+                        <!-- Control & Legal -->
+                        <div id="node-compliance" class="org-node bg-white rounded-lg p-4 shadow-sm border-t-[3px] border-t-rose-500 relative" onclick="selectNode('compliance')">
+                            <div class="org-hc-badge"><span class="text-[8px]">👤</span> 4</div>
+                            <div class="text-[9px] font-bold uppercase tracking-wider text-rose-600 mb-1.5">Control & Legal</div>
+                            <div class="flex items-center gap-1 mb-0.5">
+                                <span class="ent-badge alyc">CCO</span>
+                                <span class="reg-icon alyc" title="Titular UIF (ALyC)">🛡️</span>
+                            </div>
+                            <div class="text-[9px] text-slate-500">Chief Compliance Officer</div>
+                            <div class="mt-2.5 pt-2.5 border-t border-slate-100 space-y-1">
+                                <div class="org-subnode"><span class="dot-ind bg-emerald-500"></span><span class="ent-badge alyc text-[8px]">Compliance Mgr & Onboarding</span></div>
+                                <div class="org-subnode"><span class="dot-ind bg-emerald-500"></span><span class="ent-badge alyc text-[8px]">AML Analyst (Ssr)</span></div>
+                                <div class="org-subnode"><span class="dot-ind bg-indigo-500"></span><span class="ent-badge sg text-[8px]">Auditor (Jr)</span></div>
+                            </div>
                         </div>
-                        <!-- Grid for Managers -->
-                        <div class="grid grid-cols-4 gap-4 relative">
-                            <div class="absolute -top-6 left-10 right-10 border-t-2 border-slate-300"></div>
-                            <div class="absolute -top-10 left-1/2 -translate-x-1/2 h-10 tree-line-vertical"></div>
-                            <!-- Compliance -->
-                            <div class="relative pt-6">
-                                <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
-                                <div id="node-compliance" class="node-card bg-white border-l-4 border-rose-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('compliance')">
-                                    <div>
-                                        <div class="text-xs text-rose-600 font-bold mb-1">CONTROL</div>
-                                        <div class="flex items-center gap-1 mb-1">
-                                            <h4 class="pos-badge pos-alyc text-xs">CCO</h4>
-                                            <span class="reg-badge reg-badge-alyc" title="Titular UIF (ALyC)">🛡️</span>
-                                        </div>
-                                        <p class="text-[10px] text-slate-500 mb-2">Chief Compliance Officer</p>
-                                    </div>
-                                    <div class="mt-2 pt-2 border-t border-slate-100">
-                                        <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                            <span class="w-1.5 h-1.5 bg-rose-400 rounded-full mr-1"></span><span class="pos-badge pos-alyc text-[9px] ml-1">Compliance Mgr</span>
-                                        </div>
-                                        <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
-                                            <div>• <span class="pos-badge pos-alyc text-[9px]">AML (Ssr)</span></div>
-                                            <div>• <span class="pos-badge pos-sg text-[9px]">Auditor (Jr)</span></div>
-                                        </div>
-                                    </div>
-                                </div>
+
+                        <!-- Operations -->
+                        <div id="node-ops" class="org-node bg-white rounded-lg p-4 shadow-sm border-t-[3px] border-t-blue-500 relative" onclick="selectNode('ops')">
+                            <div class="org-hc-badge"><span class="text-[8px]">👤</span> 11</div>
+                            <div class="text-[9px] font-bold uppercase tracking-wider text-blue-600 mb-1.5">Operations</div>
+                            <div class="flex items-center gap-1 mb-0.5">
+                                <span class="ent-badge alyc">COO</span>
                             </div>
-                            <!-- Back Office -->
-                            <div class="relative pt-6">
-                                <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
-                                <div id="node-ops" class="node-card bg-white border-l-4 border-blue-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('ops')">
-                                    <div>
-                                        <div class="text-xs text-blue-600 font-bold mb-1">OPERATIONS</div>
-                                        <div class="flex items-center gap-1 mb-1"><h4 class="pos-badge pos-alyc text-xs">COO</h4></div>
-                                        <p class="text-[10px] text-slate-500 mb-2">Chief Operating Officer</p>
-                                    </div>
-                                    <div class="mt-2 pt-2 border-t border-slate-100">
-                                        <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                            <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span><span class="pos-badge pos-alyc text-[9px] ml-1">Head Ops</span>
-                                        </div>
-                                        <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
-                                            <div>• <span class="pos-badge pos-alyc text-[9px]">Settl/Custody</span></div>
-                                            <div>• <span class="pos-badge pos-sg text-[9px]">Fund Admin</span></div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="text-[9px] text-slate-500">Chief Operating Officer</div>
+                            <div class="mt-2.5 pt-2.5 border-t border-slate-100 space-y-1">
+                                <div class="org-subnode"><span class="dot-ind bg-emerald-500"></span><span class="ent-badge alyc text-[8px]">Head of Back Office</span></div>
+                                <div class="org-subnode"><span class="dot-ind bg-emerald-500"></span><span class="ent-badge alyc text-[8px]">Settlement (×1)</span></div>
+                                <div class="org-subnode"><span class="dot-ind bg-indigo-500"></span><span class="ent-badge sg text-[8px]">Fund Admin (×2)</span></div>
+                                <div class="org-subnode"><span class="dot-ind bg-emerald-500"></span><span class="ent-badge alyc text-[8px]">Treasury (×3)</span></div>
+                                <div class="org-subnode"><span class="dot-ind bg-emerald-500"></span><span class="ent-badge alyc text-[8px]">Securities (×3)</span></div>
                             </div>
-                            <!-- Admin & Treasury -->
-                            <div class="relative pt-6">
-                                <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
-                                <div id="node-admin" class="node-card bg-white border-l-4 border-blue-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('admin')">
-                                    <div>
-                                        <div class="text-xs text-blue-600 font-bold mb-1">FINANCE</div>
-                                        <div class="flex items-center gap-1 mb-1">
-                                            <h4 class="pos-badge pos-sg text-xs">CFO</h4>
-                                            <span class="reg-badge reg-badge-sgfci" title="Titular UIF (SGFCI)">🛡️</span>
-                                        </div>
-                                        <p class="text-[10px] text-slate-500 mb-2">Chief Financial Officer</p>
-                                    </div>
-                                    <div class="mt-2 pt-2 border-t border-slate-100">
-                                        <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                            <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span><span class="pos-badge pos-alyc text-[9px] ml-1">Treasurer</span>
-                                        </div>
-                                        <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
-                                            <div>• <span class="pos-badge pos-sg text-[9px]">Treasury/Acct</span></div>
-                                            <div>• <span class="pos-badge pos-alyc text-[9px]">Tax / AP</span></div>
-                                        </div>
-                                    </div>
-                                </div>
+                        </div>
+
+                        <!-- Finance -->
+                        <div id="node-admin" class="org-node bg-white rounded-lg p-4 shadow-sm border-t-[3px] border-t-blue-600 relative" onclick="selectNode('admin')">
+                            <div class="org-hc-badge"><span class="text-[8px]">👤</span> 4</div>
+                            <div class="text-[9px] font-bold uppercase tracking-wider text-blue-600 mb-1.5">Finance</div>
+                            <div class="flex items-center gap-1 mb-0.5">
+                                <span class="ent-badge sg">CFO</span>
+                                <span class="reg-icon sg" title="Titular UIF (SGFCI)">🛡️</span>
                             </div>
-                            <!-- Research -->
-                            <div class="relative pt-6">
-                                <div class="absolute -top-0 left-1/2 -translate-x-1/2 h-6 tree-line-vertical"></div>
-                                <div id="node-research" class="node-card bg-white border-l-4 border-purple-500 p-4 rounded shadow hover:shadow-md h-full flex flex-col justify-between" onclick="loadDetail('research')">
-                                    <div>
-                                        <div class="text-xs text-purple-600 font-bold mb-1">STRATEGY</div>
-                                        <div class="flex items-center gap-1 mb-1"><h4 class="pos-badge pos-alyc text-xs">CSO</h4></div>
-                                        <p class="text-[10px] text-slate-500 mb-2">Chief Strategy Officer</p>
-                                    </div>
-                                    <div class="mt-2 pt-2 border-t border-slate-100">
-                                        <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                            <span class="w-1.5 h-1.5 bg-purple-400 rounded-full mr-1"></span><span class="pos-badge pos-sg text-[9px] ml-1">Head Rsrch</span>
-                                        </div>
-                                        <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
-                                            <div>• <span class="pos-badge pos-sg text-[9px]">Macro/Credit</span></div>
-                                            <div>• <span class="pos-badge pos-sg text-[9px]">Quant</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="absolute bottom-0 left-1/2 w-0.5 h-10 bg-purple-300 hidden md:block" style="height: 140px; transform: translate(-50%, 0); z-index: -1;"></div>
-                                <div class="absolute bottom-0 left-1/2 h-0.5 bg-purple-300 hidden md:block" style="width: 320%; transform: translate(-100%, 140px); z-index: -1;"></div>
+                            <div class="text-[9px] text-slate-500">Chief Financial Officer</div>
+                            <div class="mt-2.5 pt-2.5 border-t border-slate-100 space-y-1">
+                                <div class="org-subnode"><span class="dot-ind bg-emerald-500"></span><span class="ent-badge alyc text-[8px]">Head of Administration</span></div>
+                                <div class="org-subnode"><span class="dot-ind bg-indigo-500"></span><span class="ent-badge sg text-[8px]">Treasury & Accounting</span></div>
+                                <div class="org-subnode"><span class="dot-ind bg-emerald-500"></span><span class="ent-badge alyc text-[8px]">Tax & Accounts Payable</span></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- LEVEL 3: Business Units -->
-                    <div class="w-full mt-4 flex gap-8 justify-center items-start">
-                        <!-- ALyC Unit -->
-                        <div class="w-1/2 max-w-sm bg-emerald-50/30 border-2 border-emerald-100 rounded-xl p-4 relative min-h-[160px]">
-                            <div class="absolute -top-3 left-4 bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded border border-emerald-200">ALYC (Regulated)</div>
-                            <div id="node-trading" class="node-card bg-white border-2 border-purple-300 p-4 rounded shadow-sm mt-2 relative flex flex-col justify-between h-full" onclick="loadDetail('trading')">
-                                <div class="absolute -top-3 right-0 -mr-2 bg-purple-100 text-purple-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-purple-200 shadow-sm flex items-center">
-                                    <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span> Linked to Strategy
+                    <!-- Service Committees (Tech + Marketing) -->
+                    <div class="flex justify-center gap-4 mt-5 w-full max-w-[500px]">
+                        <div id="node-tech-com" class="org-node bg-white border border-slate-200 rounded-lg px-4 py-3 text-center shadow-sm border-l-[3px] border-l-cyan-500 flex-1 relative" onclick="selectNode('tech-com')">
+                            <div class="org-hc-badge"><span class="text-[8px]">👤</span> 1</div>
+                            <div class="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Comité de Desarrollo Tecnológico</div>
+                            <div class="text-[9px] text-slate-400 mt-1">1 recurso · Transversal a C-Level</div>
+                        </div>
+                        <div id="node-mktg-com" class="org-node bg-white border border-slate-200 rounded-lg px-4 py-3 text-center shadow-sm border-l-[3px] border-l-rose-500 flex-1 relative" onclick="selectNode('mktg-com')">
+                            <div class="org-hc-badge"><span class="text-[8px]">👤</span> 1</div>
+                            <div class="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Comité de Marketing</div>
+                            <div class="text-[9px] text-slate-400 mt-1">1 recurso · Transversal a C-Level</div>
+                        </div>
+                    </div>
+
+                    <div class="org-v-line" style="height:36px;"></div>
+
+                    <!-- LEVEL 3: BUSINESS UNITS -->
+                    <div class="inline-flex items-center bg-gradient-to-r from-emerald-100 to-indigo-100 text-slate-600 text-[9px] font-bold uppercase tracking-[1.5px] px-4 py-1.5 rounded-full border border-slate-200">
+                        Unidades de Negocio Reguladas
+                    </div>
+
+                    <div class="org-v-line" style="height:20px;"></div>
+
+                    <!-- BU Row -->
+                    <div class="flex justify-center gap-10 w-full max-w-[900px]">
+                        <!-- ALyC -->
+                        <div class="flex-1 border-2 border-emerald-200 rounded-2xl p-5 relative" style="background:rgba(16,185,129,0.02)">
+                            <div class="absolute -top-3 left-4 bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-md border border-emerald-500/30">ALyC (Regulada CNV)</div>
+                            
+                            <!-- Trading -->
+                            <div id="node-trading" class="org-node bg-white border-2 border-slate-200 rounded-lg p-4 shadow-sm relative mb-3" onclick="selectNode('trading')">
+                                <div class="org-hc-badge"><span class="text-[8px]">👤</span> 5</div>
+                                <div class="text-[9px] font-bold uppercase tracking-wider text-purple-600 mb-1.5">Trading</div>
+                                <div class="flex items-center gap-1 mb-0.5 flex-wrap">
+                                    <span class="ent-badge alyc text-[10px]">Head of Trading</span>
+                                    <span class="reg-icon alyc" title="Rel. Público (ALyC)">🤝</span>
                                 </div>
-                                <div>
-                                    <div class="flex justify-between items-start mb-1">
-                                        <div class="text-xs text-purple-700 font-bold uppercase tracking-wider">TRADING</div>
-                                        <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">Business Unit</span>
-                                    </div>
-                                    <div class="flex items-center flex-wrap gap-1 mb-2">
-                                        <h4 class="pos-badge pos-alyc text-xs">HEAD OF TRADING</h4>
-                                        <span class="reg-badge reg-badge-alyc" title="Relaciones Público (ALyC)">🤝</span>
-                                    </div>
-                                    <p class="text-[10px] text-slate-500 font-semibold mt-0.5 mb-2">Exclusive to ALyC</p>
-                                    <div class="mt-1 pt-2 border-t border-purple-50">
-                                        <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                            <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span><span class="pos-badge pos-alyc text-[9px] ml-1">Senior Trader</span>
-                                        </div>
-                                        <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
-                                            <div>• <span class="pos-badge pos-alyc text-[9px]">FI / Equity Traders</span></div>
-                                            <div>• <span class="pos-badge pos-alyc text-[9px]">Sales & Inst.</span></div>
-                                        </div>
-                                    </div>
+                                <div class="text-[9px] text-slate-400 font-semibold mt-0.5">Exclusivo ALyC</div>
+                                <div class="mt-2.5 pt-2.5 border-t border-slate-100 space-y-1">
+                                    <div class="org-subnode"><span class="dot-ind bg-emerald-500"></span><span class="ent-badge alyc text-[8px]">Senior Trader</span></div>
+                                    <div class="org-subnode"><span class="dot-ind bg-emerald-500"></span><span class="ent-badge alyc text-[8px]">FI / Equity Traders</span></div>
+                                    <div class="org-subnode"><span class="dot-ind bg-emerald-500"></span><span class="ent-badge alyc text-[8px]">Proprietary Trader</span></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Comercial -->
+                            <div id="node-comercial" class="org-node bg-white border-2 border-slate-200 rounded-lg p-4 shadow-sm relative" onclick="selectNode('comercial')">
+                                <div class="org-hc-badge"><span class="text-[8px]">👤</span> 4</div>
+                                <div class="text-[9px] font-bold uppercase tracking-wider text-emerald-600 mb-1.5">Comercial</div>
+                                <div class="flex items-center gap-1 mb-0.5">
+                                    <span class="ent-badge alyc text-[10px]">Head Comercial</span>
+                                </div>
+                                <div class="text-[9px] text-slate-400 font-semibold mt-0.5">Desarrollo de Negocio</div>
+                                <div class="mt-2.5 pt-2.5 border-t border-slate-100 space-y-1">
+                                    <div class="org-subnode"><span class="dot-ind bg-emerald-500"></span><span class="ent-badge alyc text-[8px]">Key Account Mgr</span></div>
+                                    <div class="org-subnode"><span class="dot-ind bg-emerald-500"></span><span class="ent-badge alyc text-[8px]">Sales Advisor</span></div>
+                                    <div class="org-subnode"><span class="dot-ind bg-emerald-500"></span><span class="ent-badge alyc text-[8px]">Onboarding Comercial</span></div>
                                 </div>
                             </div>
                         </div>
-                        <!-- SGFCI Unit -->
-                        <div class="w-1/2 max-w-sm bg-indigo-50/30 border-2 border-indigo-100 rounded-xl p-4 relative min-h-[160px]">
-                            <div class="absolute -top-3 left-4 bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded border border-indigo-200">SGFCI (Regulated)</div>
-                            <div id="node-sgfci" class="node-card bg-white border-2 border-purple-300 p-4 rounded shadow-sm mt-2 relative flex flex-col justify-between h-full" onclick="loadDetail('sgfci')">
-                                <div class="absolute -top-3 right-0 -mr-2 bg-purple-100 text-purple-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-purple-200 shadow-sm flex items-center">
-                                    <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span> Linked to Strategy
+
+                        <!-- SGFCI -->
+                        <div class="flex-1 border-2 border-indigo-200 rounded-2xl p-5 relative" style="background:rgba(99,102,241,0.02)">
+                            <div class="absolute -top-3 left-4 bg-indigo-100 text-indigo-800 text-[10px] font-bold px-2.5 py-1 rounded-md border border-indigo-500/30">SGFCI (Regulada CNV)</div>
+                            
+                            <!-- Asset Management & Research -->
+                            <div id="node-sgfci" class="org-node bg-white border-2 border-slate-200 rounded-lg p-4 shadow-sm relative mb-3" onclick="selectNode('sgfci')">
+                                <div class="org-hc-badge"><span class="text-[8px]">👤</span> 8</div>
+                                <div class="text-[9px] font-bold uppercase tracking-wider text-purple-600 mb-1.5">Asset Management & Research</div>
+                                <div class="flex items-center gap-1 mb-0.5 flex-wrap">
+                                    <span class="ent-badge sg text-[10px]">CIO</span>
+                                    <span class="reg-icon sg" title="Resp. Inversiones">✒️</span>
                                 </div>
-                                <div>
-                                    <div class="flex justify-between items-start mb-1">
-                                        <div class="text-xs text-purple-700 font-bold uppercase tracking-wider">ASSET MANAGEMENT</div>
-                                        <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">Business Unit</span>
-                                    </div>
-                                    <div class="flex items-center flex-wrap gap-1 mb-2">
-                                        <h4 class="pos-badge pos-sg text-xs">CIO</h4>
-                                        <span class="reg-badge reg-badge-sgfci" title="Suplente UIF (SGFCI)">🛟</span>
-                                        <span class="reg-badge reg-badge-sgfci" title="Resp. Inversiones">✒️</span>
-                                    </div>
-                                    <p class="text-[10px] text-slate-500 font-semibold mt-0.5 mb-2">Exclusive to SGFCI</p>
-                                    <div class="mt-1 pt-2 border-t border-purple-50">
-                                        <div class="text-[10px] font-semibold text-slate-700 flex items-center mb-1">
-                                            <span class="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1"></span><span class="pos-badge pos-sg text-[9px] ml-1">Head PM</span>
-                                        </div>
-                                        <div class="text-[9px] text-slate-500 pl-2 leading-tight space-y-1">
-                                            <div>• <span class="pos-badge pos-sg text-[9px]">Portfolio Mgrs</span></div>
-                                            <div>• <span class="pos-badge pos-sg text-[9px]">Performance</span></div>
-                                        </div>
-                                    </div>
+                                <div class="text-[9px] text-slate-400 font-semibold mt-0.5">Exclusivo SGFCI · PM + Research</div>
+                                <div class="mt-2.5 pt-2.5 border-t border-slate-100 space-y-1">
+                                    <div class="org-subnode"><span class="dot-ind bg-indigo-500"></span><span class="ent-badge sg text-[8px]">Head PM</span></div>
+                                    <div class="org-subnode"><span class="dot-ind bg-indigo-500"></span><span class="ent-badge sg text-[8px]">PM / Research (×6)</span></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Distribución -->
+                            <div id="node-fund-dist" class="org-node bg-white border-2 border-slate-200 rounded-lg p-4 shadow-sm relative" onclick="selectNode('fund-dist')">
+                                <div class="org-hc-badge"><span class="text-[8px]">👤</span> 2</div>
+                                <div class="text-[9px] font-bold uppercase tracking-wider text-indigo-600 mb-1.5">Distribución</div>
+                                <div class="flex items-center gap-1 mb-0.5">
+                                    <span class="ent-badge sg text-[10px]">Head Distribución</span>
+                                </div>
+                                <div class="text-[9px] text-slate-400 font-semibold mt-0.5">Relación con ACDIs</div>
+                                <div class="mt-2.5 pt-2.5 border-t border-slate-100 space-y-1">
+                                    <div class="org-subnode"><span class="dot-ind bg-indigo-500"></span><span class="ent-badge sg text-[8px]">Coord. Distribución</span></div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <div class="text-center mt-10 text-slate-400 text-[10px]">* Las líneas punteadas implican servicios transversales. Estructura teórica para un holding financiero argentino.</div>
                 </div>
-                <div class="text-center mt-12 text-slate-400 text-xs">* Dotted lines imply transversal services.</div>
             </div>
 
-            <!-- RIGHT PANEL: Detailed Analysis -->
-            <div class="w-full md:w-[400px] lg:w-[480px] shrink-0 bg-white border-l border-slate-200 flex flex-col shadow-xl z-20">
-                <div id="empty-state" class="flex-1 flex flex-col items-center justify-center p-10 text-center">
-                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-400 text-2xl">⚡</div>
+            <!-- RIGHT PANEL: Detail -->
+            <div class="w-full md:w-[420px] lg:w-[440px] shrink-0 bg-white border-l border-slate-200 flex flex-col shadow-xl z-20">
+                <div id="panel-empty" class="flex-1 flex flex-col items-center justify-center p-10 text-center">
+                    <div class="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-400 text-2xl">⚡</div>
                     <h3 class="text-lg font-bold text-slate-700">Explorador Funcional</h3>
-                    <p class="text-sm text-slate-500 mt-2">Seleccione un área del organigrama para ver el desglose.</p>
+                    <p class="text-sm text-slate-500 mt-2 leading-relaxed">Seleccione un área del organigrama para ver el desglose detallado de roles, responsabilidades y enfoque.</p>
                 </div>
-                <div id="detail-content" class="hidden flex-col h-full overflow-y-auto custom-scroll">
-                    <div id="panel-header" class="p-6 bg-slate-50 border-b border-slate-200">
-                        <span id="role-tag" class="text-[10px] font-bold tracking-widest uppercase bg-blue-100 text-blue-700 px-2 py-1 rounded-sm">Transversal</span>
-                        <h2 id="role-title" class="text-2xl font-bold text-slate-800 mt-2">Gerencia</h2>
-                        <p id="role-desc" class="text-sm text-slate-600 mt-1 leading-relaxed">Descripción.</p>
+                <div id="panel-content" class="hidden flex-col h-full overflow-hidden">
+                    <!-- Header -->
+                    <div class="p-6 bg-slate-50 border-b border-slate-200 flex-shrink-0">
+                        <span id="detail-tag" class="text-[9px] font-bold tracking-widest uppercase px-2.5 py-1 rounded inline-block mb-2" style="background:#dbeafe;color:#1d4ed8;">Transversal</span>
+                        <h2 id="detail-title" class="text-xl font-bold text-slate-800" style="font-family:'DM Serif Display',serif;">Área</h2>
+                        <p id="detail-desc" class="text-sm text-slate-500 mt-1.5 leading-relaxed">Descripción.</p>
                     </div>
-                    <div class="p-4 border-b border-slate-100">
-                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">Enfoque del Área</h4>
-                        <div class="chart-container" style="height: 180px;"><canvas id="focusChart"></canvas></div>
+                    <!-- Focus Chart (Bars) -->
+                    <div class="p-4 border-b border-slate-100 flex-shrink-0">
+                        <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2.5">Enfoque del Área</h4>
+                        <div id="focus-bars" class="flex flex-col gap-1.5">
+                            <!-- Generated via JS -->
+                        </div>
                     </div>
-                    <div class="p-6 space-y-6">
-                        <div>
-                            <h3 id="middle-title" class="text-sm font-bold text-slate-800 flex items-center mb-3"><span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>Middle Management</h3>
-                            <div id="middle-management-container" class="bg-blue-50 border border-blue-100 rounded-lg p-3"></div>
+                    <!-- Body -->
+                    <div class="flex-1 overflow-y-auto custom-scroll p-6 space-y-6">
+                        <!-- Middle Management -->
+                        <div id="sec-middle">
+                            <h3 class="text-xs font-bold text-slate-700 flex items-center gap-1.5 mb-2.5"><span class="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>Middle Management</h3>
+                            <div id="middle-mgmt-content" class="bg-blue-50 border border-blue-100 rounded-md p-3"></div>
                         </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-slate-800 flex items-center mb-3"><span class="w-2 h-2 bg-slate-400 rounded-full mr-2"></span>Operational Roles</h3>
-                            <div id="operational-roles-container" class="space-y-2"></div>
+                        <!-- Operational Roles -->
+                        <div id="sec-roles">
+                            <h3 class="text-xs font-bold text-slate-700 flex items-center gap-1.5 mb-2.5"><span class="w-1.5 h-1.5 bg-slate-400 rounded-full"></span>Operational Roles</h3>
+                            <div id="roles-container" class="space-y-2"></div>
                         </div>
+                        <!-- Responsibilities -->
                         <div>
-                            <h3 class="text-sm font-bold text-slate-800 mb-2 border-b border-slate-100 pb-2">Responsabilidades Críticas</h3>
-                            <ul id="responsibilities-list" class="text-sm text-slate-600 space-y-2 list-disc pl-4 marker:text-slate-300"></ul>
+                            <h3 class="text-xs font-bold text-slate-700 mb-2 border-b border-slate-100 pb-2 flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>Responsabilidades Críticas</h3>
+                            <ul id="resp-list" class="text-sm text-slate-600 space-y-1.5 list-none"></ul>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- VIEW: RRHH (Staffing Table) -->
+        <div id="view-rrhh" class="hidden absolute inset-0 bg-slate-50 overflow-hidden flex flex-col z-20">
+            <!-- Summary Bar -->
+            <div class="flex items-center gap-5 px-8 py-4 bg-white border-b border-slate-200 flex-shrink-0 relative">
+                <div class="flex-1">
+                    <div class="text-base font-bold text-slate-800">Dotación & Costeo</div>
+                    <div class="text-[11px] text-slate-500 mt-0.5">Referencia informativa. Los costos del P/L se calculan desde la pestaña COSTOS 2026.</div>
+                </div>
+                <div class="flex flex-col px-4 py-2 rounded-md border border-slate-200 min-w-[100px]">
+                    <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Headcount</span>
+                    <span class="text-xl font-bold text-blue-600" id="sum-hc">0</span>
+                </div>
+                <div class="flex flex-col px-4 py-2 rounded-md border border-slate-200 min-w-[100px]">
+                    <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Cubiertas</span>
+                    <span class="text-xl font-bold text-emerald-600" id="sum-filled">0</span>
+                </div>
+                <div class="flex flex-col px-4 py-2 rounded-md border border-amber-400 min-w-[140px]">
+                    <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Costo Anual Total</span>
+                    <span class="text-xl font-bold text-amber-600" id="sum-cost">USD 0</span>
+                </div>
+                <!-- Persistence Buttons -->
+                <div class="flex flex-col gap-1 ml-2">
+                    <button onclick="exportStaffingJSON()" class="flex items-center gap-1 px-3 py-1.5 rounded-md text-[10px] font-bold bg-slate-900 text-white border border-slate-700 hover:bg-slate-700 transition-all" title="Descargar JSON">
+                        <span>↓</span> Exportar
+                    </button>
+                    <button onclick="document.getElementById('import-file').click()" class="flex items-center gap-1 px-3 py-1.5 rounded-md text-[10px] font-bold bg-white text-slate-600 border border-slate-300 hover:bg-slate-50 transition-all" title="Cargar JSON">
+                        <span>↑</span> Importar
+                    </button>
+                    <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importStaffingJSON(event)">
+                </div>
+                <!-- Auto-save indicator -->
+                <div id="save-indicator" class="absolute bottom-1 right-8 text-[9px] text-slate-400 opacity-0 transition-opacity duration-300">✓ Guardado</div>
+            </div>
+            <!-- Table -->
+            <div class="flex-1 overflow-y-auto custom-scroll px-8 py-6 bg-slate-50">
+                <table class="w-full max-w-[1100px] mx-auto border-collapse">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-slate-400 border-b-2 border-slate-200 bg-white sticky top-0 z-10" style="width:28%;">Posición</th>
+                            <th class="px-4 py-2.5 text-center text-[9px] font-bold uppercase tracking-wider text-slate-400 border-b-2 border-slate-200 bg-white sticky top-0 z-10" style="width:8%;">Nómina</th>
+                            <th class="px-4 py-2.5 text-center text-[9px] font-bold uppercase tracking-wider text-slate-400 border-b-2 border-slate-200 bg-white sticky top-0 z-10" style="width:10%;">Jerarquía</th>
+                            <th class="px-4 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-slate-400 border-b-2 border-slate-200 bg-white sticky top-0 z-10" style="width:20%;">Nombre</th>
+                            <th class="px-4 py-2.5 text-right text-[9px] font-bold uppercase tracking-wider text-slate-400 border-b-2 border-slate-200 bg-white sticky top-0 z-10" style="width:16%;">Costo Anual (USD)</th>
+                            <th class="px-4 py-2.5 text-center text-[9px] font-bold uppercase tracking-wider text-slate-400 border-b-2 border-slate-200 bg-white sticky top-0 z-10" style="width:8%;">Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staffing-tbody"></tbody>
+                </table>
+            </div>
+        </div>
 
+        <!-- Role Detail Modal -->
+        <div class="role-modal-overlay" id="role-modal-overlay" onclick="closeRoleModal(event)">
+            <div class="role-modal" onclick="event.stopPropagation()">
+                <div class="flex justify-between items-start p-6 border-b border-slate-100 flex-shrink-0">
+                    <div>
+                        <div class="text-xl text-slate-800" id="rm-title" style="font-family:'DM Serif Display',serif;">Posición</div>
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1" id="rm-area">Área</div>
+                    </div>
+                    <button class="w-8 h-8 border border-slate-200 rounded-lg bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-slate-100 transition-all flex-shrink-0" onclick="closeRoleModal()">✕</button>
+                </div>
+                <div class="p-6 overflow-y-auto flex-1 custom-scroll space-y-5">
+                    <div>
+                        <div class="rm-meta-grid" id="rm-meta"></div>
+                    </div>
+                    <div>
+                        <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 pb-1.5 border-b border-slate-100">Tareas & Responsabilidades</h4>
+                        <ul class="rm-task-list" id="rm-tasks"></ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 pb-1.5 border-b border-slate-100">Lo que la empresa espera de esta posición</h4>
+                        <div class="text-sm text-slate-600 leading-relaxed bg-blue-50 border border-blue-100 rounded-md p-3" id="rm-expectations"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- VIEW 2: SGFCI 2026 -->
         <div id="view-revenue" class="hidden absolute inset-0 bg-slate-100 overflow-hidden flex flex-col z-20">
             <!-- (Contenido de SGFCI se mantiene igual) -->
@@ -1208,7 +1273,6 @@
         </div>
 
     </div>
-
     <!-- Data & Logic -->
     <script>
         // --- SHARED GLOBALS (FOR P/L) ---
@@ -1233,18 +1297,25 @@
 
         // --- STRUCTURE DATA ---
         // (No changes to OrgData)
+
+        // --- STRUCTURE DATA (NEW) ---
         const orgData = {
-            'board': { title: "BOARD OF DIRECTORS", tag: "Governance & Strategy", desc: "Órgano máximo de decisión. Define el apetito de riesgo y lidera la agresividad comercial del grupo.", focus: [0, 5, 5, 5, 0], middle: "CEO (Chief Executive Officer)", middleEntity: "ALyC", roles: [], resp: ["Definición de Estrategia Comercial y de Expansión.", "Aprobación de Balances y Presupuestos.", "Designación de Comités (Inversión, Riesgo, PLA/FT).", "Supervisión directa del desempeño del CEO."], color: "slate", headcount: 5 },
-            'risk-com': { title: "RISK COMMITTEE", tag: "Mandatory C-Suite Body", desc: "Órgano colegiado de control liderado por el CCO. Integrado obligatoriamente por toda la C-Suite. NO posee estructura operativa a cargo.", focus: [0, 5, 0, 5, 0], middle: "Chair: CCO (Chief Compliance Officer)", roles: [], resp: ["Participantes Obligatorios: CEO, CFO, COO, CCO, CSO.", "Aprobación de límites de contraparte y solvencia.", "Validación de nuevos productos.", "Puede incorporar participantes Ad-hoc según temática."], color: "amber", headcount: 0 },
-            'inv-com': { title: "INVESTMENT COMMITTEE", tag: "Mandatory C-Suite Body", desc: "Órgano colegiado estratégico liderado por el CSO. Integrado obligatoriamente por toda la C-Suite. Define el 'House View' sin ejecutar.", focus: [0, 5, 5, 2, 0], middle: "Chair: CSO (Chief Strategy Officer)", roles: [], resp: ["Participantes Obligatorios: CEO, CFO, COO, CCO, CSO.", "Definición de Asset Allocation estratégico.", "Revisión de performance de fondos.", "Puede incorporar participantes Ad-hoc según temática."], color: "indigo", headcount: 0 },
-            'ceo': { title: "CEO (Chief Executive Officer)", tag: "Executive", desc: "Nexo entre el Directorio y la operación. Garantiza que las unidades reguladas funcionen eficientemente compartiendo servicios.", focus: [3, 5, 5, 3, 3], middle: "C-Suite (COO, CFO, CCO, CSO)", middleEntity: "ALyC", roles: [{ title: "Direct Report Policy", desc: "El nivel operativo NO tiene acceso directo al CEO. Canalizan vía C-Level.", entity: "ALyC" }], resp: ["★ ROL CNV (ALyC): Responsable de Cumplimiento Regulatorio (Titular).", "★ ROL UIF (ALyC): Oficial de Cumplimiento (Suplente).", "Supervisión de P&L consolidado.", "Arbitraje de recursos entre ALyC y SGFCI."], color: "slate", headcount: 1, entity: "ALyC" },
-            'ops': { title: "COO (Chief Operating Officer)", tag: "Transversal / Shared Service", desc: "El corazón de la 'fábrica'. Procesa, liquida y custodia los activos de ambas unidades de negocio bajo procesos diferenciados.", focus: [5, 1, 0, 3, 4], middle: "Head of Operations", middleEntity: "ALyC", roles: [{ title: "Settlement Officer", desc: "Liquidación BYMA, MAE, Rofex. Control de garantías.", entity: "ALyC" }, { title: "Fund Administrator", desc: "Cálculo de Valor Cuota diario. Devengamientos.", entity: "SG" }, { title: "Onboarding Analyst", desc: "Legajos digitales, onboarding clientes (KYC).", entity: "ALyC" }, { title: "Custody Analyst", desc: "Conciliación con Caja de Valores.", entity: "ALyC" }], resp: ["Garantizar la liquidación en tiempo y forma (T+0, T+1, T+2).", "Cálculo preciso del patrimonio de los FCI.", "Conciliación diaria de saldos comitentes vs. Caja.", "Reportes operativos a CNV (autopistas de información)."], color: "blue", headcount: 6, entity: "ALyC" },
-            'admin': { title: "CFO (Chief Financial Officer)", tag: "Transversal / Shared Service", desc: "Maneja los flujos monetarios y la contabilidad. CRÍTICO: Debe asegurar la segregación de cuentas bancarias.", focus: [4, 1, 0, 4, 5], middle: "Treasurer / Head of Administration", middleEntity: "ALyC", roles: [{ title: "Treasury Analyst", desc: "Manejo de portales bancarios, transferencias MEP/CCL.", entity: "SG" }, { title: "Senior Accountant", desc: "Contabilidad bimonetaria, ajuste por inflación.", entity: "SG" }, { title: "Tax Analyst", desc: "Retenciones, IIBB, IVA.", entity: "ALyC" }, { title: "Accounts Payable (AP)", desc: "Gestión administrativa del Holding.", entity: "ALyC" }], resp: ["★ ROL UIF (SGFCI): Oficial de Cumplimiento (Titular).", "Conciliación bancaria diaria y segregación de cuentas.", "Ejecución de rescates y suscripciones (movimiento de fondos).", "Presentación de Balances Trimestrales y Anuales."], color: "blue", headcount: 6, entity: "SG" },
-            'compliance': { title: "CCO (Chief Compliance Officer)", tag: "Control / Transversal", desc: "Vela por la integridad normativa. Reporta funcionalmente al Directorio para asegurar independencia. Cubre ALyC y SGFCI.", focus: [2, 1, 0, 5, 1], middle: "Compliance Manager (Titular ante UIF)", middleEntity: "ALyC", roles: [{ title: "AML/CFT Analyst (Ssr)", desc: "Monitoreo transaccional, matrices de riesgo, alertas.", entity: "ALyC" }, { title: "Internal Auditor (Jr)", desc: "Control de legajos, onboarding y auditoría básica.", entity: "SG" }], resp: ["★ ROL UIF (ALyC): Oficial de Cumplimiento (Titular).", "Reporte de Operaciones Sospechosas (ROS).", "Control del Código de Conducta y Conflictos de Interés.", "Aprobación de clientes de alto riesgo."], color: "rose", headcount: 4, entity: "ALyC" },
-            'research': { title: "CSO (Chief Strategy Officer) / RESEARCH", tag: "Transversal / Support", desc: "Genera inteligencia de mercado para uso interno (Mesa/PMs) y externo (Clientes). No ejecuta, solo analiza.", focus: [1, 5, 0, 0, 1], middle: "Head of Research", middleEntity: "SG", roles: [{ title: "Macro Economist", desc: "Política monetaria, fiscal, FX.", entity: "SG" }, { title: "Credit Analyst", desc: "Análisis de balances de emisores de ONs.", entity: "SG" }, { title: "Quantitative Analyst (Quant)", desc: "Modelos de valuación y bases de datos.", entity: "SG" }], resp: ["Daily reports y Weekly reports para clientes.", "Soporte analítico al Comité de Inversiones.", "Valuación de activos ilíquidos (para SGFCI)."], color: "purple", headcount: 5, entity: "ALyC" },
-            'trading': { title: "TRADING AREA / HEAD OF TRADING", tag: "Business Unit / ALyC", desc: "Unidad de negocio interna de la ALyC. Responsable de la ejecución y generación de ingresos. Se vincula estratégicamente con el CSO.", focus: [3, 4, 5, 2, 0], middle: "Senior Trader", middleEntity: "ALyC", roles: [{ title: "Fixed Income Trader", desc: "Bonos soberanos, subsoberanos, ONs. Arbitrajes.", entity: "ALyC" }, { title: "Equity & Cedears Trader", desc: "Acciones, Equity local e internacional.", entity: "ALyC" }, { title: "Institutional Sales Trader", desc: "Atención a grandes clientes y SGFCI (como cliente).", entity: "ALyC" }, { title: "Sales Executive", desc: "Relación directa con clientes activos.", entity: "ALyC" }], resp: ["★ ROL CNV (ALyC): Responsable de Relaciones con el Público.", "Best Execution (Prioridad Precio-Tiempo).", "Ejecución de órdenes propias y de clientes.", "Ejecución de órdenes instruidas por la SGFCI.", "Vinculación directa con Estrategia (CSO)."], color: "purple", headcount: 6, entity: "ALyC" },
-            'sgfci': { title: "ASSET MANAGEMENT / CIO", tag: "Business Unit / SGFCI", desc: "Unidad fiduciaria interna de la Sociedad Gerente. Decide la composición de las carteras de los fondos. Responsable ante CNV.", focus: [2, 5, 4, 3, 1], middle: "Head Portfolio Manager", middleEntity: "SG", roles: [{ title: "Portfolio Manager (MM/T+1)", desc: "Manejo de liquidez, cauciones, cuentas remuneradas.", entity: "SG" }, { title: "Portfolio Manager (Fixed Income)", desc: "Fondos de bonos, estrategia de duration.", entity: "SG" }, { title: "Performance Analyst", desc: "Atribución de retorno, benchmarking.", entity: "SG" }], resp: ["★ ROL UIF (SGFCI): Oficial de Cumplimiento (Suplente).", "★ ROL IDÓNEO: Responsable de Inversiones.", "Minutas de inversión diarias y administración discrecional.", "Vinculación directa con Estrategia (CSO)."], color: "purple", headcount: 5, entity: "SG" }
+            'board': { title: "BOARD OF DIRECTORS", tag: "Governance & Strategy", tagColor: "#334155", tagBg: "#f1f5f9", desc: "Órgano máximo de decisión. Define el apetito de riesgo y lidera la agresividad comercial del grupo.", focus: { Operativo: 0, Estratégico: 5, Comercial: 5, Control: 5, Admin: 0 }, middle: { title: "CEO", entity: "alyc" }, roles: [], resp: [{ text: "Definición de Estrategia Comercial y de Expansión.", highlight: false },{ text: "Aprobación de Balances y Presupuestos.", highlight: false },{ text: "Designación de Comités.", highlight: false },{ text: "Supervisión directa del CEO.", highlight: false }] },
+            'risk-com': { title: "COMITÉ DE RIESGO", tag: "Órgano Colegiado", tagColor: "#d97706", tagBg: "#fffbeb", desc: "Liderado por el CCO. Integrado por toda la C-Suite.", focus: { Operativo: 0, Estratégico: 5, Comercial: 0, Control: 5, Admin: 0 }, middle: { title: "Chair: CCO", entity: "alyc" }, roles: [], resp: [{ text: "Participantes: CEO, CFO, COO, CCO, CIO.", highlight: true },{ text: "Aprobación de límites de contraparte.", highlight: false },{ text: "Validación de nuevos productos.", highlight: false }] },
+            'inv-com': { title: "COMITÉ DE INVERSIONES", tag: "Órgano Colegiado", tagColor: "#4338ca", tagBg: "#eef2ff", desc: "Liderado por el CIO. Define el House View.", focus: { Operativo: 0, Estratégico: 5, Comercial: 5, Control: 2, Admin: 0 }, middle: { title: "Chair: CIO", entity: "sg" }, roles: [], resp: [{ text: "Participantes: CEO, CFO, COO, CCO, CIO.", highlight: true },{ text: "Asset Allocation estratégico.", highlight: false },{ text: "Revisión de performance de fondos.", highlight: false }] },
+            'ceo': { title: "CEO", tag: "Executive", tagColor: "#334155", tagBg: "#f1f5f9", desc: "Nexo entre el Directorio y la operación.", focus: { Operativo: 3, Estratégico: 5, Comercial: 5, Control: 3, Admin: 3 }, middle: { title: "C-Suite (COO, CFO, CCO, CIO)", entity: "alyc" }, roles: [{ title: "Direct Report Policy", desc: "Nivel operativo canaliza vía C-Level.", entity: "alyc" }], resp: [{ text: "★ ROL CNV (ALyC): Resp. Cumplimiento Regulatorio.", highlight: true },{ text: "★ ROL UIF (ALyC): Oficial de Cumplimiento (Suplente).", highlight: true },{ text: "Supervisión de P&L consolidado.", highlight: false }] },
+            'compliance': { title: "CCO (Control & Legal)", tag: "Control / Transversal", tagColor: "#e11d48", tagBg: "#fff1f2", desc: "Unifica Compliance y Asesoría Legal. Reporta al Directorio.", focus: { Operativo: 2, Estratégico: 2, Comercial: 0, Control: 5, Admin: 2 }, middle: { title: "Compliance Mgr & Onboarding", entity: "alyc" }, roles: [{ title: "AML/CFT Analyst (Ssr)", desc: "Monitoreo transaccional, SIRO.", entity: "alyc" },{ title: "Internal Auditor (Jr)", desc: "Legajos, onboarding, auditoría, soporte legal.", entity: "sg" }], resp: [{ text: "★ ROL UIF (ALyC): Titular.", highlight: true },{ text: "ROS ante UIF.", highlight: false },{ text: "Onboarding KYC.", highlight: false },{ text: "Revisión contratos y asesoría regulatoria.", highlight: false }] },
+            'ops': { title: "COO (Operations)", tag: "Transversal", tagColor: "#2563eb", tagBg: "#eff6ff", desc: "Back office, tesorería y títulos valores.", focus: { Operativo: 5, Estratégico: 1, Comercial: 0, Control: 3, Admin: 4 }, middle: { title: "Head of Back Office", entity: "alyc" }, roles: [{ title: "Settlement Officer", desc: "Liquidación BYMA, MAE, Rofex.", entity: "alyc" },{ title: "Fund Admin (×2)", desc: "Valor Cuota, devengamientos.", entity: "sg" },{ title: "Treasury (×3)", desc: "Portales bancarios, MEP/CCL.", entity: "alyc" },{ title: "Securities (×3)", desc: "Custodia, CVSA, títulos.", entity: "alyc" }], resp: [{ text: "Liquidación T+0/T+1/T+2.", highlight: false },{ text: "Cálculo patrimonio FCI.", highlight: false },{ text: "Conciliación CVSA.", highlight: false },{ text: "Tesorería y títulos valores.", highlight: false }] },
+            'admin': { title: "CFO (Finance)", tag: "Transversal", tagColor: "#2563eb", tagBg: "#eff6ff", desc: "Contabilidad, registración, proveedores y reportería.", focus: { Operativo: 4, Estratégico: 1, Comercial: 0, Control: 4, Admin: 5 }, middle: { title: "Head of Administration", entity: "alyc" }, roles: [{ title: "Treasury & Accounting", desc: "Contabilidad bimonetaria, RT6.", entity: "sg" },{ title: "Tax & AP", desc: "IIBB, IVA, proveedores.", entity: "alyc" }], resp: [{ text: "★ ROL UIF (SGFCI): Titular.", highlight: true },{ text: "Segregación de cuentas bancarias.", highlight: false },{ text: "Balances ante CNV.", highlight: false }] },
+            'tech-com': { title: "Comité de Tecnología", tag: "Comité Transversal", tagColor: "#0891b2", tagBg: "#ecfeff", desc: "1 recurso transversal a todos los C-Level.", focus: { Operativo: 4, Estratégico: 2, Comercial: 1, Control: 2, Admin: 3 }, middle: null, roles: [{ title: "Resp. Tecnología", desc: "Infra, mercados, seguridad, BI.", entity: "alyc" }], resp: [{ text: "Conectividad con mercados.", highlight: false },{ text: "Seguridad informática.", highlight: false },{ text: "Priorización colegiada.", highlight: true }] },
+            'mktg-com': { title: "Comité de Marketing", tag: "Comité Transversal", tagColor: "#f43f5e", tagBg: "#fff1f2", desc: "1 recurso transversal a todos los C-Level.", focus: { Operativo: 1, Estratégico: 3, Comercial: 5, Control: 0, Admin: 1 }, middle: null, roles: [{ title: "Resp. Marketing", desc: "Comunicación, contenido, eventos.", entity: "alyc" }], resp: [{ text: "Marca y posicionamiento.", highlight: false },{ text: "Material comercial.", highlight: false },{ text: "Priorización colegiada.", highlight: true }] },
+            'trading': { title: "Trading", tag: "BU / ALyC", tagColor: "#047857", tagBg: "#ecfdf5", desc: "Ejecución, intermediación y cartera propia.", focus: { Operativo: 3, Estratégico: 4, Comercial: 5, Control: 2, Admin: 0 }, middle: { title: "Senior Trader", entity: "alyc" }, roles: [{ title: "FI Trader", desc: "Bonos, ONs, arbitrajes.", entity: "alyc" },{ title: "Equity Trader", desc: "Acciones, Cedears.", entity: "alyc" },{ title: "Proprietary Trader", desc: "Cartera propia.", entity: "alyc" }], resp: [{ text: "★ Rel. con el Público (CNV).", highlight: true },{ text: "Best Execution.", highlight: false },{ text: "Cartera propia.", highlight: true }] },
+            'comercial': { title: "Comercial ALyC", tag: "BU / ALyC", tagColor: "#047857", tagBg: "#ecfdf5", desc: "Captación, gestión de cuentas, onboarding.", focus: { Operativo: 2, Estratégico: 3, Comercial: 5, Control: 1, Admin: 1 }, middle: { title: "Head Comercial", entity: "alyc" }, roles: [{ title: "Key Account Mgr", desc: "Clientes institucionales.", entity: "alyc" },{ title: "Sales Advisor", desc: "Captación.", entity: "alyc" },{ title: "Onboarding Comercial", desc: "Apertura de cuentas.", entity: "alyc" }], resp: [{ text: "Captación de comitentes.", highlight: false },{ text: "Cross-selling.", highlight: false },{ text: "Pipeline comercial.", highlight: false }] },
+            'sgfci': { title: "Asset Mgmt & Research / CIO", tag: "BU / SGFCI", tagColor: "#4338ca", tagBg: "#eef2ff", desc: "PM + Research unificado bajo CIO. Rotación por seniority.", focus: { Operativo: 2, Estratégico: 5, Comercial: 4, Control: 3, Admin: 1 }, middle: { title: "Head PM", entity: "sg" }, roles: [{ title: "PM / Research (×6)", desc: "Rotación PM ↔ Research.", entity: "sg" }], resp: [{ text: "★ Suplente UIF (SGFCI).", highlight: true },{ text: "★ Idóneo CNV.", highlight: true },{ text: "Rotación PM ↔ Research.", highlight: true }] },
+            'fund-dist': { title: "Distribución SGFCI", tag: "BU / SGFCI", tagColor: "#4338ca", tagBg: "#eef2ff", desc: "Distribución de fondos via ACDIs.", focus: { Operativo: 2, Estratégico: 3, Comercial: 5, Control: 1, Admin: 2 }, middle: { title: "Head Distribución", entity: "sg" }, roles: [{ title: "Coord. Distribución", desc: "ACDIs, plataformas.", entity: "sg" }], resp: [{ text: "Acuerdos con ACDIs.", highlight: false },{ text: "Fees y retrocesiones.", highlight: false }] }
         };
+
+        const orgHeadcounts = { 'compliance':{total:4,alyc:3,sg:1},'ops':{total:11,alyc:9,sg:2},'admin':{total:4,alyc:2,sg:2},'tech-com':{total:1,alyc:1,sg:0},'mktg-com':{total:1,alyc:1,sg:0},'ceo':{total:1,alyc:1,sg:0},'trading':{total:5,alyc:5,sg:0},'comercial':{total:4,alyc:4,sg:0},'sgfci':{total:8,alyc:0,sg:8},'fund-dist':{total:2,alyc:0,sg:2} };
 
         // --- SGFCI DATA ---
         const initialFundsData = [
@@ -1405,7 +1476,7 @@
         let globalAlloc = { sg: 10, alyc: 75, off: 1, trad: 5, am: 10 };
 
         // State & Formatters
-        let radarChart = null, chartInstance = null, costPieChart = null;
+        let chartInstance = null, costPieChart = null;
         let plRevenueChart = null, plWaterfallChart = null;
         let simData = JSON.parse(JSON.stringify(initialFundsData));
         // Initialize dynamic fields for simData
@@ -1433,82 +1504,6 @@
         const pctFmt = new Intl.NumberFormat('en-US', { style: 'percent', minimumFractionDigits: 1 });
 
         // --- STRUCTURE LOGIC ---
-        function updateHeadcounts() {
-            let visualTotal = 0, visualAlyc = 0, visualSg = 0;
-            
-            // Calculate totals from OrgData
-            Object.keys(orgData).forEach(key => {
-                const data = orgData[key];
-                if (key !== 'board') {
-                    const hc = data.headcount || 0; 
-                    visualTotal += hc;
-                    if (data.entity === 'SG') visualSg += hc; else visualAlyc += hc;
-
-                    // Add Badge to Node
-                    const node = document.getElementById(`node-${key}`);
-                    if (node && key !== 'risk-com' && key !== 'inv-com') { 
-                        // Remove existing
-                        const existing = node.querySelector('.hc-indicator');
-                        if(existing) existing.remove();
-
-                        if(hc > 0) {
-                            const badge = document.createElement('div');
-                            badge.className = 'hc-indicator';
-                            badge.title = `Headcount: ${hc}`;
-                            badge.innerHTML = `<span class="mr-0.5 text-[8px]">👤</span>${hc}`;
-                            node.appendChild(badge);
-                        }
-                    }
-                }
-            });
-            document.getElementById('total-headcount').innerText = visualTotal;
-            document.getElementById('count-alyc').innerText = visualAlyc;
-            document.getElementById('count-sg').innerText = visualSg;
-        }
-
-        function initStructureChart() {
-            const ctx = document.getElementById('focusChart').getContext('2d');
-            radarChart = new Chart(ctx, { type: 'radar', data: { labels: ['Operativo', 'Estratégico', 'Ejecución/Comercial', 'Control/Riesgo', 'Administrativo'], datasets: [{ label: 'Nivel de Foco', data: [0,0,0,0,0], fill: true, backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: 'rgb(59, 130, 246)', pointBackgroundColor: 'rgb(59, 130, 246)' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { display: true }, min: 0, max: 5, ticks: { display: false } } }, plugins: { legend: { display: false } } } });
-        }
-
-        function loadDetail(nodeId) {
-            const data = orgData[nodeId]; if (!data) return;
-            document.querySelectorAll('.node-card').forEach(el => el.classList.remove('active'));
-            document.getElementById(`node-${nodeId}`)?.classList.add('active');
-            document.getElementById('empty-state').classList.add('hidden');
-            const content = document.getElementById('detail-content'); content.classList.remove('hidden'); content.classList.add('flex');
-            
-            document.getElementById('role-title').innerText = data.title; document.getElementById('role-tag').innerText = data.tag; document.getElementById('role-desc').innerText = data.desc;
-            let colorCls = 'bg-slate-200 text-slate-700';
-            if (data.color === 'rose') colorCls = 'bg-rose-100 text-rose-700'; else if (data.color === 'emerald') colorCls = 'bg-emerald-100 text-emerald-700'; else if (data.color === 'blue') colorCls = 'bg-blue-100 text-blue-700'; else if (data.color === 'purple') colorCls = 'bg-purple-100 text-purple-700';
-            document.getElementById('role-tag').className = `text-[10px] font-bold tracking-widest uppercase px-2 py-1 rounded-sm ${colorCls}`;
-
-            if (radarChart) {
-                radarChart.data.datasets[0].data = data.focus;
-                const rgb = data.color === 'rose' ? '225, 29, 72' : data.color === 'emerald' ? '16, 185, 129' : data.color === 'blue' ? '59, 130, 246' : '147, 51, 234';
-                radarChart.data.datasets[0].backgroundColor = `rgba(${rgb}, 0.2)`; radarChart.data.datasets[0].borderColor = `rgb(${rgb})`; radarChart.data.datasets[0].pointBackgroundColor = `rgb(${rgb})`; radarChart.update();
-            }
-
-            const middleContainer = document.getElementById('middle-management-container');
-            if (data.middle) {
-                let styleClass = data.middleEntity === 'SG' ? 'pos-sg' : 'pos-alyc';
-                middleContainer.innerHTML = `<div class="font-bold text-slate-700 text-sm flex items-center"><span class="pos-badge ${styleClass} text-[11px]">${data.middle}</span></div><div class="text-xs text-slate-500 mt-1">Coordination</div>`;
-                middleContainer.parentElement.classList.remove('hidden');
-            } else middleContainer.parentElement.classList.add('hidden');
-
-            const roleContainer = document.getElementById('operational-roles-container'); roleContainer.innerHTML = '';
-            if (data.roles.length > 0) {
-                data.roles.forEach(role => {
-                    const div = document.createElement('div'); div.className = "bg-white border border-slate-200 p-3 rounded shadow-sm hover:border-blue-300 transition-colors flex justify-between items-start";
-                    div.innerHTML = `<div><div class="font-bold text-slate-700 text-xs mb-1"><span class="pos-badge ${role.entity === 'SG' ? 'pos-sg' : 'pos-alyc'} text-[10px]">${role.title}</span></div><div class="text-[10px] text-slate-500 leading-tight">${role.desc}</div></div>`;
-                    roleContainer.appendChild(div);
-                });
-                roleContainer.parentElement.classList.remove('hidden');
-            } else roleContainer.parentElement.classList.add('hidden');
-
-            const respList = document.getElementById('responsibilities-list'); respList.innerHTML = '';
-            data.resp.forEach(item => { const li = document.createElement('li'); li.innerText = item; respList.appendChild(li); });
-        }
 
         // --- SGFCI LOGIC ---
         function initSimulation() {
@@ -2856,17 +2851,248 @@
         }
 
         // --- GLOBAL SWITCH ---
+
+        // --- STRUCTURE LOGIC (NEW) ---
+        function updateHeadcounts() {
+            let a=0,s=0;
+            Object.values(orgHeadcounts).forEach(h=>{a+=h.alyc;s+=h.sg;});
+            document.getElementById('count-alyc').innerText = a;
+            document.getElementById('count-sg').innerText = s;
+            document.getElementById('total-headcount').innerText = a+s;
+        }
+
+        let selectedNode = null;
+        function selectNode(nodeId) {
+            const data = orgData[nodeId]; if(!data) return;
+            document.querySelectorAll('.org-node').forEach(el => el.classList.remove('selected'));
+            const nodeEl = document.getElementById(`node-${nodeId}`);
+            if(nodeEl) nodeEl.classList.add('selected');
+            selectedNode = nodeId;
+
+            document.getElementById('panel-empty').classList.add('hidden');
+            const content = document.getElementById('panel-content');
+            content.classList.remove('hidden'); content.classList.add('flex');
+
+            // Tag
+            const tagEl = document.getElementById('detail-tag');
+            tagEl.innerText = data.tag;
+            tagEl.style.background = data.tagBg;
+            tagEl.style.color = data.tagColor;
+            
+            document.getElementById('detail-title').innerText = data.title;
+            document.getElementById('detail-desc').innerText = data.desc;
+
+            // Focus Bars
+            const bc = document.getElementById('focus-bars');
+            bc.innerHTML = '';
+            const colors = ['bg-blue-500','bg-purple-500','bg-emerald-500','bg-rose-500','bg-amber-500'];
+            let idx = 0;
+            for(const [label, val] of Object.entries(data.focus)) {
+                bc.innerHTML += `<div class="flex items-center gap-2"><span class="text-[10px] text-slate-500 w-[90px] text-right flex-shrink-0">${label}</span><div class="focus-bar-track"><div class="focus-bar-fill ${colors[idx%5]}" style="width:${(val/5)*100}%;"></div></div></div>`;
+                idx++;
+            }
+
+            // Middle Management
+            const ms = document.getElementById('sec-middle');
+            const mc = document.getElementById('middle-mgmt-content');
+            if(data.middle) {
+                ms.style.display = '';
+                const ent = data.middle.entity === 'sg' ? 'sg' : 'alyc';
+                mc.innerHTML = `<div class="font-bold text-slate-700 text-sm"><span class="ent-badge ${ent} text-[10px]">${data.middle.title}</span></div><div class="text-[10px] text-slate-500 mt-1">Coordination Role</div>`;
+            } else { ms.style.display = 'none'; }
+
+            // Operational Roles
+            const rs = document.getElementById('sec-roles');
+            const rc = document.getElementById('roles-container');
+            rc.innerHTML = '';
+            if(data.roles.length > 0) {
+                rs.style.display = '';
+                data.roles.forEach(r => {
+                    const ent = r.entity === 'sg' ? 'sg' : 'alyc';
+                    rc.innerHTML += `<div class="bg-white border border-slate-200 p-2.5 rounded shadow-sm hover:border-blue-300 transition-colors"><div class="font-bold text-slate-700 text-xs"><span class="ent-badge ${ent} text-[9px]">${r.title}</span></div><div class="text-[10px] text-slate-500 mt-1 leading-snug">${r.desc}</div></div>`;
+                });
+            } else { rs.style.display = 'none'; }
+
+            // Responsibilities
+            const rl = document.getElementById('resp-list');
+            rl.innerHTML = '';
+            data.resp.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'text-sm text-slate-600 py-1 border-b border-slate-50 flex items-start gap-2 leading-snug';
+                if(item.highlight) li.classList.add('font-semibold', 'text-slate-700');
+                const dotColor = item.highlight ? 'bg-amber-500 w-[5px] h-[5px]' : 'bg-slate-300 w-1 h-1';
+                li.innerHTML = `<span class="${dotColor} rounded-full mt-1.5 flex-shrink-0"></span>${item.text}`;
+                rl.appendChild(li);
+            });
+        }
+
+        // --- STAFFING DATA (42 positions) ---
+        const staffingData = [
+            {id:'ceo-1',area:'C-Level',ac:'#0a1628',pos:'CEO',ent:'alyc',hier:'C-Level',lead:true,rep:'Board of Directors',dr:4,tasks:['Supervisión de P&L consolidado del Holding.','Arbitraje de recursos entre ALyC y SGFCI.','Representación institucional ante reguladores.','Definición de estrategia comercial y expansión.','Coordinación de la C-Suite.'],exp:'Liderazgo integral del holding. Visión estratégica, articulación entre entidades reguladas, y generación de valor sostenible. Responsable CNV (Titular) y Suplente UIF de la ALyC.',n:'',c:0},
+            {id:'cco-1',area:'Control & Legal',ac:'#e11d48',pos:'CCO',ent:'alyc',hier:'C-Level',lead:true,rep:'CEO / Directorio (funcional)',dr:3,tasks:['Diseñar y ejecutar programa de compliance.','Oficial de Cumplimiento UIF Titular (ALyC).','Supervisar onboarding y KYC.','Aprobar clientes de alto riesgo (PEPs).','Revisión de contratos y asesoría regulatoria.'],exp:'Garante de integridad regulatoria. Independencia total, reporte funcional al Directorio.',n:'',c:0},
+            {id:'cco-2',area:'Control & Legal',ac:'#e11d48',pos:'Compliance Mgr & Onboarding',ent:'alyc',hier:'Middle Mgmt',lead:false,rep:'CCO',dr:2,tasks:['Proceso completo de onboarding de clientes.','Revisión de legajos digitales y KYC.','Flujo de aprobación de nuevas cuentas.','Soporte operativo al CCO.'],exp:'Nexo operativo entre el CCO y el equipo.',n:'',c:0},
+            {id:'cco-3',area:'Control & Legal',ac:'#e11d48',pos:'AML/CFT Analyst (Ssr)',ent:'alyc',hier:'Analyst',lead:false,rep:'Compliance Mgr',dr:0,tasks:['Monitoreo transaccional diario (SIRO).','Matrices de riesgo.','Investigación de operaciones sospechosas.','Preparación de ROS.'],exp:'Especialista en prevención de lavado.',n:'',c:0},
+            {id:'cco-4',area:'Control & Legal',ac:'#e11d48',pos:'Internal Auditor (Jr)',ent:'sg',hier:'Junior',lead:false,rep:'Compliance Mgr',dr:0,tasks:['Auditoría de legajos.','Control de calidad onboarding.','Soporte en auditorías.','Soporte legal.'],exp:'Perfil en formación orientado al detalle.',n:'',c:0},
+            {id:'coo-1',area:'Operations',ac:'#2563eb',pos:'COO',ent:'alyc',hier:'C-Level',lead:true,rep:'CEO',dr:10,tasks:['Supervisar cadena operativa completa.','Garantizar liquidación en tiempo y forma.','Coordinar back office, tesorería y títulos.','Optimizar procesos operativos.'],exp:'Responsable de que la fábrica funcione sin errores.',n:'',c:0},
+            {id:'coo-2',area:'Operations',ac:'#2563eb',pos:'Head of Back Office',ent:'alyc',hier:'Middle Mgmt',lead:false,rep:'COO',dr:9,tasks:['Coordinación diaria de settlement, treasury y securities.','Control de cierre operativo diario.','Supervisión del cálculo de valor cuota.','Reportes operativos a CNV.'],exp:'Coordinador operativo del día a día.',n:'',c:0},
+            {id:'coo-3',area:'Operations',ac:'#2563eb',pos:'Settlement Officer',ent:'alyc',hier:'Senior',lead:false,rep:'Head of Back Office',dr:0,tasks:['Liquidación BYMA, MAE, Rofex.','Control de garantías.','Conciliación T+0, T+1, T+2.'],exp:'Especialista en liquidación.',n:'',c:0},
+            {id:'coo-4',area:'Operations',ac:'#2563eb',pos:'Fund Administrator 1',ent:'sg',hier:'Senior',lead:false,rep:'Head of Back Office',dr:0,tasks:['Cálculo diario de Valor Cuota.','Devengamiento de intereses.','Suscripciones y rescates.'],exp:'Precisión absoluta en patrimonio de FCI.',n:'',c:0},
+            {id:'coo-5',area:'Operations',ac:'#2563eb',pos:'Fund Administrator 2',ent:'sg',hier:'Senior',lead:false,rep:'Head of Back Office',dr:0,tasks:['Cálculo diario de Valor Cuota.','Devengamiento de intereses.','Cobertura mutua.'],exp:'Mismo perfil que Fund Admin 1.',n:'',c:0},
+            {id:'coo-6',area:'Operations',ac:'#2563eb',pos:'Treasury 1',ent:'alyc',hier:'Analyst',lead:false,rep:'Head of Back Office',dr:0,tasks:['Portales bancarios.','Transferencias MEP/CCL.','Conciliación bancaria diaria.'],exp:'Operador de tesorería confiable.',n:'',c:0},
+            {id:'coo-7',area:'Operations',ac:'#2563eb',pos:'Treasury 2',ent:'alyc',hier:'Analyst',lead:false,rep:'Head of Back Office',dr:0,tasks:['Portales bancarios.','Transferencias MEP/CCL.','Conciliación bancaria.'],exp:'Redundancia operativa.',n:'',c:0},
+            {id:'coo-8',area:'Operations',ac:'#2563eb',pos:'Treasury 3',ent:'alyc',hier:'Analyst',lead:false,rep:'Head of Back Office',dr:0,tasks:['Portales bancarios.','Transferencias MEP/CCL.','Picos operativos.'],exp:'Tercer recurso para volumen.',n:'',c:0},
+            {id:'coo-9',area:'Operations',ac:'#2563eb',pos:'Securities 1',ent:'alyc',hier:'Analyst',lead:false,rep:'Head of Back Office',dr:0,tasks:['Custodia y conciliación con CVSA.','Registración de títulos valores.','Control de posiciones.'],exp:'Especialista en custodia.',n:'',c:0},
+            {id:'coo-10',area:'Operations',ac:'#2563eb',pos:'Securities 2',ent:'alyc',hier:'Analyst',lead:false,rep:'Head of Back Office',dr:0,tasks:['Custodia y conciliación con CVSA.','Registración de títulos valores.'],exp:'Redundancia conciliación.',n:'',c:0},
+            {id:'coo-11',area:'Operations',ac:'#2563eb',pos:'Securities 3',ent:'alyc',hier:'Analyst',lead:false,rep:'Head of Back Office',dr:0,tasks:['Custodia y conciliación con CVSA.','Registración de títulos valores.'],exp:'Tercer recurso para volumen.',n:'',c:0},
+            {id:'cfo-1',area:'Finance',ac:'#2563eb',pos:'CFO',ent:'sg',hier:'C-Level',lead:true,rep:'CEO',dr:3,tasks:['Supervisar contabilidad y reportería.','Segregación de cuentas bancarias.','Balances ante CNV.','Oficial UIF Titular (SGFCI).'],exp:'Garante de salud financiera.',n:'',c:0},
+            {id:'cfo-2',area:'Finance',ac:'#2563eb',pos:'Head of Administration',ent:'alyc',hier:'Middle Mgmt',lead:false,rep:'CFO',dr:2,tasks:['Coordinar contabilidad y administración.','Supervisar registraciones contables.','Control de proveedores.'],exp:'Brazo ejecutor del CFO.',n:'',c:0},
+            {id:'cfo-3',area:'Finance',ac:'#2563eb',pos:'Treasury & Accounting',ent:'sg',hier:'Analyst',lead:false,rep:'Head of Administration',dr:0,tasks:['Contabilidad bimonetaria y RT6.','Conciliación bancaria.','EECC.'],exp:'Contable bimonetario.',n:'',c:0},
+            {id:'cfo-4',area:'Finance',ac:'#2563eb',pos:'Tax & Accounts Payable',ent:'alyc',hier:'Analyst',lead:false,rep:'Head of Administration',dr:0,tasks:['Retenciones IIBB, IVA, Ganancias.','Gestión de proveedores.','Pagos del Holding.'],exp:'Especialista impositivo.',n:'',c:0},
+            {id:'tech-1',area:'Comité de Tecnología',ac:'#0891b2',pos:'Responsable de Tecnología',ent:'alyc',hier:'Specialist',lead:true,rep:'Todos los C-Level (Comité)',dr:0,tasks:['Conectividad con mercados.','Infraestructura y seguridad.','Desarrollo herramientas internas y BI.','Integraciones API.'],exp:'Recurso integral de tecnología.',n:'',c:0},
+            {id:'mktg-1',area:'Comité de Marketing',ac:'#f43f5e',pos:'Responsable de Marketing',ent:'alyc',hier:'Specialist',lead:true,rep:'Todos los C-Level (Comité)',dr:0,tasks:['Estrategia de marca.','Redes sociales y contenido.','Newsletters y material comercial.','Eventos.'],exp:'Recurso integral de comunicación.',n:'',c:0},
+            {id:'trd-1',area:'Trading (ALyC)',ac:'#059669',pos:'Head of Trading',ent:'alyc',hier:'C-Level',lead:true,rep:'CEO',dr:4,tasks:['Liderar mesa de operaciones.','Estrategia de ejecución y pricing.','Resp. Relaciones con el Público (CNV).'],exp:'Líder de generación de ingresos por intermediación.',n:'',c:0},
+            {id:'trd-2',area:'Trading (ALyC)',ac:'#059669',pos:'Senior Trader',ent:'alyc',hier:'Senior',lead:false,rep:'Head of Trading',dr:2,tasks:['Ejecución órdenes de mayor volumen.','Supervisión operativa de traders.','Estrategias de arbitraje.'],exp:'Trader experimentado con capacidad de mentoreo.',n:'',c:0},
+            {id:'trd-3',area:'Trading (ALyC)',ac:'#059669',pos:'Fixed Income Trader',ent:'alyc',hier:'Analyst',lead:false,rep:'Senior Trader',dr:0,tasks:['Operar bonos soberanos, subsoberanos y ONs.','Arbitrajes de renta fija.','Monitoreo de curvas y spreads.'],exp:'Especialista en renta fija.',n:'',c:0},
+            {id:'trd-4',area:'Trading (ALyC)',ac:'#059669',pos:'Equity & Cedears Trader',ent:'alyc',hier:'Analyst',lead:false,rep:'Senior Trader',dr:0,tasks:['Operar acciones, Cedears y derivados.','Equity research e índices.'],exp:'Especialista en renta variable.',n:'',c:0},
+            {id:'trd-5',area:'Trading (ALyC)',ac:'#059669',pos:'Proprietary Trader',ent:'alyc',hier:'Senior',lead:false,rep:'Head of Trading',dr:0,tasks:['Gestión cartera propia.','Estrategias propietarias.','Control de P&L propio.'],exp:'Trader con autonomía para gestionar capital propio.',n:'',c:0},
+            {id:'com-1',area:'Comercial (ALyC)',ac:'#059669',pos:'Head Comercial',ent:'alyc',hier:'Middle Mgmt',lead:true,rep:'CEO',dr:3,tasks:['Liderar equipo de desarrollo comercial.','Estrategia de captación y retención.','Pipeline de oportunidades.'],exp:'Motor comercial de la ALyC.',n:'',c:0},
+            {id:'com-2',area:'Comercial (ALyC)',ac:'#059669',pos:'Key Account Manager',ent:'alyc',hier:'Senior',lead:false,rep:'Head Comercial',dr:0,tasks:['Gestión clientes institucionales y alto patrimonio.','Cross-selling.','Seguimiento post-venta.'],exp:'Gestor de cuentas clave.',n:'',c:0},
+            {id:'com-3',area:'Comercial (ALyC)',ac:'#059669',pos:'Sales Advisor',ent:'alyc',hier:'Analyst',lead:false,rep:'Head Comercial',dr:0,tasks:['Captación de nuevos clientes.','Propuestas comerciales.','Seguimiento de leads.'],exp:'Hunter comercial.',n:'',c:0},
+            {id:'com-4',area:'Comercial (ALyC)',ac:'#059669',pos:'Onboarding Comercial',ent:'alyc',hier:'Junior',lead:false,rep:'Head Comercial',dr:0,tasks:['Coordinación apertura de cuentas.','Recopilación de documentación.','Enlace cliente-Compliance.'],exp:'Facilitador del proceso de alta.',n:'',c:0},
+            {id:'am-1',area:'Asset Management (SGFCI)',ac:'#4338ca',pos:'CIO',ent:'sg',hier:'C-Level',lead:true,rep:'CEO',dr:7,tasks:['Estrategia de inversión de todos los FCI.','Chair del Comité de Inversiones.','Supervisar PM y Research unificado.','Idóneo CNV.'],exp:'Máximo responsable de decisiones de inversión.',n:'',c:0},
+            {id:'am-2',area:'Asset Management (SGFCI)',ac:'#4338ca',pos:'Head PM',ent:'sg',hier:'Middle Mgmt',lead:false,rep:'CIO',dr:6,tasks:['Coordinación operativa equipo PM/Research.','Supervisión gestión de carteras FCI.','Minutas de inversión diarias.'],exp:'Coordinador bajo el CIO.',n:'',c:0},
+            {id:'am-3',area:'Asset Management (SGFCI)',ac:'#4338ca',pos:'PM / Research 1',ent:'sg',hier:'Senior',lead:false,rep:'Head PM',dr:0,tasks:['Gestión de carteras FCI.','Análisis macro/crédito/quant.','Reportes daily/weekly.'],exp:'Perfil senior dual PM/Research.',n:'',c:0},
+            {id:'am-4',area:'Asset Management (SGFCI)',ac:'#4338ca',pos:'PM / Research 2',ent:'sg',hier:'Senior',lead:false,rep:'Head PM',dr:0,tasks:['Gestión de carteras FCI.','Análisis macro/crédito/quant.','Reportes daily/weekly.'],exp:'Mismo perfil senior dual.',n:'',c:0},
+            {id:'am-5',area:'Asset Management (SGFCI)',ac:'#4338ca',pos:'PM / Research 3',ent:'sg',hier:'Analyst',lead:false,rep:'Head PM',dr:0,tasks:['Soporte en gestión de carteras.','Research y bases de datos.','Modelos de valuación.'],exp:'Perfil en desarrollo.',n:'',c:0},
+            {id:'am-6',area:'Asset Management (SGFCI)',ac:'#4338ca',pos:'PM / Research 4',ent:'sg',hier:'Analyst',lead:false,rep:'Head PM',dr:0,tasks:['Soporte en gestión de carteras.','Research y bases de datos.','Modelos de valuación.'],exp:'Mismo perfil analyst.',n:'',c:0},
+            {id:'am-7',area:'Asset Management (SGFCI)',ac:'#4338ca',pos:'PM / Research 5',ent:'sg',hier:'Junior',lead:false,rep:'Head PM',dr:0,tasks:['Actualización de planillas.','Soporte operativo.','Carga de datos de mercado.'],exp:'Perfil junior ingresante.',n:'',c:0},
+            {id:'am-8',area:'Asset Management (SGFCI)',ac:'#4338ca',pos:'PM / Research 6',ent:'sg',hier:'Junior',lead:false,rep:'Head PM',dr:0,tasks:['Actualización de planillas.','Soporte operativo.','Carga de datos de mercado.'],exp:'Segundo recurso junior.',n:'',c:0},
+            {id:'dist-1',area:'Distribución (SGFCI)',ac:'#4338ca',pos:'Head Distribución',ent:'sg',hier:'Middle Mgmt',lead:true,rep:'CIO',dr:1,tasks:['Acuerdos de distribución con ACDIs.','Fees de distribución y retrocesiones.','Alta de fondos en plataformas.'],exp:'Responsable de que los fondos lleguen al mercado.',n:'',c:0},
+            {id:'dist-2',area:'Distribución (SGFCI)',ac:'#4338ca',pos:'Coordinador Distribución',ent:'sg',hier:'Analyst',lead:false,rep:'Head Distribución',dr:0,tasks:['Soporte operativo relación con ACDIs.','Alta y mantenimiento en plataformas.','Reportes de captación.'],exp:'Ejecutor operativo de distribución.',n:'',c:0}
+        ];
+
+        // --- STAFFING TABLE LOGIC ---
+        const staffIntFmt = (n) => n ? n.toLocaleString('es-AR') : '';
+        const staffParseNum = (s) => parseInt(String(s).replace(/\./g,'').replace(/,/g,'')) || 0;
+        let staffInit = false;
+
+        function renderStaffingTable() {
+            const tbody = document.getElementById('staffing-tbody'); tbody.innerHTML = ''; let curArea = '';
+            staffingData.forEach((p, i) => {
+                if(p.area !== curArea) {
+                    curArea = p.area;
+                    const r = document.createElement('tr');
+                    r.className = 'bg-slate-100 border-b-2 border-slate-300';
+                    r.innerHTML = `<td colspan="6" class="px-4 py-2.5 text-[10px] font-bold uppercase tracking-[1.5px] text-slate-500 sticky top-0 z-[5] bg-slate-100"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full" style="background:${p.ac};"></span>${p.area}</div></td>`;
+                    tbody.appendChild(r);
+                }
+                const tr = document.createElement('tr');
+                tr.className = `hover:bg-white cursor-pointer transition-colors border-b border-slate-100 ${p.lead ? '' : ''}`;
+                const indent = p.lead ? '' : '<span class="w-5 h-5 border-l-2 border-slate-200 ml-2 flex-shrink-0"></span>';
+                const nameWeight = p.lead ? 'font-bold text-slate-800' : 'font-medium text-slate-600';
+                tr.innerHTML = `
+                    <td class="px-4 py-2.5"><div class="flex items-center gap-2">${indent}<span class="${nameWeight} text-[13px]">${p.pos}</span></div></td>
+                    <td class="px-4 py-2.5 text-center"><span class="ent-badge ${p.ent} text-[9px]">${p.ent==='alyc'?'ALYC':'SGFCI'}</span></td>
+                    <td class="px-4 py-2.5 text-center text-[11px] text-slate-500">${p.hier}</td>
+                    <td class="px-4 py-2.5"><input type="text" class="staff-input" placeholder="Vacante" value="${p.n}" data-idx="${i}" data-field="name" onchange="updStaffField(this)"></td>
+                    <td class="px-4 py-2.5"><input type="text" class="staff-input cost-input" placeholder="0" value="${p.c ? staffIntFmt(p.c) : ''}" data-idx="${i}" onchange="updStaffCost(this)" onblur="fmtStaffCost(this)"></td>
+                    <td class="px-4 py-2.5 text-center"><div class="w-5 h-5 rounded bg-slate-100 flex items-center justify-center text-[10px] text-slate-400 hover:bg-blue-100 hover:text-blue-600 transition-all cursor-pointer" onclick="event.stopPropagation(); openModal(${i})" title="Ver detalle">▸</div></td>`;
+                tr.addEventListener('click', (e) => { if(e.target.tagName !== 'INPUT') openModal(i); });
+                tbody.appendChild(tr);
+            });
+            updStaffSummary();
+        }
+        function updStaffField(el) { staffingData[parseInt(el.dataset.idx)].n = el.value; updStaffSummary(); saveStaffToLocal(); }
+        function updStaffCost(el) { staffingData[parseInt(el.dataset.idx)].c = staffParseNum(el.value); updStaffSummary(); saveStaffToLocal(); }
+        function fmtStaffCost(el) { const v = staffParseNum(el.value); el.value = v > 0 ? staffIntFmt(v) : ''; }
+        function updStaffSummary() {
+            document.getElementById('sum-hc').innerText = staffingData.length;
+            document.getElementById('sum-filled').innerText = staffingData.filter(p => p.n.trim() !== '').length;
+            document.getElementById('sum-cost').innerText = usdFmt.format(staffingData.reduce((s,p) => s + (p.c||0), 0));
+        }
+
+        // --- MODAL ---
+        function openModal(i) {
+            const p = staffingData[i];
+            document.getElementById('rm-title').innerText = p.pos;
+            document.getElementById('rm-area').innerText = p.area;
+            document.getElementById('rm-meta').innerHTML = `
+                <div class="rm-meta-item"><div class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Nómina</div><div class="text-[13px] font-semibold text-slate-700 mt-0.5"><span class="ent-badge ${p.ent}" style="font-size:10px;">${p.ent==='alyc'?'ALYC':'SGFCI'}</span></div></div>
+                <div class="rm-meta-item"><div class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Jerarquía</div><div class="text-[13px] font-semibold text-slate-700 mt-0.5">${p.hier}</div></div>
+                <div class="rm-meta-item"><div class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Reporta a</div><div class="text-[13px] font-semibold text-slate-700 mt-0.5">${p.rep}</div></div>
+                <div class="rm-meta-item"><div class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Gente a cargo</div><div class="text-[13px] font-semibold text-slate-700 mt-0.5">${p.dr} ${p.dr===1?'persona':'personas'}</div></div>
+                <div class="rm-meta-item"><div class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Asignado</div><div class="text-[13px] font-semibold text-slate-700 mt-0.5">${p.n||'— Vacante —'}</div></div>
+                <div class="rm-meta-item"><div class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Costo Anual</div><div class="text-[13px] font-semibold mt-0.5" style="color:#a67c2e;">${p.c ? usdFmt.format(p.c) : '— Sin definir —'}</div></div>`;
+            const tl = document.getElementById('rm-tasks'); tl.innerHTML = '';
+            p.tasks.forEach(t => { const li = document.createElement('li'); li.innerText = t; tl.appendChild(li); });
+            document.getElementById('rm-expectations').innerText = p.exp;
+            document.getElementById('role-modal-overlay').classList.add('visible');
+        }
+        function closeRoleModal(e) { if(e && e.target !== e.currentTarget) return; document.getElementById('role-modal-overlay').classList.remove('visible'); }
+        document.addEventListener('keydown', (e) => { if(e.key === 'Escape') document.getElementById('role-modal-overlay').classList.remove('visible'); });
+
+        // --- STAFFING PERSISTENCE ---
+        const STAFF_STORAGE_KEY = 'holding_staffing_data_v1';
+        function saveStaffToLocal() {
+            const data = staffingData.map(p => ({ id: p.id, n: p.n, c: p.c }));
+            try { localStorage.setItem(STAFF_STORAGE_KEY, JSON.stringify(data)); flashStaffSave(); } catch(e) {}
+        }
+        function loadStaffFromLocal() {
+            try {
+                const raw = localStorage.getItem(STAFF_STORAGE_KEY);
+                if(!raw) return false;
+                const saved = JSON.parse(raw);
+                if(!Array.isArray(saved)) return false;
+                saved.forEach(s => { const pos = staffingData.find(p => p.id === s.id); if(pos) { pos.n = s.n || ''; pos.c = s.c || 0; } });
+                return true;
+            } catch(e) { return false; }
+        }
+        let staffSaveTimeout;
+        function flashStaffSave() {
+            const el = document.getElementById('save-indicator');
+            if(!el) return;
+            el.style.opacity = '1';
+            clearTimeout(staffSaveTimeout);
+            staffSaveTimeout = setTimeout(() => { el.style.opacity = '0'; }, 1500);
+        }
+        function exportStaffingJSON() {
+            const data = staffingData.map(p => ({ id:p.id, posicion:p.pos, area:p.area, entidad:p.ent, jerarquia:p.hier, nombre:p.n, costo_anual_usd:p.c }));
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url;
+            a.download = `dotacion_holding_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        }
+        function importStaffingJSON(event) {
+            const file = event.target.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if(!Array.isArray(imported)) { alert('Formato inválido'); return; }
+                    imported.forEach(row => { const pos = staffingData.find(p => p.id === row.id); if(pos) { pos.n = row.nombre || row.n || ''; pos.c = row.costo_anual_usd || row.c || 0; } });
+                    saveStaffToLocal();
+                    if(staffInit) renderStaffingTable();
+                    alert('Datos importados (' + imported.length + ' posiciones)');
+                } catch(err) { alert('Error: ' + err.message); }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // --- GLOBAL SWITCH (UPDATED) ---
         function switchView(viewId) {
-            ['view-structure','view-revenue','view-alyc','view-offshore','view-costs','view-pl'].forEach(id => document.getElementById(id).classList.add('hidden'));
-            ['tab-structure','tab-revenue','tab-alyc','tab-offshore','tab-costs','tab-pl'].forEach(id => { const el = document.getElementById(id); el.classList.remove('bg-white','text-blue-700','shadow-sm'); el.classList.add('text-slate-500','hover:bg-white/50'); });
+            ['view-structure','view-rrhh','view-revenue','view-alyc','view-offshore','view-costs','view-pl'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             
             document.getElementById(`view-${viewId}`).classList.remove('hidden');
             const activeTab = document.getElementById(`tab-${viewId}`);
-            activeTab.classList.remove('text-slate-500','hover:bg-white/50'); activeTab.classList.add('bg-white','text-blue-700','shadow-sm');
+            if(activeTab) activeTab.classList.add('active');
             
             const legend = document.getElementById('legend-bar');
             if(viewId === 'structure') legend.style.display = 'flex'; else legend.style.display = 'none';
 
+            if (viewId === 'rrhh' && !staffInit) { loadStaffFromLocal(); renderStaffingTable(); staffInit = true; }
             if (viewId === 'revenue' && !chartInstance) initSimulation();
             if (viewId === 'alyc') initAlycSimulation();
             if (viewId === 'offshore') initOffshoreSimulation();
@@ -2875,7 +3101,9 @@
         }
 
         window.addEventListener('load', () => {
-            initStructureChart(); updateHeadcounts(); loadDetail('board');
+            loadStaffFromLocal();
+            updateHeadcounts();
+            selectNode('board');
             initSimulation(); initAlycSimulation(); initOffshoreSimulation(); initCostSimulation(); initPL();
         });
     </script>
